@@ -1,2 +1,1 @@
-# ds-bubbles
-Viral bubbles resolve bacteriophage genomes from metagenomic data
+# ds-bubbles: Viral bubbles resolve bacteriophage genomes from metagenomic data
