@@ -1,4 +1,3 @@
-
 def get_smg_contigs(hmmout, mg_frac):
 
     # Commands
@@ -10,7 +9,7 @@ def get_smg_contigs(hmmout, mg_frac):
     contig_smgs = {}
 
     with open(hmmout, "r") as myfile:
-        
+
         for line in myfile.readlines():
             if not line.startswith("#"):
                 strings = line.strip().split()
@@ -49,20 +48,20 @@ def get_phrog_contigs(phrogs, align_score, seq_identity):
     contig_phrogs = {}
 
     with open(phrogs, "r") as myfile:
-        
+
         for line in myfile.readlines():
-            
+
             if line.startswith("contig_"):
-                
+
                 strings = line.strip().split()
-                
+
                 name = strings[0].replace("contig", "edge")
-                phrog = ' '.join(strings[12:])
+                phrog = " ".join(strings[12:])
                 alnScore = float(strings[2])
                 seqIdentity = float(strings[3])
 
                 if alnScore > align_score and seqIdentity > seq_identity:
-                    
+
                     if name not in contig_phrogs:
                         contig_phrogs[name] = set([phrog])
                     else:
