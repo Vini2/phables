@@ -4,7 +4,11 @@
 
 # ds-bubbles: Viral bubbles resolve bacteriophage genomes from metagenomic data
 
-`ds-bubbles` is a tool developed to resolve bacteriophage genomes using viral bubbles in metagenomic data. `ds-bubbles` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
+`ds-bubbles` is a tool developed to resolve bacteriophage genomes using viral bubbles in metagenomic data. It models phage-like components as directed graphs, detects cycles and resolves genomic paths corresponding to those cycles.
+
+![](resolve_genomes.png)
+
+`ds-bubbles` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
 
 ## Usage
 
