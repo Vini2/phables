@@ -41,3 +41,9 @@ Options:
   -o, --output PATH         path to the output folder  [required]
   --help                    Show this message and exit.
 ```
+
+### Example usage
+
+```
+python dsbubbles.py -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -o /output/path/
+```
