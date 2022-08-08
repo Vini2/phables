@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from dsbubbles_utils import (component_utils, edge_graph_utils, edge_utils,
                              gene_utils)
-from dsbubbles_utils.genome_utils import GenomePath
+from dsbubbles_utils.genome_utils import GenomeComponent, GenomePath
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, ds-bubbles Project"
@@ -246,7 +246,9 @@ def main(
 
     all_resolved_paths = []
 
-    for my_count in pruned_vs:
+    all_components = []
+
+    for my_count in tqdm(pruned_vs, desc="Resolving components"):
 
         my_genomic_paths = []
 
@@ -288,7 +290,27 @@ def main(
                     my_genomic_paths.append(genome_path)
 
             if not has_long_circular:
+
+                # Get component stats
+
                 pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
+
+                graph_degree = assembly_graph.degree(pruned_vs[my_count], mode="all")
+                in_degree = assembly_graph.degree(pruned_vs[my_count], mode="in")
+                out_degree = assembly_graph.degree(pruned_vs[my_count], mode="out")
+
+                genome_comp = GenomeComponent(
+                    f"phage_comp_{my_count}",
+                    len(pruned_vs[my_count]),
+                    max(graph_degree),
+                    max(in_degree),
+                    max(out_degree),
+                    sum(graph_degree) / len(graph_degree),
+                    sum(in_degree) / len(in_degree),
+                    sum(out_degree) / len(out_degree),
+                    pruned_graph.density(loops=False),
+                )
+                all_components.append(genome_comp)
 
                 # Create Directed Graph
                 G = nx.DiGraph()
@@ -453,11 +475,7 @@ def main(
 
         with open(f"{output}/resolved_paths.fasta", "a+") as myfile:
 
-            # with open(output+"viral_comp_len_family.csv", "a+") as myfile_fam:
-
             for genomic_path in final_genomic_paths:
-
-                # myfile_fam.write(genomic_path.id+",,"+str(genomic_path.length)+"\n")
 
                 myfile.write(f">{genomic_path.id}\n")
 
@@ -486,6 +504,36 @@ def main(
 
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
+
+    # Record path information
+    # ----------------------------------------------------------------------
+
+    with open(f"{output}/resolved_genome_info.txt", "w") as myfile:
+        myfile.write(f"Path\tCoverage\tLength\tNode order\n")
+        for genomic_path in all_resolved_paths:
+            myfile.write(
+                f"{genomic_path.id}\t{genomic_path.coverage}\t{genomic_path.length}\t{genomic_path.node_order}\n"
+            )
+
+    logger.info(
+        f"Resolved genome information can be found in {output}/resolved_genome_info.txt"
+    )
+
+    # Record component information
+    # ----------------------------------------------------------------------
+
+    with open(f"{output}/resolved_component_info.txt", "w") as myfile:
+        myfile.write(
+            f"Component\tNumber of nodes\tMaximum degree\tMaximum in degree\tMaximum out degree\tAverage degree\tAverage in degree\tAverage out degree\tDensity\n"
+        )
+        for component in all_components:
+            myfile.write(
+                f"{component.id}\t{component.n_nodes}\t{component.max_degree}\t{component.max_in_degree}\t{component.max_out_degree}\t{component.avg_degree}\t{component.avg_in_degree}\t{component.avg_out_degree}\t{component.density}\n"
+            )
+
+    logger.info(
+        f"Resolved component information can be found in {output}/resolved_component_info.txt"
+    )
 
     # Get elapsed time
     # ----------------------------------------------------------------------
