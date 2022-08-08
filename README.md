@@ -4,7 +4,9 @@
 
 # ds-bubbles: Viral bubbles resolve bacteriophage genomes from metagenomic data
 
-`ds-bubbles` is a tool developed to resolve bacteriophage genomes using viral bubbles in metagenomic data. It models phage-like components in the metagenomic assembly as graphs, detects cycles and resolves genomic paths corresponding to those cycles. The figure below shows an example component where two genomic paths are resolved.
+`ds-bubbles` is a tool developed to resolve bacteriophage genomes using viral bubbles in metagenomic data. It models phage-like components in the metagenomic assembly as graphs, detects cycles and resolves genomic paths corresponding to those cycles. 
+
+The figure below shows an example component where two genomic paths are resolved. There are two branching contigs (in pink and purple) shared by the common brown contig. The two genomic paths formed by the pink contig and the purple contigs can be resolved as shown.
 
 ![](resolve_genomes.png)
 
