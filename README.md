@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="ds-bubbles-logo.png" width="800" title="ds-bubbles logo" alt="ds-bubbles logo">
+  <img src="ds-bubbles-logo.png" width="700" title="ds-bubbles logo" alt="ds-bubbles logo">
 </p>
 
 # ds-bubbles: Viral bubbles resolve bacteriophage genomes from metagenomic data
