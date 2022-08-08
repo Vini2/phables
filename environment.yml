@@ -1,0 +1,15 @@
+name: dsbubbles
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python >=3.8
+  - biopython
+  - python-igraph
+  - fraggenescan
+  - hmmer
+  - networkx
+  - scipy
+  - numpy
+  - tqdm
+  - click
