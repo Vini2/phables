@@ -1,5 +1,5 @@
-from igraph import *
 from Bio import SeqIO
+from igraph import *
 
 
 class BidirectionalError(Exception):
@@ -38,7 +38,7 @@ class BidirectionalMap(dict):
 
 
 def get_edge_lengths(edge_file):
-    
+
     contig_lengths = {}
 
     for index, record in enumerate(SeqIO.parse(edge_file, "fasta")):
@@ -75,28 +75,28 @@ def get_links(assembly_graph_file):
                 link1 = strings[1]
                 link2 = strings[3]
 
-                link1_orientation =strings[2]
-                link2_orientation =strings[4]
+                link1_orientation = strings[2]
+                link2_orientation = strings[4]
                 # read_count = int(strings[6].split(":")[-1])
 
                 if link1_orientation == "+" and link2_orientation == "+":
                     link.append(link1)
                     link.append(link2)
-#                     links.append(link)
+                #                     links.append(link)
                 elif link1_orientation == "-" and link2_orientation == "-":
                     link.append(link2)
                     link.append(link1)
-#                     links.append(link)
+                #                     links.append(link)
                 elif link1_orientation == "+" and link2_orientation == "-":
                     link.append(link1)
                     link.append(link2)
-#                     links.append(link)
+                #                     links.append(link)
                 elif link1_orientation == "-" and link2_orientation == "+":
                     link.append(link1)
                     link.append(link2)
-#                     links.append(link)
-#                 link.append(link1)
-#                 link.append(link2)
+                #                     links.append(link)
+                #                 link.append(link1)
+                #                 link.append(link2)
                 # link.append(read_count)
                 links.append(link)
 
@@ -143,8 +143,15 @@ def get_graph_edges(links, contig_names_rev):
 
 
 def build_assembly_graph(assembly_graph_file):
-    
-    node_count, graph_contigs, links, contig_names, edge_depths, edges_lengths = get_links(assembly_graph_file)
+
+    (
+        node_count,
+        graph_contigs,
+        links,
+        contig_names,
+        edge_depths,
+        edges_lengths,
+    ) = get_links(assembly_graph_file)
 
     # Get reverse mapping of contig identifiers
     contig_names_rev = contig_names.inverse
@@ -156,14 +163,15 @@ def build_assembly_graph(assembly_graph_file):
     assembly_graph.add_vertices(node_count)
     # print("Total number of contigs available: " + str(len(list(assembly_graph.vs))))
 
-
     # Name vertices with contig identifiers
     for i in range(node_count):
         assembly_graph.vs[i]["id"] = i
         assembly_graph.vs[i]["name"] = contig_names[i]
         assembly_graph.vs[i]["label"] = contig_names[i] + "\nID:" + str(i)
-        
-    edge_list, self_looped_edges = get_graph_edges(links=links, contig_names_rev=contig_names_rev)
+
+    edge_list, self_looped_edges = get_graph_edges(
+        links=links, contig_names_rev=contig_names_rev
+    )
 
     # print(len(edge_list), edge_list)
 
@@ -178,4 +186,13 @@ def build_assembly_graph(assembly_graph_file):
 
     # print("Total number of edges in the assembly graph: " + str(len(list(assembly_graph.es))))
 
-    return assembly_graph, edge_list, contig_names, contig_names_rev, graph_contigs, edge_depths, self_looped_edges, edges_lengths
+    return (
+        assembly_graph,
+        edge_list,
+        contig_names,
+        contig_names_rev,
+        graph_contigs,
+        edge_depths,
+        self_looped_edges,
+        edges_lengths,
+    )

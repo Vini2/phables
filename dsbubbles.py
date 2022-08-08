@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
-import sys
 import logging
-import click
-import networkx as nx
+import sys
 import time
 
+import click
+import networkx as nx
 from igraph import *
 from tqdm import tqdm
 
-from dsbubbles_utils import edge_graph_utils
-from dsbubbles_utils import edge_utils
-from dsbubbles_utils import gene_utils
-from dsbubbles_utils import component_utils
+from dsbubbles_utils import (component_utils, edge_graph_utils, edge_utils,
+                             gene_utils)
 from dsbubbles_utils.genome_utils import GenomePath
 
 __author__ = "Vijini Mallawaarachchi"
@@ -36,6 +34,7 @@ MAX_VAL = sys.maxsize
 
 # Setup arguments
 # ----------------------------------------------------------------------
+
 
 @click.command()
 @click.option(
@@ -136,8 +135,21 @@ MAX_VAL = sys.maxsize
     help="path to the output folder",
     type=click.Path(exists=True),
 )
-
-def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, mgfrac, alignscore, seqidentity, degree, output):
+def main(
+    graph,
+    contigs,
+    paths,
+    hmmout,
+    phrogs,
+    minlength,
+    biglength,
+    pathdiff,
+    mgfrac,
+    alignscore,
+    seqidentity,
+    degree,
+    output,
+):
 
     """ds-bubbles: Resolve bacteriophage genomes from viral bubbles in metagenomic data."""
 
@@ -175,17 +187,32 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
-    logger.info(f"Minimum in/out degree of nodes in a component to be complex: {degree}")
+    logger.info(
+        f"Minimum in/out degree of nodes in a component to be complex: {degree}"
+    )
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
 
     # Get assembly graph
     # ----------------------------------------------------------------------
-    assembly_graph, edge_list, contig_names, contig_names_rev, graph_contigs, edge_depths, self_looped_nodes, edges_lengths = edge_graph_utils.build_assembly_graph(graph)
+    (
+        assembly_graph,
+        edge_list,
+        contig_names,
+        contig_names_rev,
+        graph_contigs,
+        edge_depths,
+        self_looped_nodes,
+        edges_lengths,
+    ) = edge_graph_utils.build_assembly_graph(graph)
 
-    logger.info(f"Total number of vertices in the assembly graph: {len(assembly_graph.vs)}")
-    logger.info(f"Total number of links in the assembly graph: {len(assembly_graph.es)}")
+    logger.info(
+        f"Total number of vertices in the assembly graph: {len(assembly_graph.vs)}"
+    )
+    logger.info(
+        f"Total number of links in the assembly graph: {len(assembly_graph.es)}"
+    )
 
     # Get circular contigs
     # ----------------------------------------------------------------------
@@ -201,9 +228,16 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
 
     # Get components with viral bubbles
     # ----------------------------------------------------------------------
-    pruned_vs = component_utils.get_components(assembly_graph, contig_names, smg_contigs, contig_phrogs, circular, edges_lengths, minlength)
+    pruned_vs = component_utils.get_components(
+        assembly_graph,
+        contig_names,
+        smg_contigs,
+        contig_phrogs,
+        circular,
+        edges_lengths,
+        minlength,
+    )
     logger.info(f"Total number of components found: {len(pruned_vs)}")
-
 
     # Resolve genomes
     # ----------------------------------------------------------------------
@@ -217,7 +251,7 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
         my_genomic_paths = []
 
         logger.debug(f"my_count: {my_count}")
-        
+
         if len(pruned_vs[my_count]) > 1:
 
             has_long_circular = False
@@ -227,29 +261,37 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
 
             for node in pruned_vs[my_count]:
 
-                in_degree = assembly_graph.degree(node, mode='in')
-                out_degree = assembly_graph.degree(node, mode='out')
+                in_degree = assembly_graph.degree(node, mode="in")
+                out_degree = assembly_graph.degree(node, mode="out")
 
                 if out_degree > degree or in_degree > degree:
                     is_complex_graph = True
 
                 contig_name = contig_names[node]
 
-                if contig_name in self_looped_nodes and len(graph_contigs[contig_names[node]]) > biglength:
+                if (
+                    contig_name in self_looped_nodes
+                    and len(graph_contigs[contig_names[node]]) > biglength
+                ):
                     has_long_circular = True
                     cycle_number = 1
 
-                    path_string = (graph_contigs[contig_name])
+                    path_string = graph_contigs[contig_name]
 
-                    genome_path = GenomePath(f"phage_comp_{my_count}_cycle_{cycle_number}", [pruned_vs[my_count][0]], path_string, coverage, len(graph_contigs[contig_name]))
+                    genome_path = GenomePath(
+                        f"phage_comp_{my_count}_cycle_{cycle_number}",
+                        [pruned_vs[my_count][0]],
+                        path_string,
+                        coverage,
+                        len(graph_contigs[contig_name]),
+                    )
                     my_genomic_paths.append(genome_path)
 
-            
             if not has_long_circular:
                 pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
 
                 # Create Directed Graph
-                G=nx.DiGraph()
+                G = nx.DiGraph()
 
                 # Add a list of nodes:
                 named_vertex_list = pruned_graph.vs()["label"]
@@ -279,7 +321,7 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
 
                 cycle_number = 1
 
-                #Return a list of cycles described as a list o nodes
+                # Return a list of cycles described as a list o nodes
                 for cycle in my_cycles:
 
                     if len(cycle) > 1:
@@ -295,7 +337,7 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
                         node_order = []
 
                         path_string = ""
-                        
+
                         for node in cycle:
 
                             contig_name = contig_names[pruned_vs[my_count][node]]
@@ -304,16 +346,16 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
                             #     cycle_family.add(edge_family[contig_name])
                             # else:
                             #     cycle_family.add("Unclassified")
-                            
+
                             # if pruned_vs[my_count][node] in [2228, 2231, 2234]:
                             #     print(my_count)
                             # print(node, ":", pruned_vs[my_count][node], contig_names[pruned_vs[my_count][node]], ":", edge_depths[contig_names[pruned_vs[my_count][node]]], end=" --> ")
 
                             resolved_edges.add(contig_names[pruned_vs[my_count][node]])
-                            
+
                             node_order.append(contig_names[pruned_vs[my_count][node]])
                             total_length += len(graph_contigs[contig_name])
-                            path_string += (graph_contigs[contig_name])
+                            path_string += graph_contigs[contig_name]
 
                             if coverage > edge_depths[contig_name]:
                                 coverage = edge_depths[contig_name]
@@ -329,14 +371,20 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
 
                         if len(path_string) > 0 and coverage != MAX_VAL:
 
-                            genome_path = GenomePath(f"phage_comp_{my_count}_cycle_{cycle_number}", node_order, path_string, coverage, total_length)
+                            genome_path = GenomePath(
+                                f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                node_order,
+                                path_string,
+                                coverage,
+                                total_length,
+                            )
                             my_genomic_paths.append(genome_path)
 
                             # viral_comp_length["phage_comp_"+str(my_count)+"_cycle_"+str(cycle_number)] = len(path_string)
 
                             # if len(cycle_family) == 1:
                             #     viral_comp_family["phage_comp_"+str(my_count)+"_cycle_"+str(cycle_number)] = list(cycle_family)[0]
-                            
+
                         cycle_number += 1
 
         else:
@@ -350,11 +398,17 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
             # else:
             #     cycle_family.add("Unclassified")
 
-            path_string = (graph_contigs[contig_name])
+            path_string = graph_contigs[contig_name]
 
             cycle_number = 1
 
-            genome_path = GenomePath(f"phage_comp_{my_count}_cycle_{cycle_number}", [pruned_vs[my_count][0]], path_string, coverage, len(graph_contigs[contig_name]))
+            genome_path = GenomePath(
+                f"phage_comp_{my_count}_cycle_{cycle_number}",
+                [pruned_vs[my_count][0]],
+                path_string,
+                coverage,
+                len(graph_contigs[contig_name]),
+            )
             my_genomic_paths.append(genome_path)
 
             # viral_comp_length["viral_comp_"+str(my_count)+"_path_"+str(cycle_number)] = len(path_string)
@@ -366,7 +420,6 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
             # if contig_name in edge_family:
             #     viral_comp_family["viral_comp_"+str(my_count)+"_path_"+str(cycle_number)] = edge_family[contig_name]
 
-
         my_genomic_paths.sort(key=lambda x: x.length, reverse=True)
 
         final_genomic_paths = []
@@ -376,7 +429,9 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
             len_dif_threshold = pathdiff
 
             prev_length = my_genomic_paths[0].length
-            length_difference = abs(my_genomic_paths[0].length - my_genomic_paths[1].length)
+            length_difference = abs(
+                my_genomic_paths[0].length - my_genomic_paths[1].length
+            )
 
             for genomic_path in my_genomic_paths:
                 current_len_dif = abs(prev_length - genomic_path.length)
@@ -393,7 +448,6 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
                 final_genomic_paths.append(genomic_path)
                 all_resolved_paths.append(genomic_path)
                 logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
-        
 
         # Write to file
 
@@ -403,18 +457,20 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
 
             for genomic_path in final_genomic_paths:
 
-                    # myfile_fam.write(genomic_path.id+",,"+str(genomic_path.length)+"\n")
+                # myfile_fam.write(genomic_path.id+",,"+str(genomic_path.length)+"\n")
 
                 myfile.write(f">{genomic_path.id}\n")
 
-                n=60
+                n = 60
 
-                chunks = [genomic_path.path[i:i+n] for i in range(0, genomic_path.length, n)]
+                chunks = [
+                    genomic_path.path[i : i + n]
+                    for i in range(0, genomic_path.length, n)
+                ]
 
                 for chunk in chunks:
                     myfile.write(f"{chunk}\n")
 
-        
         # for genomic_path in final_genomic_paths:
 
         #     with open(project_path+"resolved_phages/"+genomic_path.id+".fasta", "w+") as myfile:
@@ -431,7 +487,6 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
-
     # Get elapsed time
     # ----------------------------------------------------------------------
 
@@ -441,7 +496,6 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
     # Print elapsed time for the process
     logger.info("Elapsed time: " + str(elapsed_time) + " seconds")
 
-
     # Exit program
     # ----------------------------------------------------------------------
 
@@ -450,4 +504,3 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, 
 
 if __name__ == "__main__":
     main()
-
