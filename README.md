@@ -28,10 +28,14 @@ Options:
   -ph, --phrogs PATH        path to the contig phrog annotations file
                             [required]
   -ml, --minlength INTEGER  minimum length of circular contigs to consider
+  -bl, --biglength INTEGER  minimum length of a big circular contig
+  -pd, --pathdiff INTEGER   length threshold to filter paths of a component
   -mgf, --mgfrac FLOAT      length threshold to consider single copy marker
                             genes
   -as, --alignscore FLOAT   minimum alignment score (%) for phrog annotations
   -si, --seqidentity FLOAT  minimum sequence identity for phrog annotations
+  -d, --degree INTEGER      minimum in/out degree of nodes in a component to
+                            be complex
   -o, --output PATH         path to the output folder  [required]
   --help                    Show this message and exit.
 ```
