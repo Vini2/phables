@@ -24,8 +24,6 @@ __email__ = "vijini.mallawaarachchi@flinders.edu.au"
 __status__ = "Development"
 
 MAX_VAL = sys.maxsize
-path_diff_threshold = 5000
-big_cicular_len = 10000
 
 # Sample command
 # -------------------------------------------------------------------
@@ -84,6 +82,22 @@ big_cicular_len = 10000
     type=int,
 )
 @click.option(
+    "--biglength",
+    "-bl",
+    default=10000,
+    required=False,
+    help="minimum length of a big circular contig",
+    type=int,
+)
+@click.option(
+    "--pathdiff",
+    "-pd",
+    default=5000,
+    required=False,
+    help="length threshold to filter paths of a component",
+    type=int,
+)
+@click.option(
     "--mgfrac",
     "-mgf",
     default=0.5,
@@ -108,6 +122,14 @@ big_cicular_len = 10000
     type=float,
 )
 @click.option(
+    "--degree",
+    "-d",
+    default=10,
+    required=False,
+    help="minimum in/out degree of nodes in a component to be complex",
+    type=int,
+)
+@click.option(
     "--output",
     "-o",
     required=True,
@@ -115,7 +137,7 @@ big_cicular_len = 10000
     type=click.Path(exists=True),
 )
 
-def main(graph, contigs, paths, hmmout, phrogs, minlength, mgfrac, alignscore, seqidentity, output):
+def main(graph, contigs, paths, hmmout, phrogs, minlength, biglength, pathdiff, mgfrac, alignscore, seqidentity, degree, output):
 
     """ds-bubbles: Resolve bacteriophage genomes from viral bubbles in metagenomic data."""
 
@@ -148,9 +170,12 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, mgfrac, alignscore, s
     logger.info(f"Contig .hmmout file: {hmmout}")
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
+    logger.info(f"Minimum length of a big circular contig: {biglength}")
+    logger.info(f"Length threshold to filter paths of a component: {pathdiff}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
-    logger.info(f"Mminimum sequence identity for phrog annotations: {seqidentity}")
+    logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
+    logger.info(f"Minimum in/out degree of nodes in a component to be complex: {degree}")
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
@@ -205,12 +230,12 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, mgfrac, alignscore, s
                 in_degree = assembly_graph.degree(node, mode='in')
                 out_degree = assembly_graph.degree(node, mode='out')
 
-                if out_degree > 10 or in_degree > 10:
+                if out_degree > degree or in_degree > degree:
                     is_complex_graph = True
 
                 contig_name = contig_names[node]
 
-                if contig_name in self_looped_nodes and len(graph_contigs[contig_names[node]]) > big_cicular_len:
+                if contig_name in self_looped_nodes and len(graph_contigs[contig_names[node]]) > biglength:
                     has_long_circular = True
                     cycle_number = 1
 
@@ -348,7 +373,7 @@ def main(graph, contigs, paths, hmmout, phrogs, minlength, mgfrac, alignscore, s
 
         if len(my_genomic_paths) > 1:
 
-            len_dif_threshold = path_diff_threshold
+            len_dif_threshold = pathdiff
 
             prev_length = my_genomic_paths[0].length
             length_difference = abs(my_genomic_paths[0].length - my_genomic_paths[1].length)
