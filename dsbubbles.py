@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import subprocess
 import sys
 import time
 
@@ -22,6 +23,7 @@ __email__ = "vijini.mallawaarachchi@flinders.edu.au"
 __status__ = "Development"
 
 MAX_VAL = sys.maxsize
+FASTA_LINE_LEN = 60
 
 # Sample command
 # -------------------------------------------------------------------
@@ -91,9 +93,9 @@ MAX_VAL = sys.maxsize
 @click.option(
     "--pathdiff",
     "-pd",
-    default=5000,
+    default=2000,
     required=False,
-    help="length threshold to filter paths of a component",
+    help="length difference threshold to filter paths of a component",
     type=int,
 )
 @click.option(
@@ -183,7 +185,7 @@ def main(
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
     logger.info(f"Minimum length of a big circular contig: {biglength}")
-    logger.info(f"Length threshold to filter paths of a component: {pathdiff}")
+    logger.info(f"Length difference threshold to filter paths of a component: {pathdiff}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
@@ -256,6 +258,27 @@ def main(
 
         if len(pruned_vs[my_count]) > 1:
 
+            # Get component stats
+
+            pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
+
+            graph_degree = assembly_graph.degree(pruned_vs[my_count], mode="all")
+            in_degree = assembly_graph.degree(pruned_vs[my_count], mode="in")
+            out_degree = assembly_graph.degree(pruned_vs[my_count], mode="out")
+
+            genome_comp = GenomeComponent(
+                f"phage_comp_{my_count}",
+                len(pruned_vs[my_count]),
+                max(graph_degree),
+                max(in_degree),
+                max(out_degree),
+                sum(graph_degree) / len(graph_degree),
+                sum(in_degree) / len(in_degree),
+                sum(out_degree) / len(out_degree),
+                pruned_graph.density(loops=False),
+            )
+            all_components.append(genome_comp)
+
             has_long_circular = False
 
             # Check if the bubble is complex
@@ -291,27 +314,6 @@ def main(
 
             if not has_long_circular:
 
-                # Get component stats
-
-                pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
-
-                graph_degree = assembly_graph.degree(pruned_vs[my_count], mode="all")
-                in_degree = assembly_graph.degree(pruned_vs[my_count], mode="in")
-                out_degree = assembly_graph.degree(pruned_vs[my_count], mode="out")
-
-                genome_comp = GenomeComponent(
-                    f"phage_comp_{my_count}",
-                    len(pruned_vs[my_count]),
-                    max(graph_degree),
-                    max(in_degree),
-                    max(out_degree),
-                    sum(graph_degree) / len(graph_degree),
-                    sum(in_degree) / len(in_degree),
-                    sum(out_degree) / len(out_degree),
-                    pruned_graph.density(loops=False),
-                )
-                all_components.append(genome_comp)
-
                 # Create Directed Graph
                 G = nx.DiGraph()
 
@@ -343,7 +345,7 @@ def main(
 
                 cycle_number = 1
 
-                # Return a list of cycles described as a list o nodes
+                # Return a list of cycles described as a list of nodes
                 for cycle in my_cycles:
 
                     if len(cycle) > 1:
@@ -451,17 +453,26 @@ def main(
             len_dif_threshold = pathdiff
 
             prev_length = my_genomic_paths[0].length
-            length_difference = abs(
-                my_genomic_paths[0].length - my_genomic_paths[1].length
-            )
 
             for genomic_path in my_genomic_paths:
                 current_len_dif = abs(prev_length - genomic_path.length)
+                # cycle_nodes = set(genomic_path.node_order)
+
                 if current_len_dif < len_dif_threshold:
-                    length_difference = current_len_dif
-                    logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
-                    final_genomic_paths.append(genomic_path)
-                    all_resolved_paths.append(genomic_path)
+
+                    path_is_subset = False
+
+                    for final_path in final_genomic_paths:
+                        if (set(genomic_path.node_order).issubset(set(final_path.node_order))):
+                            path_is_subset = True
+                            break
+
+                    if not path_is_subset:
+                        prev_length = genomic_path.length
+
+                        logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
+                        final_genomic_paths.append(genomic_path)
+                        all_resolved_paths.append(genomic_path)
                 else:
                     break
 
@@ -479,28 +490,32 @@ def main(
 
                 myfile.write(f">{genomic_path.id}\n")
 
-                n = 60
-
                 chunks = [
-                    genomic_path.path[i : i + n]
-                    for i in range(0, genomic_path.length, n)
+                    genomic_path.path[i : i + FASTA_LINE_LEN]
+                    for i in range(0, genomic_path.length, FASTA_LINE_LEN)
                 ]
 
                 for chunk in chunks:
                     myfile.write(f"{chunk}\n")
 
-        # for genomic_path in final_genomic_paths:
+        output_genomes_path = f"{output}/resolved_phages"
+        subprocess.run("mkdir -p " + output_genomes_path, shell=True)
 
-        #     with open(project_path+"resolved_phages/"+genomic_path.id+".fasta", "w+") as myfile:
+        for genomic_path in final_genomic_paths:
 
-        #         myfile.write(">"+genomic_path.id+"\n")
+            with open(
+                f"{output}/resolved_phages/{genomic_path.id}.fasta", "w+"
+            ) as myfile:
 
-        #         n=60
+                myfile.write(">" + genomic_path.id + "\n")
 
-        #         chunks = [genomic_path.path[i:i+n] for i in range(0, genomic_path.length, n)]
+                chunks = [
+                    genomic_path.path[i : i + FASTA_LINE_LEN]
+                    for i in range(0, genomic_path.length, FASTA_LINE_LEN)
+                ]
 
-        #         for chunk in chunks:
-        #             myfile.write(chunk+"\n")
+                for chunk in chunks:
+                    myfile.write(chunk + "\n")
 
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
