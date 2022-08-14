@@ -14,7 +14,7 @@ The figure below shows an example component where two genomic paths are resolved
 
 ## Usage
 
-You can see the following command line options of `dsbubbles.py` using `python dsbubbles.py --help`.
+You can see the following command-line options of `dsbubbles.py` using `python dsbubbles.py --help`.
 
 ```
 Usage: dsbubbles.py [OPTIONS]
