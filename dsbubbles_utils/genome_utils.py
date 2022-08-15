@@ -19,15 +19,15 @@ class GenomeComponent:
         avg_in_degree,
         avg_out_degree,
         density,
-        max_path_length = 0,
-        min_path_length = 0,
-        min_max_len_ratio = 0,
-        max_cov_path_length = 0,
-        min_cov_path_length = 0,
-        min_max_cov_len_ratio = 0,
-        max_cov = 0,
-        min_cov = 0,
-        min_max_cov_ratio = 0
+        max_path_length,
+        min_path_length,
+        min_max_len_ratio,
+        max_cov_path_length,
+        min_cov_path_length,
+        min_max_cov_len_ratio,
+        max_cov,
+        min_cov,
+        min_max_cov_ratio
     ):
         self.id = id
         self.n_nodes = n_nodes
