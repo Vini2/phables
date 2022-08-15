@@ -256,28 +256,9 @@ def main(
 
         logger.debug(f"my_count: {my_count}")
 
+        pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
+
         if len(pruned_vs[my_count]) > 1:
-
-            # Get component stats
-
-            pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
-
-            graph_degree = assembly_graph.degree(pruned_vs[my_count], mode="all")
-            in_degree = assembly_graph.degree(pruned_vs[my_count], mode="in")
-            out_degree = assembly_graph.degree(pruned_vs[my_count], mode="out")
-
-            genome_comp = GenomeComponent(
-                f"phage_comp_{my_count}",
-                len(pruned_vs[my_count]),
-                max(graph_degree),
-                max(in_degree),
-                max(out_degree),
-                sum(graph_degree) / len(graph_degree),
-                sum(in_degree) / len(in_degree),
-                sum(out_degree) / len(out_degree),
-                pruned_graph.density(loops=False),
-            )
-            all_components.append(genome_comp)
 
             has_long_circular = False
 
@@ -286,10 +267,10 @@ def main(
 
             for node in pruned_vs[my_count]:
 
-                in_degree = assembly_graph.degree(node, mode="in")
-                out_degree = assembly_graph.degree(node, mode="out")
+                in_degree_node = assembly_graph.degree(node, mode="in")
+                out_degree_node = assembly_graph.degree(node, mode="out")
 
-                if out_degree > degree or in_degree > degree:
+                if out_degree_node > degree or in_degree_node > degree:
                     is_complex_graph = True
 
                 contig_name = contig_names[node]
@@ -411,6 +392,7 @@ def main(
 
                         cycle_number += 1
 
+
         else:
 
             contig_name = contig_names[pruned_vs[my_count][0]]
@@ -444,11 +426,20 @@ def main(
             # if contig_name in edge_family:
             #     viral_comp_family["viral_comp_"+str(my_count)+"_path_"+str(cycle_number)] = edge_family[contig_name]
 
+
         my_genomic_paths.sort(key=lambda x: x.length, reverse=True)
 
         final_genomic_paths = []
 
         if len(my_genomic_paths) > 1:
+
+            # Get component stats
+            graph_degree = assembly_graph.degree(pruned_vs[my_count], mode="all")
+            in_degree = assembly_graph.degree(pruned_vs[my_count], mode="in")
+            out_degree = assembly_graph.degree(pruned_vs[my_count], mode="out")
+
+            path_lengths = []
+            path_coverages = []
 
             len_dif_threshold = pathdiff
 
@@ -471,10 +462,34 @@ def main(
                         prev_length = genomic_path.length
 
                         logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
+                        path_lengths.append(genomic_path.length)
+                        path_coverages.append(genomic_path.coverage)
                         final_genomic_paths.append(genomic_path)
                         all_resolved_paths.append(genomic_path)
                 else:
                     break
+
+            genome_comp = GenomeComponent(
+                f"phage_comp_{my_count}",
+                len(pruned_vs[my_count]),
+                max(graph_degree),
+                max(in_degree),
+                max(out_degree),
+                sum(graph_degree) / len(graph_degree),
+                sum(in_degree) / len(in_degree),
+                sum(out_degree) / len(out_degree),
+                pruned_graph.density(loops=False),
+                max(path_lengths),
+                min(path_lengths),
+                max(path_lengths)/min(path_lengths),
+                path_lengths[path_coverages.index(max(path_coverages))],
+                path_lengths[path_coverages.index(min(path_coverages))],
+                path_lengths[path_coverages.index(max(path_coverages))]/path_lengths[path_coverages.index(min(path_coverages))],
+                max(path_coverages),
+                min(path_coverages),
+                max(path_coverages)/min(path_coverages)
+            )
+            all_components.append(genome_comp)
 
         else:
             for genomic_path in my_genomic_paths:
@@ -538,13 +553,20 @@ def main(
     # ----------------------------------------------------------------------
 
     with open(f"{output}/resolved_component_info.txt", "w") as myfile:
-        myfile.write(
-            f"Component\tNumber of nodes\tMaximum degree\tMaximum in degree\tMaximum out degree\tAverage degree\tAverage in degree\tAverage out degree\tDensity\n"
-        )
+        myfile.write(f"Component\tNumber of nodes\tMaximum degree\t")
+        myfile.write(f"Maximum in degree\tMaximum out degree\tAverage degree\t")
+        myfile.write(f"Average in degree\tAverage out degree\tDensity\t")
+        myfile.write(f"Maximum path length\tMinimum path length\tLength ratio (long/short)\t")
+        myfile.write(f"Maximum coverage path length\tMinimum coverage path length\tLength ratio (highest cov/lowest cov)\t")
+        myfile.write(f"Maximum coverage\tMinimum coverage\tCoverage ratio (highest/lowest)\n")
+
         for component in all_components:
-            myfile.write(
-                f"{component.id}\t{component.n_nodes}\t{component.max_degree}\t{component.max_in_degree}\t{component.max_out_degree}\t{component.avg_degree}\t{component.avg_in_degree}\t{component.avg_out_degree}\t{component.density}\n"
-            )
+            myfile.write(f"{component.id}\t{component.n_nodes}\t{component.max_degree}\t")
+            myfile.write(f"{component.max_in_degree}\t{component.max_out_degree}\t{component.avg_degree}\t")
+            myfile.write(f"{component.avg_in_degree}\t{component.avg_out_degree}\t{component.density}\t")
+            myfile.write(f"{component.max_path_length}\t{component.min_path_length}\t{component.min_max_len_ratio}\t")
+            myfile.write(f"{component.max_cov_path_length}\t{component.min_cov_path_length}\t{component.min_max_cov_len_ratio}\t")
+            myfile.write(f"{component.max_cov}\t{component.min_cov}\t{component.min_max_cov_ratio}\n")
 
     logger.info(
         f"Resolved component information can be found in {output}/resolved_component_info.txt"
