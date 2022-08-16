@@ -472,6 +472,7 @@ def main(
             genome_comp = GenomeComponent(
                 f"phage_comp_{my_count}",
                 len(pruned_vs[my_count]),
+                len(final_genomic_paths),
                 max(graph_degree),
                 max(in_degree),
                 max(out_degree),
@@ -553,7 +554,7 @@ def main(
     # ----------------------------------------------------------------------
 
     with open(f"{output}/resolved_component_info.txt", "w") as myfile:
-        myfile.write(f"Component\tNumber of nodes\tMaximum degree\t")
+        myfile.write(f"Component\tNumber of nodes\tNumber of paths\tMaximum degree\t")
         myfile.write(f"Maximum in degree\tMaximum out degree\tAverage degree\t")
         myfile.write(f"Average in degree\tAverage out degree\tDensity\t")
         myfile.write(f"Maximum path length\tMinimum path length\tLength ratio (long/short)\t")
@@ -561,7 +562,7 @@ def main(
         myfile.write(f"Maximum coverage\tMinimum coverage\tCoverage ratio (highest/lowest)\n")
 
         for component in all_components:
-            myfile.write(f"{component.id}\t{component.n_nodes}\t{component.max_degree}\t")
+            myfile.write(f"{component.id}\t{component.n_nodes}\t{component.n_paths}\t{component.max_degree}\t")
             myfile.write(f"{component.max_in_degree}\t{component.max_out_degree}\t{component.avg_degree}\t")
             myfile.write(f"{component.avg_in_degree}\t{component.avg_out_degree}\t{component.density}\t")
             myfile.write(f"{component.max_path_length}\t{component.min_path_length}\t{component.min_max_len_ratio}\t")
