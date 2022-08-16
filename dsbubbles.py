@@ -276,7 +276,7 @@ def main(
                 contig_name = contig_names[node]
 
                 if (
-                    contig_name in self_looped_nodes
+                    node in self_looped_nodes
                     and len(graph_contigs[contig_names[node]]) > biglength
                 ):
                     has_long_circular = True

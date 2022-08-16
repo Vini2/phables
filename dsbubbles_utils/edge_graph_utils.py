@@ -137,7 +137,7 @@ def get_graph_edges(links, contig_names_rev):
             # weights_dict[(contig_names_rev[link[0]], contig_names_rev[link[1]])] = link[2]
             # weights_dict[(contig_names_rev[link[1]], contig_names_rev[link[0]])] = link[2]
         else:
-            self_looped_nodes.append(link[0])
+            self_looped_nodes.append(contig_names_rev[link[0]])
 
     return edge_list, self_looped_nodes
 
@@ -169,7 +169,7 @@ def build_assembly_graph(assembly_graph_file):
         assembly_graph.vs[i]["name"] = contig_names[i]
         assembly_graph.vs[i]["label"] = contig_names[i] + "\nID:" + str(i)
 
-    edge_list, self_looped_edges = get_graph_edges(
+    edge_list, self_looped_nodes = get_graph_edges(
         links=links, contig_names_rev=contig_names_rev
     )
 
@@ -193,6 +193,6 @@ def build_assembly_graph(assembly_graph_file):
         contig_names_rev,
         graph_contigs,
         edge_depths,
-        self_looped_edges,
+        self_looped_nodes,
         edges_lengths,
     )
