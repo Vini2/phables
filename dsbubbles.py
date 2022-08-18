@@ -91,6 +91,14 @@ FASTA_LINE_LEN = 60
     type=int,
 )
 @click.option(
+    "--bigcount",
+    "-bc",
+    default=30,
+    required=False,
+    help="minimum contig count to be a complex component",
+    type=int,
+)
+@click.option(
     "--pathdiff",
     "-pd",
     default=2000,
@@ -145,6 +153,7 @@ def main(
     phrogs,
     minlength,
     biglength,
+    bigcount,
     pathdiff,
     mgfrac,
     alignscore,
@@ -185,6 +194,7 @@ def main(
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
     logger.info(f"Minimum length of a big circular contig: {biglength}")
+    logger.info(f"minimum contig count to be a complex component: {bigcount}")
     logger.info(f"Length difference threshold to filter paths of a component: {pathdiff}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
@@ -251,6 +261,10 @@ def main(
     all_components = []
 
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
+    # for my_count in pruned_vs:
+
+        # if my_count != 51:
+        #     continue
 
         my_genomic_paths = []
 
@@ -258,9 +272,13 @@ def main(
 
         candidate_nodes = pruned_vs[my_count]
 
+        logger.debug(f"number of contigs: {len(candidate_nodes)}")
+
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
         single_in_out_nodes = set()
+
+        max_degree = 0
 
         if len(candidate_nodes) > 1:
 
@@ -269,15 +287,39 @@ def main(
             # Check if the bubble is complex
             is_complex_graph = False
 
+            all_degrees = []
+
+            for node in candidate_nodes:
+
+                # get degree without self-looping nodes
+                in_degree_node = len([x for x in assembly_graph.neighbors(node, mode="in") if x not in self_looped_nodes])
+                out_degree_node = len([x for x in assembly_graph.neighbors(node, mode="out") if x not in self_looped_nodes])
+
+                all_degrees.append(in_degree_node)
+                all_degrees.append(out_degree_node)
+
+                logger.debug(f"component: {my_count}, node: {node},  without self_looped_nodes --> in_degree_node: {in_degree_node}, out_degree_node: {out_degree_node}")
+
+                # if (in_degree_node > degree and out_degree_node > 0) or (out_degree_node > degree and in_degree_node > 0):
+                #     has_big_degree = True
+                    # break
+
+                if in_degree_node == 1 or out_degree_node == 1:
+                    single_in_out_nodes.add(node)
+
+            max_degree = max(all_degrees)
+
             for node in candidate_nodes:
 
                 in_degree_node = assembly_graph.degree(node, mode="in")
                 out_degree_node = assembly_graph.degree(node, mode="out")
 
+                logger.debug(f"component: {my_count}, node: {node},  with self_looped_nodes --> in_degree_node: {in_degree_node}, out_degree_node: {out_degree_node}")
+
                 if in_degree_node == 1 or out_degree_node == 1:
                     single_in_out_nodes.add(node)
 
-                if out_degree_node > degree or in_degree_node > degree:
+                if out_degree_node > degree or in_degree_node > degree or len(candidate_nodes) >= bigcount:
                     is_complex_graph = True
 
                 contig_name = contig_names[node]
@@ -368,7 +410,7 @@ def main(
                             resolved_edges.add(contig_names[candidate_nodes[node]])
 
                             node_order.append(contig_names[candidate_nodes[node]])
-                            node_id_order.append(node)
+                            node_id_order.append(candidate_nodes[node])
                             total_length += len(graph_contigs[contig_name])
                             path_string += graph_contigs[contig_name]
 
@@ -384,17 +426,19 @@ def main(
 
                         # Save path
 
-                        if len(path_string) > 0 and coverage != MAX_VAL:
+                        if len(path_string) > 0 and coverage != MAX_VAL and coverage > 0:
 
-                            genome_path = GenomePath(
-                                f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                node_order,
-                                node_id_order,
-                                path_string,
-                                coverage,
-                                total_length,
-                            )
-                            my_genomic_paths.append(genome_path)
+                            if not is_complex_graph or (is_complex_graph and len(path_string) > biglength):
+
+                                genome_path = GenomePath(
+                                    f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                    node_order,
+                                    node_id_order,
+                                    path_string,
+                                    coverage,
+                                    total_length,
+                                )
+                                my_genomic_paths.append(genome_path)
 
                             # viral_comp_length["phage_comp_"+str(my_count)+"_cycle_"+str(cycle_number)] = len(path_string)
 
@@ -439,6 +483,10 @@ def main(
             #     viral_comp_family["viral_comp_"+str(my_count)+"_path_"+str(cycle_number)] = edge_family[contig_name]
 
 
+        # print(single_in_out_nodes)
+        
+        # logger.info(f"my_count: {my_count}, max_degree: {max_degree}")
+        
         single_in_out_nodes_visited = set()
         single_in_out_nodes_visited_count = {}
 
@@ -475,7 +523,7 @@ def main(
 
                     for path_node in genomic_path.node_id_order:
                         if path_node in single_in_out_nodes_visited_count:
-                            if single_in_out_nodes_visited_count[path_node] > 2:
+                            if single_in_out_nodes_visited_count[path_node] >= max_degree:
                                 path_is_subset = True
 
                     if not path_is_subset:
@@ -487,6 +535,8 @@ def main(
                         final_genomic_paths.append(genomic_path)
                         all_resolved_paths.append(genomic_path)
 
+                        # print(genomic_path.node_id_order)
+
                         for path_node in genomic_path.node_id_order:
                             if path_node in single_in_out_nodes:
                                 single_in_out_nodes_visited.add(path_node)
@@ -495,6 +545,8 @@ def main(
                                     single_in_out_nodes_visited_count[path_node] += 1
                                 else:
                                     single_in_out_nodes_visited_count[path_node] = 1
+
+                                
                 else:
                     break
 
