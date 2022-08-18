@@ -256,19 +256,26 @@ def main(
 
         logger.debug(f"my_count: {my_count}")
 
-        pruned_graph = assembly_graph.subgraph(pruned_vs[my_count])
+        candidate_nodes = pruned_vs[my_count]
 
-        if len(pruned_vs[my_count]) > 1:
+        pruned_graph = assembly_graph.subgraph(candidate_nodes)
+
+        single_in_out_nodes = set()
+
+        if len(candidate_nodes) > 1:
 
             has_long_circular = False
 
             # Check if the bubble is complex
             is_complex_graph = False
 
-            for node in pruned_vs[my_count]:
+            for node in candidate_nodes:
 
                 in_degree_node = assembly_graph.degree(node, mode="in")
                 out_degree_node = assembly_graph.degree(node, mode="out")
+
+                if in_degree_node == 1 or out_degree_node == 1:
+                    single_in_out_nodes.add(node)
 
                 if out_degree_node > degree or in_degree_node > degree:
                     is_complex_graph = True
@@ -286,7 +293,8 @@ def main(
 
                     genome_path = GenomePath(
                         f"phage_comp_{my_count}_cycle_{cycle_number}",
-                        [pruned_vs[my_count][0]],
+                        [contig_names[candidate_nodes[0]]],
+                        [candidate_nodes[0]],
                         path_string,
                         coverage,
                         len(graph_contigs[contig_name]),
@@ -340,25 +348,27 @@ def main(
                         coverage = MAX_VAL
 
                         node_order = []
+                        node_id_order = []
 
                         path_string = ""
 
                         for node in cycle:
 
-                            contig_name = contig_names[pruned_vs[my_count][node]]
+                            contig_name = contig_names[candidate_nodes[node]]
 
                             # if contig_name in edge_family:
                             #     cycle_family.add(edge_family[contig_name])
                             # else:
                             #     cycle_family.add("Unclassified")
 
-                            # if pruned_vs[my_count][node] in [2228, 2231, 2234]:
+                            # if candidate_nodes[node] in [2228, 2231, 2234]:
                             #     print(my_count)
-                            # print(node, ":", pruned_vs[my_count][node], contig_names[pruned_vs[my_count][node]], ":", edge_depths[contig_names[pruned_vs[my_count][node]]], end=" --> ")
+                            # print(node, ":", candidate_nodes[node], contig_names[candidate_nodes[node]], ":", edge_depths[contig_names[candidate_nodes[node]]], end=" --> ")
 
-                            resolved_edges.add(contig_names[pruned_vs[my_count][node]])
+                            resolved_edges.add(contig_names[candidate_nodes[node]])
 
-                            node_order.append(contig_names[pruned_vs[my_count][node]])
+                            node_order.append(contig_names[candidate_nodes[node]])
+                            node_id_order.append(node)
                             total_length += len(graph_contigs[contig_name])
                             path_string += graph_contigs[contig_name]
 
@@ -379,6 +389,7 @@ def main(
                             genome_path = GenomePath(
                                 f"phage_comp_{my_count}_cycle_{cycle_number}",
                                 node_order,
+                                node_id_order,
                                 path_string,
                                 coverage,
                                 total_length,
@@ -395,7 +406,7 @@ def main(
 
         else:
 
-            contig_name = contig_names[pruned_vs[my_count][0]]
+            contig_name = contig_names[candidate_nodes[0]]
 
             resolved_edges.add(contig_name)
 
@@ -410,7 +421,8 @@ def main(
 
             genome_path = GenomePath(
                 f"phage_comp_{my_count}_cycle_{cycle_number}",
-                [pruned_vs[my_count][0]],
+                [contig_names[candidate_nodes[0]]],
+                [candidate_nodes[0]],
                 path_string,
                 coverage,
                 len(graph_contigs[contig_name]),
@@ -421,11 +433,14 @@ def main(
 
             # has_cycles.append(my_count)
 
-            # contig_name = contig_names[pruned_vs[my_count][0]]
+            # contig_name = contig_names[candidate_nodes[0]]
 
             # if contig_name in edge_family:
             #     viral_comp_family["viral_comp_"+str(my_count)+"_path_"+str(cycle_number)] = edge_family[contig_name]
 
+
+        single_in_out_nodes_visited = set()
+        single_in_out_nodes_visited_count = {}
 
         my_genomic_paths.sort(key=lambda x: x.length, reverse=True)
 
@@ -434,9 +449,9 @@ def main(
         if len(my_genomic_paths) > 1:
 
             # Get component stats
-            graph_degree = assembly_graph.degree(pruned_vs[my_count], mode="all")
-            in_degree = assembly_graph.degree(pruned_vs[my_count], mode="in")
-            out_degree = assembly_graph.degree(pruned_vs[my_count], mode="out")
+            graph_degree = assembly_graph.degree(candidate_nodes, mode="all")
+            in_degree = assembly_graph.degree(candidate_nodes, mode="in")
+            out_degree = assembly_graph.degree(candidate_nodes, mode="out")
 
             path_lengths = []
             path_coverages = []
@@ -458,6 +473,11 @@ def main(
                             path_is_subset = True
                             break
 
+                    for path_node in genomic_path.node_id_order:
+                        if path_node in single_in_out_nodes_visited_count:
+                            if single_in_out_nodes_visited_count[path_node] > 2:
+                                path_is_subset = True
+
                     if not path_is_subset:
                         prev_length = genomic_path.length
 
@@ -466,12 +486,21 @@ def main(
                         path_coverages.append(genomic_path.coverage)
                         final_genomic_paths.append(genomic_path)
                         all_resolved_paths.append(genomic_path)
+
+                        for path_node in genomic_path.node_id_order:
+                            if path_node in single_in_out_nodes:
+                                single_in_out_nodes_visited.add(path_node)
+
+                                if path_node in single_in_out_nodes_visited_count:
+                                    single_in_out_nodes_visited_count[path_node] += 1
+                                else:
+                                    single_in_out_nodes_visited_count[path_node] = 1
                 else:
                     break
 
             genome_comp = GenomeComponent(
                 f"phage_comp_{my_count}",
-                len(pruned_vs[my_count]),
+                len(candidate_nodes),
                 len(final_genomic_paths),
                 max(graph_degree),
                 max(in_degree),
