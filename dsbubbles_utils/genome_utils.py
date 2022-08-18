@@ -29,7 +29,7 @@ class GenomeComponent:
         min_max_cov_len_ratio,
         max_cov,
         min_cov,
-        min_max_cov_ratio
+        min_max_cov_ratio,
     ):
         self.id = id
         self.n_nodes = n_nodes
@@ -50,4 +50,3 @@ class GenomeComponent:
         self.max_cov = max_cov
         self.min_cov = min_cov
         self.min_max_cov_ratio = min_max_cov_ratio
-
