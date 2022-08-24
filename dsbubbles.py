@@ -262,6 +262,8 @@ def main(
 
     all_components = []
 
+    resolved_components = set()
+
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
 
         my_genomic_paths = []
@@ -271,14 +273,16 @@ def main(
         candidate_nodes = pruned_vs[my_count]
 
         logger.debug(f"number of contigs: {len(candidate_nodes)}")
+        logger.debug(f"{candidate_nodes}")
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
         # single_in_out_nodes = set()
 
         clean_max_degree = 0
+        component_max_degree = 0
 
-        if len(candidate_nodes) > 1:
+        if len(candidate_nodes) > 1 and len(candidate_nodes) < 1000:
 
             # has_long_circular = False
 
@@ -286,41 +290,38 @@ def main(
             is_complex_graph = False
 
             all_degrees = []
+            all_clean_degrees = []
 
             for node in candidate_nodes:
 
                 # Get degree without self-looping nodes
-                in_degree_node = len(
-                    [
-                        x
-                        for x in assembly_graph.neighbors(node, mode="in")
-                        if x not in self_looped_nodes
-                    ]
-                )
-                out_degree_node = len(
-                    [
-                        x
-                        for x in assembly_graph.neighbors(node, mode="out")
-                        if x not in self_looped_nodes
-                    ]
-                )
+                in_neighbours = assembly_graph.neighbors(node, mode="in")
+                out_neighbours = assembly_graph.neighbors(node, mode="out")
+                in_degree_node = len([x for x in in_neighbours])
+                out_degree_node = len([x for x in out_neighbours])
+                clean_in_degree_node = len([x for x in in_neighbours if x not in self_looped_nodes])
+                clean_out_degree_node = len([x for x in out_neighbours if x not in self_looped_nodes])
+
+                all_clean_degrees.append(clean_in_degree_node)
+                all_clean_degrees.append(clean_out_degree_node)
 
                 all_degrees.append(in_degree_node)
                 all_degrees.append(out_degree_node)
 
-                # if in_degree_node == 1 or out_degree_node == 1:
-                #     single_in_out_nodes.add(node)
+            clean_max_degree = max(all_clean_degrees)
+            component_max_degree = max(all_degrees)
 
-            clean_max_degree = max(all_degrees)
+            logger.debug(f"clean_max_degree: {clean_max_degree}")
+            logger.debug(f"component_max_degree: {component_max_degree}")
 
             for node in candidate_nodes:
 
-                in_degree_node = assembly_graph.degree(node, mode="in")
-                out_degree_node = assembly_graph.degree(node, mode="out")
+                # in_degree_node = assembly_graph.degree(node, mode="in")
+                # out_degree_node = assembly_graph.degree(node, mode="out")
 
                 if (
-                    out_degree_node > degree
-                    or in_degree_node > degree
+                    component_max_degree > degree
+                    or component_max_degree > degree
                     or len(candidate_nodes) >= bigcount
                 ):
                     is_complex_graph = True
@@ -435,7 +436,7 @@ def main(
 
                     cycle_number += 1
 
-        else:
+        elif len(candidate_nodes) == 1:
 
             contig_name = contig_names[candidate_nodes[0]]
 
@@ -450,7 +451,7 @@ def main(
                 [contig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
-                coverage,
+                edge_depths[contig_name],
                 len(graph_contigs[contig_name]),
             )
             my_genomic_paths.append(genome_path)
@@ -544,11 +545,14 @@ def main(
             )
             all_components.append(genome_comp)
 
+            resolved_components.add(my_count)
+
         else:
             for genomic_path in my_genomic_paths:
                 final_genomic_paths.append(genomic_path)
                 all_resolved_paths.append(genomic_path)
                 logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
+                resolved_components.add(my_count)
 
         # Write to file
 
@@ -585,6 +589,7 @@ def main(
                 for chunk in chunks:
                     myfile.write(f"{chunk}\n")
 
+    logger.info(f"Total number of components resolved: {len(resolved_components)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
