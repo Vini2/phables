@@ -135,7 +135,7 @@ FASTA_LINE_LEN = 60
 @click.option(
     "--degree",
     "-d",
-    default=10,
+    default=20,
     required=False,
     help="minimum in/out degree of nodes in a component to be complex",
     type=int,
@@ -259,7 +259,7 @@ def main(
 
     contig_coverages = {}
 
-    with open("/Users/vijinimallawaarachchi/Documents/Data/IBD_Jan/contig_coverages_rpkm_noh.tsv", "r") as myfile:
+    with open("/scratch/user/mall0133/2022_Jan_IBD/contig_coverages_rpkm_noh.tsv", "r") as myfile:
         for line in myfile.readlines():
             strings = line.strip().split()
 

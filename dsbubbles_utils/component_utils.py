@@ -27,16 +27,16 @@ def get_components(
                 if contig_names[contig] in smg_contigs:
                     break
                 elif contig_names[contig] in contig_phrogs:
-                    if (
-                        "terminase large subunit head and packaging"
-                        in contig_phrogs[contig_names[contig]]
-                        or "capsid assembly protein tail"
-                        in contig_phrogs[contig_names[contig]]
-                        or "portal protein head and packaging"
-                        in contig_phrogs[contig_names[contig]]
-                    ):
+                    # if (
+                    #     "terminase large subunit head and packaging"
+                    #     in contig_phrogs[contig_names[contig]]
+                    #     or "capsid assembly protein tail"
+                    #     in contig_phrogs[contig_names[contig]]
+                    #     or "portal protein head and packaging"
+                    #     in contig_phrogs[contig_names[contig]]
+                    # ):
                     # if "terminase large subunit head and packaging" in contig_phrogs[contig_names[contig]]:
-                        has_phrog = True
+                    has_phrog = True
 
                 # if edges_lengths[contig_names[contig]] > 2000:
                 #     has_long == True
