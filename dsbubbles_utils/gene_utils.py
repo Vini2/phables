@@ -2,7 +2,7 @@ def get_smg_contigs(hmmout, mg_frac):
 
     # Commands
     # run_FragGeneScan.pl -genome=edges.fasta -out=edges.fasta.frag -complete=0 -train=complete -thread=8 1>edges.fasta.frag.out 2>edges.fasta.frag.err
-    # hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 /home/mall0133/software/MetaCoAG/auxiliary/marker.hmm edges.fasta.frag.faa 1>edges.fasta.hmmout.out 2> edges.fasta.hmmout.err
+    # hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 /home/mall0133/software/MetaCoAG/metacoag_utils/auxiliary/marker.hmm edges.fasta.frag.faa 1>edges.fasta.hmmout.out 2> edges.fasta.hmmout.err
 
     smg_contigs = set()
 
