@@ -374,12 +374,12 @@ def main(
 
             mypath_strings = []
 
-            if is_complex_graph:
-                logger.debug("Complex_graph")
-                my_cycles = nx.cycle_basis(G.to_undirected())
-            else:
-                logger.debug("Simple graph")
-                my_cycles = list(nx.simple_cycles(G))
+            # if is_complex_graph:
+            logger.debug("Complex_graph")
+            my_cycles = nx.cycle_basis(G.to_undirected())
+            # else:
+            #     logger.debug("Simple graph")
+            #     my_cycles = list(nx.simple_cycles(G))
 
             cycle_number = 1
 
