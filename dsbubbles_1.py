@@ -344,8 +344,8 @@ def main(
                             if candidate_nodes[i] not in self_looped_nodes and candidate_nodes[j] not in self_looped_nodes:
                                 # min_cov = min(edge_depths[contig_names[candidate_nodes[i]]], edge_depths[contig_names[candidate_nodes[j]]])
 
-                                cov_1 = 1
-                                cov_2 = 1
+                                cov_1 = MAX_VAL
+                                cov_2 = MAX_VAL
 
                                 if contig_names[candidate_nodes[i]] in contig_coverages:
                                     cov_1 = contig_coverages[contig_names[candidate_nodes[i]]]
@@ -478,8 +478,8 @@ def main(
                             path_string += graph_contigs[contig_name]
 
                             if contig_name in contig_coverages:
-                                if coverage > edge_depths[contig_name]:
-                                    coverage = edge_depths[contig_name]
+                                if coverage > contig_coverages[contig_name]:
+                                    coverage = contig_coverages[contig_name]
 
                         path_lengths.append(total_length)
                         path_coverages.append(coverage)
@@ -516,7 +516,7 @@ def main(
                 [contig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
-                edge_depths[contig_name],
+                contig_coverages[contig_name],
                 len(graph_contigs[contig_name]),
             )
             my_genomic_paths.append(genome_path)
