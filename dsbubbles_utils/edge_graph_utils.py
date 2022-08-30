@@ -68,7 +68,6 @@ def get_links(assembly_graph_file):
 
             # Identify lines with link information
             if line.startswith("L"):
-                link = []
 
                 strings = line.split("\t")
 
@@ -80,25 +79,38 @@ def get_links(assembly_graph_file):
                 # read_count = int(strings[6].split(":")[-1])
 
                 if link1_orientation == "+" and link2_orientation == "+":
+                    link = []
                     link.append(link1)
                     link.append(link2)
-                #                     links.append(link)
+                    links.append(link)
                 elif link1_orientation == "-" and link2_orientation == "-":
+                    link = []
                     link.append(link2)
                     link.append(link1)
-                #                     links.append(link)
-                elif link1_orientation == "+" and link2_orientation == "-":
+                    links.append(link)
+                else:
+                    link = []
                     link.append(link1)
                     link.append(link2)
-                #                     links.append(link)
-                elif link1_orientation == "-" and link2_orientation == "+":
-                    link.append(link1)
-                    link.append(link2)
-                #                     links.append(link)
-                #                 link.append(link1)
-                #                 link.append(link2)
+                    links.append(link)
+
+                    # link = []
+                    # link.append(link2)
+                    # link.append(link1)
+                    # links.append(link)
+                # elif link1_orientation == "+" and link2_orientation == "-":
+                #     link = []
+                #     link.append(link1)
+                #     link.append(link2)
+                #     links.append(link)
+                # elif link1_orientation == "-" and link2_orientation == "+":
+                #     link = []
+                #     link.append(link1)
+                #     link.append(link2)
+                #     links.append(link)
+                    
                 # link.append(read_count)
-                links.append(link)
+                
 
             elif line.startswith("S"):
 
