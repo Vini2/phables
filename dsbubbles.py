@@ -26,6 +26,7 @@ __status__ = "Development"
 
 MAX_VAL = sys.maxsize
 FASTA_LINE_LEN = 60
+REPEAT_MIN_LENGTH = 1000
 
 # Sample command
 # -------------------------------------------------------------------
@@ -77,11 +78,26 @@ FASTA_LINE_LEN = 60
     type=click.Path(exists=True),
 )
 @click.option(
+    "--coverage",
+    "-cov",
+    required=True,
+    help="path to the coverage file",
+    type=click.Path(exists=True),
+)
+@click.option(
     "--minlength",
     "-ml",
     default=2000,
     required=False,
     help="minimum length of circular contigs to consider",
+    type=int,
+)
+@click.option(
+    "--mincov",
+    "-mcov",
+    default=1,
+    required=False,
+    help="minimum coverage of path",
     type=int,
 )
 @click.option(
@@ -153,7 +169,9 @@ def main(
     paths,
     hmmout,
     phrogs,
+    coverage,
     minlength,
+    mincov,
     biglength,
     bigcount,
     pathdiff,
@@ -194,7 +212,9 @@ def main(
     logger.info(f"Contig paths file: {paths}")
     logger.info(f"Contig .hmmout file: {hmmout}")
     logger.info(f"Contig phrog annotations file: {phrogs}")
+    logger.info(f"Contig coverage file: {coverage}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
+    logger.info(f"Minimum coverage of paths: {mincov}")
     logger.info(f"Minimum length of a path in a complex component: {biglength}")
     logger.info(f"minimum contig count to be a complex component: {bigcount}")
     logger.info(
@@ -256,19 +276,21 @@ def main(
     logger.info(f"Total number of components found: {len(pruned_vs)}")
 
     # Get contig coverages
+    # ----------------------------------------------------------------------
 
     contig_coverages = {}
 
-    # with open("/scratch/user/mall0133/2022_Jan_IBD/contig_coverages_rpkm_noh.tsv", "r") as myfile:
-    with open("/Users/vijinimallawaarachchi/Documents/Data/IBD_Jan/contig_coverages_rpkm_noh.tsv", "r") as myfile:
+    with open(coverage, "r") as myfile:
         for line in myfile.readlines():
-            strings = line.strip().split()
 
-            contig_name = strings[0].replace("contig", "edge")
+            if not line.startswith("Contig"):
+                strings = line.strip().split()
 
-            coverage = sum([float(x) for x in strings[1:]])
+                contig_name = strings[0].replace("contig", "edge")
 
-            contig_coverages[contig_name] = coverage
+                coverage_sum = sum([float(x) for x in strings[1:]])
+
+                contig_coverages[contig_name] = coverage_sum
 
     # Resolve genomes
     # ----------------------------------------------------------------------
@@ -289,6 +311,10 @@ def main(
 
         candidate_nodes = pruned_vs[my_count]
 
+        pruned_graph = assembly_graph.subgraph(candidate_nodes)
+
+        comp_self_looped_nodes = [x for x in pruned_vs[my_count] if x in self_looped_nodes]
+
         # if 1352 not in candidate_nodes:
         #     continue
 
@@ -299,14 +325,57 @@ def main(
         logger.debug(f"{candidate_nodes}")
 
         
+        if len(candidate_nodes) == 2:
 
-        # if len(candidate_nodes) > 1 and len(candidate_nodes) < bigcount:
-        if len(candidate_nodes) > 1 and len(candidate_nodes) < bigcount:
+            all_self_looped = True
+
+            for node in candidate_nodes:
+                if node not in self_looped_nodes:
+                    all_self_looped = False
+            
+            if all_self_looped:
+
+                cycle_components.add(my_count)
+
+                contig1 = ""
+                contig2 = ""
+
+                for edge in pruned_graph.es:
+                    source_vertex_id = edge.source
+                    target_vertex_id = edge.target
+
+                    if source_vertex_id != target_vertex_id:
+                        contig1 = candidate_nodes[source_vertex_id]
+                        contig2 = candidate_nodes[target_vertex_id]
+
+                if contig1 != "" and contig2 != "":
+
+                    contig1_name = contig_names[contig1]
+                    contig2_name = contig_names[contig2]
+
+                    resolved_edges.add(contig1_name)
+                    resolved_edges.add(contig2_name)
+
+                    path_string = graph_contigs[contig1_name] + graph_contigs[contig2_name]
+
+                    cycle_number = 1
+
+                    genome_path = GenomePath(
+                        f"phage_comp_{my_count}_cycle_{cycle_number}",
+                        [contig1_name, contig2_name],
+                        [contig1, contig2],
+                        path_string,
+                        min(contig_coverages[contig1_name], contig_coverages[contig2_name]),
+                        len(path_string),
+                    )
+                    my_genomic_paths.append(genome_path)
+                    resolved_components.add(my_count)
+
+
+        elif len(candidate_nodes) > 2 and len(candidate_nodes) < bigcount:
 
             is_complex = False
             cycles_found = False
-
-            pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
             all_degrees = []
             all_clean_degrees = []
@@ -368,11 +437,27 @@ def main(
                         
                         if (i,j) in my_edges:
 
-                            if candidate_nodes[i] not in self_looped_nodes or candidate_nodes[j] not in self_looped_nodes:
+                            consider_edge = False
+
+                            if candidate_nodes[i] not in self_looped_nodes and candidate_nodes[j] not in self_looped_nodes:
+                                consider_edge = True
+
+                            elif len(comp_self_looped_nodes) == 1:
+                                consider_edge = True
+
+                            elif candidate_nodes[i] in self_looped_nodes and candidate_nodes[j] not in self_looped_nodes:
+                                if len(graph_contigs[contig_names[candidate_nodes[i]]]) > REPEAT_MIN_LENGTH:
+                                    consider_edge = True
+
+                            elif candidate_nodes[i] not in self_looped_nodes and candidate_nodes[j] in self_looped_nodes:
+                                if len(graph_contigs[contig_names[candidate_nodes[j]]]) > REPEAT_MIN_LENGTH:
+                                    consider_edge = True
+
+                            if consider_edge:
                                 # min_cov = min(edge_depths[contig_names[candidate_nodes[i]]], edge_depths[contig_names[candidate_nodes[j]]])
 
-                                cov_1 = 1
-                                cov_2 = 1
+                                cov_1 = MAX_VAL
+                                cov_2 = MAX_VAL
 
                                 if contig_names[candidate_nodes[i]] in contig_coverages:
                                     cov_1 = contig_coverages[contig_names[candidate_nodes[i]]]
@@ -407,7 +492,7 @@ def main(
                     step_add = 10
                     run_post = 2
                     state = 0
-                    tol = 1E-10
+                    tol = 1E-5
 
                     myCycFlowDec = CycFlowDec(F,state,tol)
                     myCycFlowDec.run(init_steps-run_post,run_post)
@@ -429,13 +514,13 @@ def main(
 
                         cycle_len = sum([len(graph_contigs[contig_names[candidate_nodes[node]]]) for node in cycle])
 
-                        if myCycFlowDec.cycles[cycle] > 0 and cycle_len > minlength:
+                        if myCycFlowDec.cycles[cycle] >= mincov and cycle_len >= minlength:
 
                             my_cc += 1
 
                             path_string = ""
                             total_length = 0
-                            coverage = myCycFlowDec.cycles[cycle]
+                            coverage_val = myCycFlowDec.cycles[cycle]
 
                             for node in cycle:
                                 contig_name = contig_names[candidate_nodes[node]]
@@ -447,7 +532,7 @@ def main(
                                 [contig_names[candidate_nodes[x]] for x in cycle],
                                 [candidate_nodes[x] for x in cycle],
                                 path_string,
-                                coverage,
+                                coverage_val,
                                 total_length,
                             )
                             my_genomic_paths.append(genome_path)
@@ -461,7 +546,7 @@ def main(
                     # is_complex = True
 
                 if cycles_iterated and len(myCycFlowDec.cycles.keys()) == 0:
-                    # logger.debug(f"No paths were found. Switching to detect cycles")
+                    logger.debug(f"No paths were found. Switching to detect cycles")
                     is_complex = True
 
             # if is_complex:
@@ -551,6 +636,7 @@ def main(
                 len(graph_contigs[contig_name]),
             )
             my_genomic_paths.append(genome_path)
+            resolved_components.add(my_count)
 
             circular_contigs.add(my_count)
 
@@ -690,8 +776,12 @@ def main(
                 for chunk in chunks:
                     myfile.write(f"{chunk}\n")
 
+    resolved_cyclic = len(cycle_components) - (len(resolved_components) - len(circular_contigs))
+
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
+    logger.info(f"Total number of cyclic components resolved: {resolved_cyclic}")
     logger.info(f"Circular contigs identified: {len(circular_contigs)}")
+    logger.info(f"Total number of cyclic components found: {len(cycle_components) + len(circular_contigs)}")
     logger.info(f"Total number of components resolved: {len(resolved_components)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
