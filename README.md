@@ -46,5 +46,5 @@ Options:
 ### Example usage
 
 ```
-python dsbubbles.py -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -o /output/path/
+python dsbubbles.py -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -cov coverage.tsv -o /output/path/
 ```
