@@ -97,31 +97,15 @@ REPEAT_MIN_LENGTH = 1000
     "-mcov",
     default=1,
     required=False,
-    help="minimum coverage of path",
+    help="minimum coverage of paths to output",
     type=int,
 )
 @click.option(
-    "--biglength",
-    "-bl",
-    default=10000,
-    required=False,
-    help="minimum length of a path in a complex component",
-    type=int,
-)
-@click.option(
-    "--bigcount",
-    "-bc",
+    "--compcount",
+    "-cc",
     default=500,
     required=False,
-    help="minimum contig count to be a complex component",
-    type=int,
-)
-@click.option(
-    "--pathdiff",
-    "-pd",
-    default=2000,
-    required=False,
-    help="length difference threshold to filter paths of a component",
+    help="maximum contig count to consider a component",
     type=int,
 )
 @click.option(
@@ -149,14 +133,6 @@ REPEAT_MIN_LENGTH = 1000
     type=float,
 )
 @click.option(
-    "--degree",
-    "-d",
-    default=20,
-    required=False,
-    help="minimum in/out degree of nodes in a component to be complex",
-    type=int,
-)
-@click.option(
     "--output",
     "-o",
     required=True,
@@ -172,13 +148,10 @@ def main(
     coverage,
     minlength,
     mincov,
-    biglength,
-    bigcount,
-    pathdiff,
+    compcount,
     mgfrac,
     alignscore,
     seqidentity,
-    degree,
     output,
 ):
 
@@ -214,18 +187,11 @@ def main(
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Contig coverage file: {coverage}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
-    logger.info(f"Minimum coverage of paths: {mincov}")
-    logger.info(f"Minimum length of a path in a complex component: {biglength}")
-    logger.info(f"minimum contig count to be a complex component: {bigcount}")
-    logger.info(
-        f"Length difference threshold to filter paths of a component: {pathdiff}"
-    )
+    logger.info(f"Minimum coverage of paths to output: {mincov}")
+    logger.info(f"minimum contig count to consider a component: {compcount}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
-    logger.info(
-        f"Minimum in/out degree of nodes in a component to be complex: {degree}"
-    )
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
@@ -372,7 +338,7 @@ def main(
                     resolved_components.add(my_count)
 
 
-        elif len(candidate_nodes) > 2 and len(candidate_nodes) < bigcount:
+        elif len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
 
             is_complex = False
             cycles_found = False
@@ -656,8 +622,6 @@ def main(
 
             path_lengths = []
             path_coverages = []
-
-            len_dif_threshold = pathdiff
 
             prev_length = my_genomic_paths[0].length
 
