@@ -19,8 +19,8 @@ You can see the following command-line options of `dsbubbles.py` using `python d
 ```
 Usage: dsbubbles.py [OPTIONS]
 
-  ds-bubbles: Resolve bacteriophage genomes from viral bubbles in metagenomic
-  data.
+  ds-bubbles: Resolve bacteriophage genomes from viral bubbles in
+  metagenomic data.
 
 Options:
   -g, --graph PATH          path to the assembly graph file  [required]
@@ -29,15 +29,16 @@ Options:
   -hm, --hmmout PATH        path to the contig .hmmout file  [required]
   -ph, --phrogs PATH        path to the contig phrog annotations file
                             [required]
+
+  -cov, --coverage PATH     path to the coverage file  [required]
   -ml, --minlength INTEGER  minimum length of circular contigs to consider
-  -bl, --biglength INTEGER  minimum length of a big circular contig
-  -pd, --pathdiff INTEGER   length threshold to filter paths of a component
+  -mcov, --mincov INTEGER   minimum coverage of paths to output
+  -cc, --compcount INTEGER  maximum contig count to consider a component
   -mgf, --mgfrac FLOAT      length threshold to consider single copy marker
                             genes
+
   -as, --alignscore FLOAT   minimum alignment score (%) for phrog annotations
   -si, --seqidentity FLOAT  minimum sequence identity for phrog annotations
-  -d, --degree INTEGER      minimum in/out degree of nodes in a component to
-                            be complex
   -o, --output PATH         path to the output folder  [required]
   --help                    Show this message and exit.
 ```
