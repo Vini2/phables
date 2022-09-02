@@ -4,13 +4,53 @@
 
 # PhaBles: Phage bubbles resolve bacteriophage genomes from metagenomic data
 
-`phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models phage-like components in the metagenomic assembly as graphs, detects cycles and resolves genomic paths corresponding to those cycles. 
+`phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models cyclic phage-like components in the metagenomic assembly as graphs and resolves genomic paths corresponding to cyclic paths determined. 
 
 The figure below shows an example component where two genomic paths are resolved. There are two branching contigs (in pink and purple) shared by the common brown contig. The two genomic paths formed by the pink contig and the purple contigs can be resolved as shown.
 
 ![](resolve_genomes.png)
 
 `phables` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
+
+## Setting up phables
+
+### Downloading phables
+
+You can clone the `phables` repository to your machine.
+
+```
+git clone https://github.com/Vini2/phables.git
+```
+
+Now go into the `phables` folder using the command
+
+```
+cd phables/
+```
+
+### Using `conda`
+
+Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run `phables`.
+
+```
+conda env create -f environment.yml
+conda activate phables
+```
+
+### Using `pip`
+You can run the following command to install phables using `pip`. Make sure you are in the `phables` folder.
+
+```
+pip install .
+```
+
+### Test the setup
+
+After setting up, run the following command to ensure that `phables` is working.
+
+```
+phables.py -h
+```
 
 ## Usage
 
