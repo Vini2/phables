@@ -11,13 +11,13 @@ import numpy as np
 from igraph import *
 from tqdm import tqdm
 
-from dsbubbles_utils import (component_utils, edge_graph_utils, edge_utils,
+from phables_utils import (component_utils, edge_graph_utils, edge_utils,
                              gene_utils)
-from dsbubbles_utils.genome_utils import GenomeComponent, GenomePath
-from dsbubbles_utils.CycFlowDec import CycFlowDec
+from phables_utils.genome_utils import GenomeComponent, GenomePath
+from phables_utils.CycFlowDec import CycFlowDec
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2022, ds-bubbles Project"
+__copyright__ = "Copyright 2022, PhaBles Project"
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "Vijini Mallawaarachchi"
@@ -30,10 +30,10 @@ REPEAT_MIN_LENGTH = 1000
 
 # Sample command
 # -------------------------------------------------------------------
-# python dsbubbles.py  -g /path/to/assembly_graph.gfa
-#                      -c /path/to/assembly.fasta
-#                      -p /path/to/assembly_info.txt
-#                      -o /path/to/output_folder
+# python phables.py  -g /path/to/assembly_graph.gfa
+#                    -c /path/to/assembly.fasta
+#                    -p /path/to/assembly_info.txt
+#                    -o /path/to/output_folder
 # -------------------------------------------------------------------
 
 
@@ -155,12 +155,12 @@ def main(
     output,
 ):
 
-    """ds-bubbles: Resolve bacteriophage genomes from viral bubbles in metagenomic data."""
+    """PhaBles: Resolve bacteriophage genomes from phage bubbles in metagenomic data."""
 
     # Setup logger
     # ----------------------------------------------------------------------
 
-    logger = logging.getLogger("dsbubbles 0.1")
+    logger = logging.getLogger("phables 0.1")
     logger.setLevel(logging.DEBUG)
     logging.captureWarnings(True)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
@@ -170,13 +170,13 @@ def main(
     logger.addHandler(consoleHeader)
 
     # Setup output path for log file
-    fileHandler = logging.FileHandler(f"{output}/dsbubbles.log")
+    fileHandler = logging.FileHandler(f"{output}/phables.log")
     fileHandler.setLevel(logging.DEBUG)
     fileHandler.setFormatter(formatter)
     logger.addHandler(fileHandler)
 
     logger.info(
-        "Welcome to ds-bubbles: Resolve bacteriophage genomes from viral bubbles in metagenomic data."
+        "Welcome to PhaBles: Resolve bacteriophage genomes from phage bubbles in metagenomic data."
     )
 
     logger.info(f"Input arguments: ")
@@ -840,7 +840,7 @@ def main(
     # Exit program
     # ----------------------------------------------------------------------
 
-    logger.info("Thank you for using ds-bubbles!")
+    logger.info("Thank you for using phables!")
 
 
 if __name__ == "__main__":

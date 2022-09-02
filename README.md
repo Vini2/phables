@@ -1,25 +1,25 @@
 <p align="center">
-  <img src="ds-bubbles-logo.png" width="700" title="ds-bubbles logo" alt="ds-bubbles logo">
+  <img src="phables_logo.png" width="700" title="phables logo" alt="phables logo">
 </p>
 
-# ds-bubbles: Viral bubbles resolve bacteriophage genomes from metagenomic data
+# PhaBles: Phage bubbles resolve bacteriophage genomes from metagenomic data
 
-`ds-bubbles` is a tool developed to resolve bacteriophage genomes using viral bubbles in metagenomic data. It models phage-like components in the metagenomic assembly as graphs, detects cycles and resolves genomic paths corresponding to those cycles. 
+`phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models phage-like components in the metagenomic assembly as graphs, detects cycles and resolves genomic paths corresponding to those cycles. 
 
 The figure below shows an example component where two genomic paths are resolved. There are two branching contigs (in pink and purple) shared by the common brown contig. The two genomic paths formed by the pink contig and the purple contigs can be resolved as shown.
 
 ![](resolve_genomes.png)
 
-`ds-bubbles` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
+`phables` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
 
 ## Usage
 
-You can see the following command-line options of `dsbubbles.py` using `python dsbubbles.py --help`.
+You can see the following command-line options of `phables.py` using `python phables.py --help`.
 
 ```
-Usage: dsbubbles.py [OPTIONS]
+Usage: phables.py [OPTIONS]
 
-  ds-bubbles: Resolve bacteriophage genomes from viral bubbles in
+  PhaBles: Resolve bacteriophage genomes from phage bubbles in
   metagenomic data.
 
 Options:
@@ -46,5 +46,5 @@ Options:
 ### Example usage
 
 ```
-python dsbubbles.py -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -cov coverage.tsv -o /output/path/
+python phables.py -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -cov coverage.tsv -o /output/path/
 ```

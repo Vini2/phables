@@ -1,4 +1,4 @@
-name: dsbubbles
+name: phables
 channels:
   - conda-forge
   - bioconda
