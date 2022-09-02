@@ -1,0 +1,7 @@
+include *.md
+include LICENSE
+
+recursive-include phables_utils/ *
+
+global-exclude phables_utils/ *.pyc
+global-exclude phables_utils/__pycache__ *.pyc
