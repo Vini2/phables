@@ -49,7 +49,7 @@ pip install .
 After setting up, run the following command to ensure that `phables` is working.
 
 ```
-phables -h
+phables --help
 ```
 
 ## Usage
