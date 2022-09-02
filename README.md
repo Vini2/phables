@@ -12,6 +12,18 @@ The figure below shows an example component where two genomic paths are resolved
 
 `phables` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
 
+## Dependencies
+
+`phables` uses the following packages.
+* python-igraph
+* biopython
+* networkx
+* scipy
+* numpy
+* tqdm
+* [CycFlowDec](https://github.com/austenb28/CycFlowDec)
+
+
 ## Setting up phables
 
 ### Downloading phables
