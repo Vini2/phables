@@ -49,15 +49,15 @@ pip install .
 After setting up, run the following command to ensure that `phables` is working.
 
 ```
-phables.py -h
+phables --help
 ```
 
 ## Usage
 
-You can see the following command-line options of `phables.py` using `python phables.py --help`.
+You can see the following command-line options of `phables` using `python phables --help`.
 
 ```
-Usage: phables.py [OPTIONS]
+Usage: phables [OPTIONS]
 
   PhaBles: Resolve bacteriophage genomes from phage bubbles in
   metagenomic data.
@@ -86,5 +86,5 @@ Options:
 ### Example usage
 
 ```
-python phables.py -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -cov coverage.tsv -o /output/path/
+python phables -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -cov coverage.tsv -o /output/path/
 ```
