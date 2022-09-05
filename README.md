@@ -14,7 +14,7 @@ The figure below shows an example component where two genomic paths are resolved
 
 ## Dependencies
 
-`phables` uses the following packages.
+`phables` uses the following packages. These are already included in setup files.
 * python-igraph
 * biopython
 * networkx
