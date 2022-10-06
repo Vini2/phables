@@ -1,5 +1,7 @@
 from Bio import SeqIO
+from Bio.Seq import Seq
 from igraph import *
+from collections import defaultdict
 
 
 class BidirectionalError(Exception):
@@ -57,6 +59,8 @@ def get_links(assembly_graph_file):
 
     edges_lengths = {}
 
+    oriented_links = defaultdict(lambda: defaultdict(list))
+
     links = []
 
     my_map = BidirectionalMap()
@@ -78,38 +82,40 @@ def get_links(assembly_graph_file):
                 link2_orientation = strings[4]
                 # read_count = int(strings[6].split(":")[-1])
 
-                if link1_orientation == "+" and link2_orientation == "+":
-                    link = []
-                    link.append(link1)
-                    link.append(link2)
-                    links.append(link)
-                elif link1_orientation == "-" and link2_orientation == "-":
-                    link = []
-                    link.append(link2)
-                    link.append(link1)
-                    links.append(link)
-                else:
-                    link = []
-                    link.append(link1)
-                    link.append(link2)
-                    links.append(link)
+                link = []
+                link.append(link1)
+                link.append(link2)
+                links.append(link)
 
-                    # link = []
-                    # link.append(link2)
-                    # link.append(link1)
-                    # links.append(link)
-                # elif link1_orientation == "+" and link2_orientation == "-":
-                #     link = []
-                #     link.append(link1)
-                #     link.append(link2)
-                #     links.append(link)
-                # elif link1_orientation == "-" and link2_orientation == "+":
-                #     link = []
-                #     link.append(link1)
-                #     link.append(link2)
-                #     links.append(link)
+                if link1 != link2:
+                    if link1_orientation == "+" and link2_orientation == "+":
+                        oriented_links[link1][link2].append(("+","+"))
+                        oriented_links[link2][link1].append(("-","-"))
+                    elif link1_orientation == "-" and link2_orientation == "-":
+                        oriented_links[link1][link2].append(("-","-"))
+                        oriented_links[link2][link1].append(("+","+"))
+                    elif link1_orientation == "+" and link2_orientation == "-":
+                        oriented_links[link1][link2].append(("+","-"))
+                        oriented_links[link2][link1].append(("+","-"))
+                    elif link1_orientation == "-" and link2_orientation == "+":
+                        oriented_links[link1][link2].append(("-","+"))
+                        oriented_links[link2][link1].append(("-","+"))
                     
-                # link.append(read_count)
+                # if link1_orientation == "+" and link2_orientation == "+":
+                #     link = []
+                #     link.append(link1)
+                #     link.append(link2)
+                #     links.append(link)
+                # elif link1_orientation == "-" and link2_orientation == "-":
+                #     link = []
+                #     link.append(link2)
+                #     link.append(link1)
+                #     links.append(link)
+                # else:
+                #     link = []
+                #     link.append(link1)
+                #     link.append(link2)
+                #     links.append(link)
                 
 
             elif line.startswith("S"):
@@ -118,7 +124,7 @@ def get_links(assembly_graph_file):
 
                 my_map[node_count] = strings[1]
 
-                graph_contigs[strings[1]] = strings[2]
+                graph_contigs[strings[1]] = Seq(strings[2])
 
                 depth = int(strings[3].split(":")[-1])
                 edge_depths[strings[1]] = depth
@@ -128,7 +134,7 @@ def get_links(assembly_graph_file):
 
             line = file.readline()
 
-    return node_count, graph_contigs, links, my_map, edge_depths, edges_lengths
+    return node_count, graph_contigs, links, oriented_links, my_map, edge_depths, edges_lengths
 
 
 def get_graph_edges(links, contig_names_rev):
@@ -149,7 +155,7 @@ def get_graph_edges(links, contig_names_rev):
             # weights_dict[(contig_names_rev[link[0]], contig_names_rev[link[1]])] = link[2]
             # weights_dict[(contig_names_rev[link[1]], contig_names_rev[link[0]])] = link[2]
         else:
-            self_looped_nodes.append(contig_names_rev[link[0]])
+            self_looped_nodes.append(link[0])
 
     return edge_list, self_looped_nodes
 
@@ -160,6 +166,7 @@ def build_assembly_graph(assembly_graph_file):
         node_count,
         graph_contigs,
         links,
+        oriented_links,
         contig_names,
         edge_depths,
         edges_lengths,
@@ -169,7 +176,7 @@ def build_assembly_graph(assembly_graph_file):
     contig_names_rev = contig_names.inverse
 
     # Create graph
-    assembly_graph = Graph(directed=True)
+    assembly_graph = Graph(directed=False)
 
     # Add vertices
     assembly_graph.add_vertices(node_count)
@@ -201,6 +208,7 @@ def build_assembly_graph(assembly_graph_file):
     return (
         assembly_graph,
         edge_list,
+        oriented_links,
         contig_names,
         contig_names_rev,
         graph_contigs,
