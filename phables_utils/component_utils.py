@@ -12,7 +12,7 @@ def get_components(
 
     i = 0
 
-    for component in assembly_graph.clusters(mode="weak"):
+    for component in assembly_graph.components():
 
         if len(component) > 1:
 
@@ -37,14 +37,6 @@ def get_components(
                     ):
                     # if "terminase large subunit head and packaging" in contig_phrogs[contig_names[contig]]:
                         has_phrog = True
-
-                # if edges_lengths[contig_names[contig]] > 2000:
-                #     has_long == True
-
-            # if 5627 in component:
-            #     print(contig_names[91046], contig_names[91046] in contig_phrogs)
-            #     print(contig_names[91046], contig_names[91046] in smg_contigs)
-            #     print("has_phrog", has_phrog)
 
             if has_phrog:
                 pruned_vs[i] = component
