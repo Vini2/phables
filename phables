@@ -285,6 +285,7 @@ def main(
     cycle_components = set()
     resolved_components = set()
     circular_contigs = set()
+    resolved_cyclic = set()
 
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
 
@@ -298,7 +299,7 @@ def main(
 
         # comp_self_looped_nodes = [x for x in pruned_vs[my_count] if contig_names[x] in self_looped_nodes]
 
-        # if 1338 not in candidate_nodes:
+        # if 1352 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
@@ -370,8 +371,9 @@ def main(
                         [f"{contig1_name}{contig1_orientation}", f"{contig2_name}{contig2_orientation}"],
                         [contig1_name, contig2_name],
                         path_string,
-                        min(contig_coverages[contig1_name], contig_coverages[contig2_name]),
+                        int(min(contig_coverages[contig1_name], contig_coverages[contig2_name])),
                         len(path_string),
+                        (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
                     )
                     my_genomic_paths.append(genome_path)
                     resolved_components.add(my_count)
@@ -389,9 +391,14 @@ def main(
 
             cycle_edges = {}
 
+            clean_node_count = 0
+
             for vertex in pruned_graph.vs["id"]:
 
                 contig_name = contig_names[vertex]
+
+                if contig_name not in self_looped_nodes:
+                    clean_node_count += 1
 
                 for node in oriented_links[contig_name]:
 
@@ -472,6 +479,8 @@ def main(
 
             clean_max_degree = max(degrees)
 
+            logger.info(f"clean_max_degree: {clean_max_degree}")
+
             cycle_number = 1
 
             cycles_iterated = False
@@ -480,7 +489,7 @@ def main(
                 F = np.zeros([G.number_of_nodes(),G.number_of_nodes()])
 
                 for edge in G.edges.data("weight", default=1):
-                    F[edge[0],edge[1]] = edge[2]
+                    F[edge[1],edge[0]] = edge[2]
 
                 n_points = 50
                 init_steps = 10
@@ -510,14 +519,18 @@ def main(
                 logger.debug(f"MREs: {MREs}")
                 logger.debug(f"Max and min MREs: {max(MREs)} {min(MREs)}")
 
+                if len(myCycFlowDec.cycles.keys()) != 0:
+                    cycle_components.add(my_count)
+
                 for cycle in myCycFlowDec.cycles.keys():
                     if myCycFlowDec.cycles[cycle] >= mincov:
+                        # logger.info(f"{cycle} {len(cycle)} {myCycFlowDec.cycles[cycle]}")
                         coverage_val = myCycFlowDec.cycles[cycle]
                         cycle = list(cycle)
-                        cycle_0 = cycle[0]
-                        cycle.pop(0)
-                        cycle.append(cycle_0)
-                        cycle.reverse()
+                        # cycle_0 = cycle[0]
+                        # cycle.pop(0)
+                        # cycle.append(cycle_0)
+                        # cycle.reverse()
                         # print([node_indices_rev[x] for x in cycle], coverage_val)
 
                         my_cc += 1
@@ -538,8 +551,9 @@ def main(
                             [node_indices_rev[x] for x in cycle],
                             [node_indices_rev[x][:-1] for x in cycle],
                             path_string,
-                            coverage_val,
+                            int(coverage_val),
                             total_length,
+                            (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
                         )
                         my_genomic_paths.append(genome_path)
 
@@ -571,8 +585,9 @@ def main(
                 [contig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
-                contig_coverages[contig_name],
+                int(contig_coverages[contig_name]),
                 len(graph_contigs[contig_name]),
+                (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
             )
             my_genomic_paths.append(genome_path)
             resolved_components.add(my_count)
@@ -584,7 +599,7 @@ def main(
 
         visited_nodes = set()
 
-        my_genomic_paths.sort(key=lambda x: x.length, reverse=True)
+        my_genomic_paths.sort(key=lambda x: (x.length, x.coverage), reverse=True)
 
         final_genomic_paths = []
 
@@ -604,23 +619,15 @@ def main(
 
             for genomic_path in my_genomic_paths:
 
-                # print("node_order:", genomic_path.node_order)
                 current_len_dif = abs(prev_length - genomic_path.length)
 
                 if current_len_dif < pathlendif:
 
                     path_is_subset = False
 
-                    # for final_path in final_genomic_paths:
-                    #     if set(genomic_path.node_order).issubset(
-                    #         set(final_path.node_order)
-                    #     ):
-                    #         path_is_subset = True
-                    #         break
-
                     node_count = 0
 
-                    if len(candidate_nodes) == 5:
+                    if len(candidate_nodes) <= 5:
                         node_count = 2
                     else:
                         # To avoid bubbles
@@ -643,13 +650,15 @@ def main(
 
                     # print("Set diff:", new_nodes)
 
-                    if len(new_nodes) > len(genomic_path.node_order)/5:
-                        path_is_subset = False
+                    has_new_nodes = False
+
+                    if len(new_nodes) > len(genomic_path.node_order)/clean_max_degree:
+                        has_new_nodes = True
 
                     if len(new_nodes) == 1 and new_nodes[0] not in visited_nodes:
-                        path_is_subset = False
+                        has_new_nodes = True
 
-                    if not path_is_subset and genomic_path.length > minlength and len(genomic_path.node_order) >= node_count:
+                    if (has_new_nodes or (not path_is_subset)) and genomic_path.length > minlength and len(genomic_path.node_order) >= clean_node_count/clean_max_degree:
                         # prev_length = genomic_path.length
 
                         logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
@@ -703,6 +712,7 @@ def main(
                 all_components.append(genome_comp)
 
             if len(final_genomic_paths) > 0:
+                resolved_cyclic.add(my_count)
                 resolved_components.add(my_count)
                 component_elapsed_time = time.time() - component_time_start
                 logger.debug(f"Elapsed time to resolve component {my_count} with {len(candidate_nodes)} nodes: {component_elapsed_time} seconds")
@@ -749,12 +759,12 @@ def main(
                 for chunk in chunks:
                     myfile.write(f"{chunk}\n")
 
-    resolved_cyclic = len(cycle_components) - (len(resolved_components) - len(circular_contigs))
+    # resolved_cyclic = len(cycle_components) - (len(resolved_components) - len(circular_contigs))
 
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
-    logger.info(f"Total number of cyclic components resolved: {resolved_cyclic}")
+    logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
     logger.info(f"Circular contigs identified: {len(circular_contigs)}")
-    logger.info(f"Total number of cyclic components found: {len(cycle_components) + len(circular_contigs)}")
+    logger.info(f"Total number of cyclic components found including circular contigs: {len(cycle_components) + len(circular_contigs)}")
     logger.info(f"Total number of components resolved: {len(resolved_components)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
@@ -778,10 +788,10 @@ def main(
     # ----------------------------------------------------------------------
 
     with open(f"{output}/resolved_genome_info.txt", "w") as myfile:
-        myfile.write(f"Path\tCoverage\tLength\tNode order\n")
+        myfile.write(f"Path\tCoverage\tLength\tGC content\tNode order\n")
         for genomic_path in all_resolved_paths:
             myfile.write(
-                f"{genomic_path.id}\t{genomic_path.coverage}\t{genomic_path.length}\t{genomic_path.node_order}\n"
+                f"{genomic_path.id}\t{genomic_path.coverage}\t{genomic_path.length}\t{genomic_path.gc}\t{genomic_path.node_order}\n"
             )
 
     logger.info(
