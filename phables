@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
-from email.policy import default
 import logging
 import subprocess
-import operator
+import os
 import sys
 import time
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 import click
 import networkx as nx
@@ -15,8 +13,7 @@ import numpy as np
 from igraph import *
 from tqdm import tqdm
 
-from phables_utils import (component_utils, edge_graph_utils, edge_utils,
-                             gene_utils)
+from phables_utils import (component_utils, edge_graph_utils, edge_utils, gene_utils)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
 from phables_utils.CycFlowDec import CycFlowDec
 
@@ -145,6 +142,14 @@ REPEAT_MIN_LENGTH = 1000
     type=int,
 )
 @click.option(
+    "--unitigfraction",
+    "-uf",
+    default=0.3,
+    required=False,
+    help="minimum unitig fraction threshold",
+    type=float,
+)
+@click.option(
     "--output",
     "-o",
     required=True,
@@ -165,6 +170,7 @@ def main(
     alignscore,
     seqidentity,
     pathlendif,
+    unitigfraction,
     output,
 ):
 
@@ -206,6 +212,7 @@ def main(
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Path length difference threshold: {pathlendif}")
+    logger.info(f"Minimum unitig fraction threshold: {unitigfraction}")
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
@@ -297,13 +304,10 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # comp_self_looped_nodes = [x for x in pruned_vs[my_count] if contig_names[x] in self_looped_nodes]
-
-        # if 1352 not in candidate_nodes:
+        # if 1338 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
-        
 
         logger.debug(f"number of contigs: {len(candidate_nodes)}")
         logger.debug(f"{candidate_nodes}")
@@ -427,6 +431,8 @@ def main(
                             cycle_edges[(contig_name+edge[0], node+edge[1])] = min_cov
                         
             # print(node_indices)
+
+            logger.debug(f"clean_node_count: {clean_node_count}")
             
             for cedge in cycle_edges:
                 G_edge.add_edge(cedge[0], cedge[1], weight=cycle_edges[cedge])
@@ -454,7 +460,7 @@ def main(
 
                 G.add_edge(node_indices[u], node_indices[v], weight=cov['weight'])
 
-            nx.draw(G)
+            # nx.draw(G)
             # plt.show()
             
             in_degree = []
@@ -479,7 +485,7 @@ def main(
 
             clean_max_degree = max(degrees)
 
-            logger.info(f"clean_max_degree: {clean_max_degree}")
+            logger.debug(f"clean_max_degree: {clean_max_degree}")
 
             cycle_number = 1
 
@@ -523,8 +529,8 @@ def main(
                     cycle_components.add(my_count)
 
                 for cycle in myCycFlowDec.cycles.keys():
+                    # logger.debug(f"{cycle} {len(cycle)} {myCycFlowDec.cycles[cycle]}")
                     if myCycFlowDec.cycles[cycle] >= mincov:
-                        # logger.info(f"{cycle} {len(cycle)} {myCycFlowDec.cycles[cycle]}")
                         coverage_val = myCycFlowDec.cycles[cycle]
                         cycle = list(cycle)
                         # cycle_0 = cycle[0]
@@ -599,9 +605,13 @@ def main(
 
         visited_nodes = set()
 
+        frac_unitigs = 1
+
         my_genomic_paths.sort(key=lambda x: (x.length, x.coverage), reverse=True)
 
         final_genomic_paths = []
+
+        comp_resolved_edges = set()
 
         n_paths = 0
 
@@ -625,13 +635,13 @@ def main(
 
                     path_is_subset = False
 
-                    node_count = 0
+                    # node_count = 0
 
-                    if len(candidate_nodes) <= 5:
-                        node_count = 2
-                    else:
-                        # To avoid bubbles
-                        node_count = 3
+                    # if len(candidate_nodes) <= 5:
+                    #     node_count = 1
+                    # else:
+                    #     # To avoid bubbles
+                    #     node_count = 3
 
                     # for final_path in final_genomic_paths:
                     #     if len(set(genomic_path.node_order).difference(set(final_path.node_order).intersection(set(genomic_path.node_order)))) > len(final_path.node_order)/2:
@@ -658,7 +668,7 @@ def main(
                     if len(new_nodes) == 1 and new_nodes[0] not in visited_nodes:
                         has_new_nodes = True
 
-                    if (has_new_nodes or (not path_is_subset)) and genomic_path.length > minlength and len(genomic_path.node_order) >= clean_node_count/clean_max_degree:
+                    if (has_new_nodes or (not path_is_subset)) and genomic_path.length > minlength and len(genomic_path.node_order) > clean_node_count/clean_max_degree:
                         # prev_length = genomic_path.length
 
                         logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
@@ -666,12 +676,11 @@ def main(
                         path_lengths.append(genomic_path.length)
                         path_coverages.append(genomic_path.coverage)
                         final_genomic_paths.append(genomic_path)
-                        all_resolved_paths.append(genomic_path)
                         visited_nodes = visited_nodes.union(set(genomic_path.node_order))
                         n_paths += 1
 
                         for path_node in genomic_path.node_id_order:
-                            resolved_edges.add(path_node)
+                            comp_resolved_edges.add(path_node)
 
                             if path_node in visited_count:
                                 visited_count[path_node] += 1
@@ -685,7 +694,11 @@ def main(
                         # else:
                         #     break
 
-            if len(final_genomic_paths) > 1 and len(in_degree) > 0 and len(out_degree) > 0:
+            frac_unitigs = len(visited_nodes)/len(candidate_nodes)
+
+            logger.debug(f"frac_unitigs: {frac_unitigs}")
+
+            if len(final_genomic_paths) > 1 and len(in_degree) > 0 and len(out_degree) > 0 and frac_unitigs > unitigfraction:
 
                 genome_comp = GenomeComponent(
                     f"phage_comp_{my_count}",
@@ -708,12 +721,15 @@ def main(
                     max(path_coverages),
                     min(path_coverages),
                     max(path_coverages) / min(path_coverages),
+                    frac_unitigs
                 )
                 all_components.append(genome_comp)
+                resolved_edges = resolved_edges.union(comp_resolved_edges)
 
-            if len(final_genomic_paths) > 0:
+            if len(final_genomic_paths) > 0 and frac_unitigs > unitigfraction:
                 resolved_cyclic.add(my_count)
                 resolved_components.add(my_count)
+                all_resolved_paths += final_genomic_paths
                 component_elapsed_time = time.time() - component_time_start
                 logger.debug(f"Elapsed time to resolve component {my_count} with {len(candidate_nodes)} nodes: {component_elapsed_time} seconds")
 
@@ -726,40 +742,40 @@ def main(
 
         # Write to file
 
-        with open(f"{output}/resolved_paths.fasta", "a+") as myfile:
+        if frac_unitigs > unitigfraction:
+
+            with open(f"{output}/resolved_paths.fasta", "a+") as myfile:
+
+                for genomic_path in final_genomic_paths:
+
+                    myfile.write(f">{genomic_path.id}\n")
+
+                    chunks = [
+                        genomic_path.path[i : i + FASTA_LINE_LEN]
+                        for i in range(0, genomic_path.length, FASTA_LINE_LEN)
+                    ]
+
+                    for chunk in chunks:
+                        myfile.write(f"{chunk}\n")
+
+            output_genomes_path = f"{output}/resolved_phages"
+
+            if not os.path.isdir(f"{output_genomes_path}"):
+                subprocess.run("mkdir -p " + output_genomes_path, shell=True)
 
             for genomic_path in final_genomic_paths:
 
-                myfile.write(f">{genomic_path.id}\n")
+                with open(f"{output_genomes_path}/{genomic_path.id}.fasta", "w+") as myfile:
 
-                chunks = [
-                    genomic_path.path[i : i + FASTA_LINE_LEN]
-                    for i in range(0, genomic_path.length, FASTA_LINE_LEN)
-                ]
+                    myfile.write(f">{genomic_path.id}\n")
 
-                for chunk in chunks:
-                    myfile.write(f"{chunk}\n")
+                    chunks = [
+                        genomic_path.path[i : i + FASTA_LINE_LEN]
+                        for i in range(0, genomic_path.length, FASTA_LINE_LEN)
+                    ]
 
-        output_genomes_path = f"{output}/resolved_phages"
-        subprocess.run("mkdir -p " + output_genomes_path, shell=True)
-
-        for genomic_path in final_genomic_paths:
-
-            with open(
-                f"{output}/resolved_phages/{genomic_path.id}.fasta", "w+"
-            ) as myfile:
-
-                myfile.write(f">{genomic_path.id}\n")
-
-                chunks = [
-                    genomic_path.path[i : i + FASTA_LINE_LEN]
-                    for i in range(0, genomic_path.length, FASTA_LINE_LEN)
-                ]
-
-                for chunk in chunks:
-                    myfile.write(f"{chunk}\n")
-
-    # resolved_cyclic = len(cycle_components) - (len(resolved_components) - len(circular_contigs))
+                    for chunk in chunks:
+                        myfile.write(f"{chunk}\n")
 
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
     logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
@@ -805,6 +821,7 @@ def main(
         myfile.write(f"Component\t")
         myfile.write(f"Number of nodes\t")
         myfile.write(f"Number of paths\t")
+        myfile.write(f"Fraction of unitigs recovered\t")
         myfile.write(f"Maximum degree\t")
         myfile.write(f"Maximum in degree\t")
         myfile.write(f"Maximum out degree\t")
@@ -826,6 +843,7 @@ def main(
             myfile.write(f"{component.id}\t")
             myfile.write(f"{component.n_nodes}\t")
             myfile.write(f"{component.n_paths}\t")
+            myfile.write(f"{component.frac_unitigs}\t")
             myfile.write(f"{component.max_degree}\t")
             myfile.write(f"{component.max_in_degree}\t")
             myfile.write(f"{component.max_out_degree}\t")
