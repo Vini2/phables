@@ -37,7 +37,110 @@ def read_input(graphfile):
     return listOfGraphs;
 
 
-def flowMultipleDecomposition(data,K):
+def flowMultipleDecompositionGurobi(data,K):
+    
+    
+    #libraries
+    import gurobipy as gp
+    from gurobipy import GRB
+    
+    # calculate the minimal flow decomposition based on such graph
+    V = data['vertices']
+    E = data['edges']
+    W = data['maxFlow']
+    S = data['sources']
+    D = data['targets']
+    AD_in = data['adj_in']
+    AD_out = data['adj_out']
+    f_low = data['flows_low']
+    f_up = data['flows_up']
+    
+    
+    try:
+        #create extra sets
+        T = [(i,j,k) for (i,j) in E for k in range(0,K)]
+        SC = [k for k in range(0,K)]
+        
+        # Create a new model
+        model = gp.Model("MFD")
+        model.Params.LogToConsole = 0
+
+        # Create variables
+        x = model.addVars(T,vtype=GRB.BINARY, name="x")
+        w = model.addVars(SC,vtype=GRB.INTEGER, name="w",lb=0)
+        z = model.addVars(T,vtype=GRB.CONTINUOUS, name="z",lb=0)
+    
+        model.setObjective(GRB.MINIMIZE)
+       
+        # flow conservation
+        for k in range(0,K):
+            for i in V:
+                if i in S:
+                    model.addConstr(sum(x[i,j,k] for j in AD_out[i])  == 1) 
+                if i in D:
+                    model.addConstr(sum(x[j,i,k] for j in AD_in[i]) == 1)
+                if i not in S and i not in D:
+                    model.addConstr(sum(x[i,j,k] for j in AD_out[i]) - sum(x[j,i,k] for j in AD_in[i]) == 0)
+                    
+
+        # flow balance inexact
+        for (i,j) in E:
+            model.addConstr(f_low[i,j] <= sum(z[i,j,k] for k in range(0,K)))
+            model.addConstr(f_up[i,j] >= sum(z[i,j,k] for k in range(0,K)))
+
+        # linearization
+        for (i,j) in E:
+            for k in range(0,K):
+                model.addConstr(z[i,j,k] <= W*x[i,j,k])
+                model.addConstr(w[k] - (1 - x[i,j,k])*W <= z[i,j,k])
+                model.addConstr(z[i,j,k] <= w[k])
+        
+        # objective function
+        model.optimize()
+        
+        
+        w_sol = [0]*len(range(0,K))
+        x_sol = {}
+        paths = [list() for i in range(0,K)]
+    
+        if model.status == GRB.OPTIMAL:
+            data['message'] = 'solved'
+            data['runtime'] = model.Runtime;
+
+            
+            for v in model.getVars():
+                if 'w' in v.VarName:
+                    for k in range(0,K):
+                        if str(k) in v.VarName:
+                            w_sol[k] = v.x
+                
+                if 'x' in v.VarName:          
+                    for (i,j,k) in T:
+                        if str(i)+","+str(j)+","+str(k) in v.VarName:
+                            x_sol[i,j,k] = v.x
+                
+            for(i,j,k) in T:
+                if x_sol[i,j,k] == 1:
+                    paths[k].append((i,j))
+            
+            #print(x_sol,w_sol,paths)
+            data['weights'] = w_sol
+            data['solution'] = paths
+        
+        if model.status == GRB.INFEASIBLE:
+            data['message'] = 'unsolved'
+        
+    except gp.GurobiError as e:
+        print('Error code ' + str(e.errno) + ': ' + str(e))
+
+    except AttributeError:
+        print('Encountered an attribute error')
+    
+    return data;
+    
+
+
+def flowMultipleDecompositionCplex(data,K):
     
    
     # calculate the minimal flow decomposition based on such graph
@@ -123,7 +226,7 @@ def flowMultipleDecomposition(data,K):
     
     
 
-def FD_Algorithm(data):
+def FD_Algorithm(data, solver):
     
     listOfEdges = data['edges']
     solutionMap = data['graph']
@@ -132,7 +235,11 @@ def FD_Algorithm(data):
     solutionWeights = 0
 
     for i in range(1,len(listOfEdges)+1):
-        data = flowMultipleDecomposition(data,i)
+
+        if solver=="gurobi":
+            data = flowMultipleDecompositionGurobi(data,i)
+        elif solver=="cplex":
+            data = flowMultipleDecompositionCplex(data,i)
         if data['message'] == "solved":
             solutionSet = data['solution']
             solutionWeights = data['weights']
@@ -149,7 +256,7 @@ def FD_Algorithm(data):
     return data, solution_paths
 
 
-def SolveInstances(Graphs,outfile,recfile):
+def SolveInstances(Graphs, outfile, recfile, solver):
     
     fp = open(outfile,'w+')
     fc = open(recfile,'w+')
@@ -224,7 +331,7 @@ def SolveInstances(Graphs,outfile,recfile):
                 'runtime': 0,
         }
         
-        data, solution_paths = FD_Algorithm(data)
+        data, solution_paths = FD_Algorithm(data, solver)
     
     return solution_paths
 

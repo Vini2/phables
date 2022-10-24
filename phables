@@ -92,6 +92,14 @@ MAX_VAL = sys.maxsize
     type=click.Path(exists=True),
 )
 @click.option(
+    "--solver",
+    "-s",
+    default="gurobi",
+    required=False,
+    help="solver to use for ILP optimisation",
+    type=str,
+)
+@click.option(
     "--minlength",
     "-ml",
     default=2000,
@@ -170,6 +178,7 @@ def main(
     phrogs,
     coverage,
     bampath,
+    solver,
     minlength,
     mincov,
     compcount,
@@ -213,6 +222,7 @@ def main(
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Contig coverage file: {coverage}")
     logger.info(f"BAM files path: {bampath}")
+    logger.info(f"Solver to use for ILP optimisation: {solver}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
     logger.info(f"minimum contig count to consider a component: {compcount}")
@@ -303,7 +313,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 5627 not in candidate_nodes:
+        if 17 not in candidate_nodes:
             continue
 
         logger.debug(f"my_count: {my_count}")
@@ -392,7 +402,7 @@ def main(
 
             source_sink = ""
 
-            # print("original candidate_nodes", candidate_nodes)
+            print("original candidate_nodes", candidate_nodes)
 
 
             # Create Directed Graph
@@ -450,8 +460,8 @@ def main(
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
 
-            # print()
-            # print()
+            print()
+            print()
 
             for node in list(G_edge.nodes):
 
@@ -460,7 +470,7 @@ def main(
                 if contig_name not in self_looped_nodes and len(graph_contigs[contig_name]) > minlength:
 
                     bfs_successors = dict(enumerate(nx.bfs_successors(G_edge, node)))
-                    # print(node, "-->", bfs_successors)
+                    print(node, "-->", bfs_successors)
                     
                     last_layer = list(bfs_successors.keys())[-1]
 
@@ -471,7 +481,7 @@ def main(
                         if item[:-1] not in self_looped_nodes:
 
                             item_successors = list(G_edge.successors(item))
-                            # print(item, item_successors)
+                            print(item, item_successors)
 
                             if len(item_successors) > 0 and list(G_edge.successors(item))[0] != node:
                                 node_is_st = False
@@ -487,9 +497,9 @@ def main(
                         # source_sink = contig_names_rev[contig_name]
                         # break
 
-                    # print()
+                    print()
 
-            # print("Identified candidate source_sinks from BFS:", source_sink_candidates)
+            print("Identified candidate source_sinks from BFS:", source_sink_candidates)
 
             # longest_st = 0
             # longest_st_len = 0
@@ -501,22 +511,22 @@ def main(
 
             # Pick the first st candidate
             source_sink = source_sink_candidates[0]
-            # print("Identified source_sink from BFS:", source_sink)
+            print("Identified source_sink from BFS:", source_sink)
 
-            # print()
-            # print()
-            # print()
+            print()
+            print()
+            print()
 
 
             if source_sink != "":
 
-                # print("source_sink", source_sink)
+                print("source_sink", source_sink)
 
                 candidate_nodes.remove(source_sink)
 
                 candidate_nodes.insert(0, source_sink)
 
-                # print("orderd candidate_nodes", candidate_nodes)
+                print("orderd candidate_nodes", candidate_nodes)
 
 
                 
@@ -567,7 +577,7 @@ def main(
 
                 for u,v,cov in G_edge.edges(data=True):
 
-                    # print(u, contig_names_rev[u[:-1]], v, contig_names_rev[v[:-1]], cov)
+                    print(u, contig_names_rev[u[:-1]], v, contig_names_rev[v[:-1]], cov)
 
                     u_name = contig_names_rev[u[:-1]]
                     v_name = contig_names_rev[v[:-1]]
@@ -578,38 +588,38 @@ def main(
                     edge_list_indices[u_index] = u
                     edge_list_indices[v_index] = v
 
-                    # print(u_index, v_index)
+                    print(u_index, v_index)
 
                     juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
                     # juction_cov = cov['weight'] - 100
 
                     if v_index == 0:
                         network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
-                        # print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
+                        print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
                     else:
                         network_edges.append((u_index, v_index, juction_cov, cov['weight']))
-                        # print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
+                        print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
 
                     
-                # print("edge_list_indices", edge_list_indices)
+                print("edge_list_indices", edge_list_indices)
 
                 G = {'Nodes':len(candidate_nodes),'list of edges': network_edges}
 
                 listOfGraphs = {}
                 listOfGraphs[0] = G
 
-                # print(listOfGraphs)
+                print(listOfGraphs)
 
                 outputfile = output+"results_gurobi_inexact.txt"
                 recordfile = output+"results_gurobi_inexact_details.txt"
 
-                solution_paths = SolveInstances(listOfGraphs,outputfile,recordfile)
+                solution_paths = SolveInstances(listOfGraphs, outputfile, recordfile, solver)
 
-                # print()
+                print()
 
-                # print(solution_paths)
+                print(solution_paths)
 
-                # print()
+                print()
 
                 logger.debug(f"Number of paths found: {len(solution_paths)}")
 
@@ -638,13 +648,13 @@ def main(
                             # Get all simple paths from node 0 to last node
                             candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
 
-                            # print("candidate_paths", candidate_paths)
+                            print("candidate_paths", candidate_paths)
 
                             for path_edge in candidate_paths[0]:
                                 if path_edge != len(candidate_nodes):
                                     path_order.append(edge_list_indices[path_edge])
 
-                            # print("path_order", path_order)
+                            print("path_order", path_order)
 
                             for node in path_order:
                                 contig_name = node[:-1]
