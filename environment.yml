@@ -2,13 +2,15 @@ name: phables
 channels:
   - conda-forge
   - bioconda
+  - ibmdecisionoptimization
 dependencies:
-  - python >=3.8
+  - python >=3.7
   - biopython
   - python-igraph
   - pysam
-  - networkx
+  - networkx==2.8.6
   - scipy
   - numpy
+  - docplex
   - tqdm
   - click
