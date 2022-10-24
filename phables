@@ -5,7 +5,6 @@ import subprocess
 import os
 import sys
 import time
-# import matplotlib.pyplot as plt
 
 import click
 import networkx as nx
@@ -15,7 +14,9 @@ from tqdm import tqdm
 
 from phables_utils import (component_utils, edge_graph_utils, edge_utils, gene_utils)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.CycFlowDec import CycFlowDec
+from phables_utils.coverage_utils import get_edge_coverage, get_junction_pe_coverage
+from phables_utils.output_utils import write_edges, write_component_info, write_res_genome_info, write_path, write_path_fasta
+from phables_utils.FD_Inexact import SolveInstances
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, PhaBles Project"
@@ -26,8 +27,6 @@ __email__ = "vijini.mallawaarachchi@flinders.edu.au"
 __status__ = "Development"
 
 MAX_VAL = sys.maxsize
-FASTA_LINE_LEN = 60
-REPEAT_MIN_LENGTH = 1000
 
 # Sample command
 # -------------------------------------------------------------------
@@ -83,6 +82,13 @@ REPEAT_MIN_LENGTH = 1000
     "-cov",
     required=True,
     help="path to the coverage file",
+    type=click.Path(exists=True),
+)
+@click.option(
+    "--bampath",
+    "-b",
+    required=True,
+    help="path to the bam files",
     type=click.Path(exists=True),
 )
 @click.option(
@@ -144,7 +150,7 @@ REPEAT_MIN_LENGTH = 1000
 @click.option(
     "--unitigfraction",
     "-uf",
-    default=0.3,
+    default=0.2,
     required=False,
     help="minimum unitig fraction threshold",
     type=float,
@@ -163,6 +169,7 @@ def main(
     hmmout,
     phrogs,
     coverage,
+    bampath,
     minlength,
     mincov,
     compcount,
@@ -205,6 +212,7 @@ def main(
     logger.info(f"Contig .hmmout file: {hmmout}")
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Contig coverage file: {coverage}")
+    logger.info(f"BAM files path: {bampath}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
     logger.info(f"minimum contig count to consider a component: {compcount}")
@@ -263,22 +271,11 @@ def main(
     )
     logger.info(f"Total number of components found: {len(pruned_vs)}")
 
-    # Get contig coverages
+    # Get contig and junction pe coverages
     # ----------------------------------------------------------------------
 
-    contig_coverages = {}
-
-    with open(coverage, "r") as myfile:
-        for line in myfile.readlines():
-
-            if not line.startswith("Contig"):
-                strings = line.strip().split()
-
-                contig_name = strings[0].replace("contig", "edge")
-
-                coverage_sum = sum([float(x) for x in strings[1:]])
-
-                contig_coverages[contig_name] = coverage_sum
+    contig_coverages = get_edge_coverage(coverage)
+    junction_pe_coverage = get_junction_pe_coverage(bampath)
 
     # Resolve genomes
     # ----------------------------------------------------------------------
@@ -294,6 +291,8 @@ def main(
     circular_contigs = set()
     resolved_cyclic = set()
 
+    phage_like_edges = set()
+
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
 
         component_time_start = time.time()
@@ -304,13 +303,14 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 1338 not in candidate_nodes:
-        #     continue
+        if 5627 not in candidate_nodes:
+            continue
 
         logger.debug(f"my_count: {my_count}")
 
         logger.debug(f"number of contigs: {len(candidate_nodes)}")
         logger.debug(f"{candidate_nodes}")
+
 
         in_degree = []
         out_degree = []
@@ -327,6 +327,8 @@ def main(
             if all_self_looped:
 
                 cycle_components.add(my_count)
+
+                phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
                 contig1 = ""
                 contig2 = ""
@@ -347,8 +349,8 @@ def main(
                     contig1_orientation = ""
                     contig2_orientation = ""
 
-                    resolved_edges.add(contig1_name)
-                    resolved_edges.add(contig2_name)
+                    resolved_edges.add(contig1)
+                    resolved_edges.add(contig2)
 
                     for node in oriented_links[contig1_name]:
                         for edge in oriented_links[contig1_name][node]:
@@ -384,6 +386,14 @@ def main(
 
 
         if len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
+
+            # Identify source/sink vertex
+            source_sink_candidates = []
+
+            source_sink = ""
+
+            # print("original candidate_nodes", candidate_nodes)
+
 
             # Create Directed Graph
             G_edge=nx.DiGraph()
@@ -428,9 +438,7 @@ def main(
                         min_cov = min([cov_1, cov_2])
 
                         for edge in oriented_links[contig_name][node]:
-                            cycle_edges[(contig_name+edge[0], node+edge[1])] = min_cov
-                        
-            # print(node_indices)
+                            cycle_edges[(contig_name+edge[0], node+edge[1])] = int(min_cov)
 
             logger.debug(f"clean_node_count: {clean_node_count}")
             
@@ -442,145 +450,238 @@ def main(
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
 
-            # Create Directed Graph
-            G=nx.DiGraph()
+            # print()
+            # print()
 
-            for u,v,cov in G_edge.edges(data=True):
+            for node in list(G_edge.nodes):
 
-                # print(u,v,cov)
+                contig_name = node[:-1]
 
-                if u not in node_indices:
-                    node_indices[u] = my_counter
-                    node_indices_rev[my_counter] = u
-                    my_counter += 1
-                if v not in node_indices:
-                    node_indices[v] = my_counter
-                    node_indices_rev[my_counter] = v
-                    my_counter += 1
+                if contig_name not in self_looped_nodes and len(graph_contigs[contig_name]) > minlength:
 
-                G.add_edge(node_indices[u], node_indices[v], weight=cov['weight'])
+                    bfs_successors = dict(enumerate(nx.bfs_successors(G_edge, node)))
+                    # print(node, "-->", bfs_successors)
+                    
+                    last_layer = list(bfs_successors.keys())[-1]
 
-            # nx.draw(G)
-            # plt.show()
-            
-            in_degree = []
-            out_degree = []
+                    node_is_st = True
 
-            for node in list(G.nodes):
+                    for item in bfs_successors[last_layer][1]:
+
+                        if item[:-1] not in self_looped_nodes:
+
+                            item_successors = list(G_edge.successors(item))
+                            # print(item, item_successors)
+
+                            if len(item_successors) > 0 and list(G_edge.successors(item))[0] != node:
+                                node_is_st = False
+                                break
+                            if len(item_successors) == 0:
+                                node_is_st = False
+
+                    if len(bfs_successors[last_layer][1]) == 0:
+                        node_is_st = False
+
+                    if node_is_st:
+                        source_sink_candidates.append(contig_names_rev[contig_name])
+                        # source_sink = contig_names_rev[contig_name]
+                        # break
+
+                    # print()
+
+            # print("Identified candidate source_sinks from BFS:", source_sink_candidates)
+
+            # longest_st = 0
+            # longest_st_len = 0
+
+            # for st in source_sink_candidates:
+            #     if len(graph_contigs[contig_names[st]]) > longest_st_len:
+            #         longest_st_len = len(graph_contigs[contig_names[st]])
+            #         longest_st = st
+
+            # Pick the first st candidate
+            source_sink = source_sink_candidates[0]
+            # print("Identified source_sink from BFS:", source_sink)
+
+            # print()
+            # print()
+            # print()
+
+
+            if source_sink != "":
+
+                # print("source_sink", source_sink)
+
+                candidate_nodes.remove(source_sink)
+
+                candidate_nodes.insert(0, source_sink)
+
+                # print("orderd candidate_nodes", candidate_nodes)
+
+
                 
-                if node_indices_rev[node][:-1] not in self_looped_nodes:
-                    clean_indegree = len([x for x in G.predecessors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
-                    in_degree.append(clean_indegree)
 
-                    clean_outdegree = len([x for x in G.successors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
-                    out_degree.append(clean_outdegree)
 
-            degrees = in_degree + out_degree
+                # Create Directed Graph
+                G=nx.DiGraph()
 
-            # print("in/out degrees:", degrees)
+                for u,v,cov in G_edge.edges(data=True):
 
-            if len(degrees) == 0:
-                logger.debug(f"Skipping component as no clean connections were found")
-                continue
+                    if u not in node_indices:
+                        node_indices[u] = my_counter
+                        node_indices_rev[my_counter] = u
+                        my_counter += 1
+                    if v not in node_indices:
+                        node_indices[v] = my_counter
+                        node_indices_rev[my_counter] = v
+                        my_counter += 1
 
-            clean_max_degree = max(degrees)
+                    G.add_edge(node_indices[u], node_indices[v], weight=cov['weight'])
 
-            logger.debug(f"clean_max_degree: {clean_max_degree}")
+                # Get connections and degree information
+                
+                in_degree = []
+                out_degree = []
 
-            cycle_number = 1
+                for node in list(G.nodes):
+                    
+                    if node_indices_rev[node][:-1] not in self_looped_nodes:
+                        clean_indegree = len([x for x in G.predecessors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
+                        in_degree.append(clean_indegree)
 
-            cycles_iterated = False
+                        clean_outdegree = len([x for x in G.successors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
+                        out_degree.append(clean_outdegree)
 
-            try:
-                F = np.zeros([G.number_of_nodes(),G.number_of_nodes()])
+                degrees = in_degree + out_degree
 
-                for edge in G.edges.data("weight", default=1):
-                    F[edge[1],edge[0]] = edge[2]
+                if len(degrees) == 0:
+                    logger.debug(f"Skipping component as no clean connections were found")
+                    continue
 
-                n_points = 50
-                init_steps = 10
-                step_add = 10
-                run_post = 2
-                state = 0
-                tol = 1E-5
 
-                myCycFlowDec = CycFlowDec(F,state,tol)
-                myCycFlowDec.run(init_steps-run_post,run_post)
-                steps = [init_steps]
-                MREs = [myCycFlowDec.calc_MRE(0)]
 
-                j = 1
-                while j < n_points:
-                    myCycFlowDec.run(step_add-run_post,run_post)
-                    steps.append(steps[-1] + step_add)
-                    current_mre = myCycFlowDec.calc_MRE(0)
-                    if current_mre > MREs[-1] and current_mre < 1:
-                        break
-                    MREs.append(current_mre)
-                    j += 1
+                # Get edges for flow network
+                network_edges = list()
 
-                my_cc = 0
+                edge_list_indices = {}
 
-                logger.debug(f"Number of cycles found: {len(myCycFlowDec.cycles.keys())}")
-                logger.debug(f"MREs: {MREs}")
-                logger.debug(f"Max and min MREs: {max(MREs)} {min(MREs)}")
+                for u,v,cov in G_edge.edges(data=True):
 
-                if len(myCycFlowDec.cycles.keys()) != 0:
+                    # print(u, contig_names_rev[u[:-1]], v, contig_names_rev[v[:-1]], cov)
+
+                    u_name = contig_names_rev[u[:-1]]
+                    v_name = contig_names_rev[v[:-1]]
+
+                    u_index = candidate_nodes.index(u_name)
+                    v_index = candidate_nodes.index(v_name)
+
+                    edge_list_indices[u_index] = u
+                    edge_list_indices[v_index] = v
+
+                    # print(u_index, v_index)
+
+                    juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
+                    # juction_cov = cov['weight'] - 100
+
+                    if v_index == 0:
+                        network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
+                        # print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
+                    else:
+                        network_edges.append((u_index, v_index, juction_cov, cov['weight']))
+                        # print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
+
+                    
+                # print("edge_list_indices", edge_list_indices)
+
+                G = {'Nodes':len(candidate_nodes),'list of edges': network_edges}
+
+                listOfGraphs = {}
+                listOfGraphs[0] = G
+
+                # print(listOfGraphs)
+
+                outputfile = output+"results_gurobi_inexact.txt"
+                recordfile = output+"results_gurobi_inexact_details.txt"
+
+                solution_paths = SolveInstances(listOfGraphs,outputfile,recordfile)
+
+                # print()
+
+                # print(solution_paths)
+
+                # print()
+
+                logger.debug(f"Number of paths found: {len(solution_paths)}")
+
+                if len(solution_paths) != 0:
                     cycle_components.add(my_count)
 
-                for cycle in myCycFlowDec.cycles.keys():
-                    # logger.debug(f"{cycle} {len(cycle)} {myCycFlowDec.cycles[cycle]}")
-                    if myCycFlowDec.cycles[cycle] >= mincov:
-                        coverage_val = myCycFlowDec.cycles[cycle]
-                        cycle = list(cycle)
-                        # cycle_0 = cycle[0]
-                        # cycle.pop(0)
-                        # cycle.append(cycle_0)
-                        # cycle.reverse()
-                        # print([node_indices_rev[x] for x in cycle], coverage_val)
+                    phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
-                        my_cc += 1
+                    cycle_number = 1
 
-                        path_string = ""
-                        total_length = 0
+                    for solution_path in solution_paths:
+                        coverage_val = solution_paths[solution_path]["weight"]
 
-                        for node in cycle:
-                            contig_name = node_indices_rev[node][:-1]
-                            if node_indices_rev[node].endswith("+"):
-                                path_string += str(graph_contigs[contig_name])
-                            else:
-                                path_string += str(graph_contigs[contig_name].reverse_complement())
-                            total_length += len(str(graph_contigs[contig_name]))
+                        if coverage_val >= mincov:
 
-                        genome_path = GenomePath(
-                            f"phage_comp_{my_count}_cycle_{cycle_number}",
-                            [node_indices_rev[x] for x in cycle],
-                            [node_indices_rev[x][:-1] for x in cycle],
-                            path_string,
-                            int(coverage_val),
-                            total_length,
-                            (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
-                        )
-                        my_genomic_paths.append(genome_path)
+                            path_string = ""
+                            total_length = 0
 
-                        cycle_number += 1
+                            path_order = []
 
-                logger.debug(f"Number of cycles selected: {cycle_number-1}")
+                            # Create graph
+                            G_path = nx.Graph()
+                            # Fill graph with data
+                            G_path.add_edges_from(solution_paths[solution_path]["path"])
 
-                cycles_iterated = True
-            
-            except ZeroDivisionError as e:
-                logger.debug(f"Encountered {e} Could not find paths")
+                            # Get all simple paths from node 0 to last node
+                            candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
 
-            if cycles_iterated and len(myCycFlowDec.cycles.keys()) == 0:
-                logger.debug(f"No paths were found.")
+                            # print("candidate_paths", candidate_paths)
 
+                            for path_edge in candidate_paths[0]:
+                                if path_edge != len(candidate_nodes):
+                                    path_order.append(edge_list_indices[path_edge])
+
+                            # print("path_order", path_order)
+
+                            for node in path_order:
+                                contig_name = node[:-1]
+                                if node.endswith("+"):
+                                    path_string += str(graph_contigs[contig_name])
+                                else:
+                                    path_string += str(graph_contigs[contig_name].reverse_complement())
+                                total_length += len(str(graph_contigs[contig_name]))
+
+                            genome_path = GenomePath(
+                                f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                [x for x in path_order],
+                                [contig_names_rev[x[:-1]] for x in path_order],
+                                path_string,
+                                int(coverage_val),
+                                total_length,
+                                (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
+                            )
+                            my_genomic_paths.append(genome_path)
+
+                            cycle_number += 1
+
+                    logger.debug(f"Number of paths selected: {cycle_number-1}")
+
+                else:
+                    logger.debug(f"No paths detected")
+                    continue
+
+            else:
+                logger.debug(f"No source/sink node detected")
+                continue
 
         elif len(candidate_nodes) == 1:
 
             contig_name = contig_names[candidate_nodes[0]]
 
-            resolved_edges.add(contig_name)
+            resolved_edges.add(candidate_nodes[0])
 
             path_string = str(graph_contigs[contig_name])
 
@@ -600,8 +701,8 @@ def main(
 
             circular_contigs.add(my_count)
 
+            phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
-        visited_count = {}
 
         visited_nodes = set()
 
@@ -619,80 +720,24 @@ def main(
 
             # Get component stats
             graph_degree = assembly_graph.degree(candidate_nodes)
-            # in_degree = assembly_graph.degree(candidate_nodes)
-            # out_degree = assembly_graph.degree(candidate_nodes)
 
             path_lengths = []
             path_coverages = []
 
-            prev_length = my_genomic_paths[0].length
+            # prev_length = my_genomic_paths[0].length
 
             for genomic_path in my_genomic_paths:
 
-                current_len_dif = abs(prev_length - genomic_path.length)
+                logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
+                logger.debug(f"{genomic_path.node_order}")
+                path_lengths.append(genomic_path.length)
+                path_coverages.append(genomic_path.coverage)
+                final_genomic_paths.append(genomic_path)
+                visited_nodes = visited_nodes.union(set(genomic_path.node_order))
+                n_paths += 1
 
-                if current_len_dif < pathlendif:
-
-                    path_is_subset = False
-
-                    # node_count = 0
-
-                    # if len(candidate_nodes) <= 5:
-                    #     node_count = 1
-                    # else:
-                    #     # To avoid bubbles
-                    #     node_count = 3
-
-                    # for final_path in final_genomic_paths:
-                    #     if len(set(genomic_path.node_order).difference(set(final_path.node_order).intersection(set(genomic_path.node_order)))) > len(final_path.node_order)/2:
-                    #         path_is_subset = True
-                    #         break
-
-                    for path_node in genomic_path.node_id_order:
-                        if path_node in visited_count:
-                            if (
-                                visited_count[path_node]
-                                >= clean_max_degree
-                            ):
-                                path_is_subset = True
-
-                    new_nodes = list(set(genomic_path.node_order).difference(visited_nodes))
-
-                    # print("Set diff:", new_nodes)
-
-                    has_new_nodes = False
-
-                    if len(new_nodes) > len(genomic_path.node_order)/clean_max_degree:
-                        has_new_nodes = True
-
-                    if len(new_nodes) == 1 and new_nodes[0] not in visited_nodes:
-                        has_new_nodes = True
-
-                    if (has_new_nodes or (not path_is_subset)) and genomic_path.length > minlength and len(genomic_path.node_order) > clean_node_count/clean_max_degree:
-                        # prev_length = genomic_path.length
-
-                        logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
-                        logger.debug(f"{genomic_path.node_order}")
-                        path_lengths.append(genomic_path.length)
-                        path_coverages.append(genomic_path.coverage)
-                        final_genomic_paths.append(genomic_path)
-                        visited_nodes = visited_nodes.union(set(genomic_path.node_order))
-                        n_paths += 1
-
-                        for path_node in genomic_path.node_id_order:
-                            comp_resolved_edges.add(path_node)
-
-                            if path_node in visited_count:
-                                visited_count[path_node] += 1
-                            else:
-                                visited_count[path_node] = 1
-
-                    else:
-                        continue
-                        # if n_paths < 10:
-                        #     continue
-                        # else:
-                        #     break
+                for path_node in genomic_path.node_id_order:
+                    comp_resolved_edges.add(path_node)
 
             frac_unitigs = len(visited_nodes)/len(candidate_nodes)
 
@@ -740,42 +785,13 @@ def main(
                 logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
                 resolved_components.add(my_count)
 
-        # Write to file
+        # Write paths to file
 
         if frac_unitigs > unitigfraction:
-
-            with open(f"{output}/resolved_paths.fasta", "a+") as myfile:
-
-                for genomic_path in final_genomic_paths:
-
-                    myfile.write(f">{genomic_path.id}\n")
-
-                    chunks = [
-                        genomic_path.path[i : i + FASTA_LINE_LEN]
-                        for i in range(0, genomic_path.length, FASTA_LINE_LEN)
-                    ]
-
-                    for chunk in chunks:
-                        myfile.write(f"{chunk}\n")
-
+            write_path(final_genomic_paths, output)
             output_genomes_path = f"{output}/resolved_phages"
+            write_path_fasta(final_genomic_paths, output_genomes_path)
 
-            if not os.path.isdir(f"{output_genomes_path}"):
-                subprocess.run("mkdir -p " + output_genomes_path, shell=True)
-
-            for genomic_path in final_genomic_paths:
-
-                with open(f"{output_genomes_path}/{genomic_path.id}.fasta", "w+") as myfile:
-
-                    myfile.write(f">{genomic_path.id}\n")
-
-                    chunks = [
-                        genomic_path.path[i : i + FASTA_LINE_LEN]
-                        for i in range(0, genomic_path.length, FASTA_LINE_LEN)
-                    ]
-
-                    for chunk in chunks:
-                        myfile.write(f"{chunk}\n")
 
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
     logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
@@ -783,86 +799,30 @@ def main(
     logger.info(f"Total number of cyclic components found including circular contigs: {len(cycle_components) + len(circular_contigs)}")
     logger.info(f"Total number of components resolved: {len(resolved_components)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
+
+    # Write phage-like edges
+    write_edges(phage_like_edges, contig_names, graph_contigs, "phage_like_edges", output)
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
-    with open(f"{output}/resolved_edges.fasta", "w+") as myfile:
-        for edge in resolved_edges:
-
-            edge_seq = str(graph_contigs[edge])
-
-            myfile.write(">" + edge + "\n")
-
-            chunks = [
-                edge_seq[i : i + FASTA_LINE_LEN]
-                for i in range(0, len(edge_seq), FASTA_LINE_LEN)
-            ]
-
-            for chunk in chunks:
-                myfile.write(chunk + "\n")
+    # Write resolved phage edges
+    write_edges(resolved_edges, contig_names, graph_contigs, "resolved_edges", output)
 
     # Record path information
     # ----------------------------------------------------------------------
 
-    with open(f"{output}/resolved_genome_info.txt", "w") as myfile:
-        myfile.write(f"Path\tCoverage\tLength\tGC content\tNode order\n")
-        for genomic_path in all_resolved_paths:
-            myfile.write(
-                f"{genomic_path.id}\t{genomic_path.coverage}\t{genomic_path.length}\t{genomic_path.gc}\t{genomic_path.node_order}\n"
-            )
+    filename = write_res_genome_info(all_resolved_paths, output)
 
     logger.info(
-        f"Resolved genome information can be found in {output}/resolved_genome_info.txt"
+        f"Resolved genome information can be found in {output}/{filename}"
     )
 
     # Record component information
     # ----------------------------------------------------------------------
 
-    with open(f"{output}/resolved_component_info.txt", "w") as myfile:
-        myfile.write(f"Component\t")
-        myfile.write(f"Number of nodes\t")
-        myfile.write(f"Number of paths\t")
-        myfile.write(f"Fraction of unitigs recovered\t")
-        myfile.write(f"Maximum degree\t")
-        myfile.write(f"Maximum in degree\t")
-        myfile.write(f"Maximum out degree\t")
-        myfile.write(f"Average degree\t")
-        myfile.write(f"Average in degree\t")
-        myfile.write(f"Average out degree\t")
-        myfile.write(f"Density\t")
-        myfile.write(f"Maximum path length\t")
-        myfile.write(f"Minimum path length\t")
-        myfile.write(f"Length ratio (long/short)\t")
-        myfile.write(f"Maximum coverage path length\t")
-        myfile.write(f"Minimum coverage path length\t")
-        myfile.write(f"Length ratio (highest cov/lowest cov)\t")
-        myfile.write(f"Maximum coverage\t")
-        myfile.write(f"Minimum coverage\t")
-        myfile.write(f"Coverage ratio (highest/lowest)\n")
-
-        for component in all_components:
-            myfile.write(f"{component.id}\t")
-            myfile.write(f"{component.n_nodes}\t")
-            myfile.write(f"{component.n_paths}\t")
-            myfile.write(f"{component.frac_unitigs}\t")
-            myfile.write(f"{component.max_degree}\t")
-            myfile.write(f"{component.max_in_degree}\t")
-            myfile.write(f"{component.max_out_degree}\t")
-            myfile.write(f"{component.avg_degree}\t")
-            myfile.write(f"{component.avg_in_degree}\t")
-            myfile.write(f"{component.avg_out_degree}\t")
-            myfile.write(f"{component.density}\t")
-            myfile.write(f"{component.max_path_length}\t")
-            myfile.write(f"{component.min_path_length}\t")
-            myfile.write(f"{component.min_max_len_ratio}\t")
-            myfile.write(f"{component.max_cov_path_length}\t")
-            myfile.write(f"{component.min_cov_path_length}\t")
-            myfile.write(f"{component.min_max_cov_len_ratio}\t")
-            myfile.write(f"{component.max_cov}\t")
-            myfile.write(f"{component.min_cov}\t")
-            myfile.write(f"{component.min_max_cov_ratio}\n")
+    filename = write_component_info(all_components, output)
 
     logger.info(
-        f"Resolved component information can be found in {output}/resolved_component_info.txt"
+        f"Resolved component information can be found in {output}/{filename}"
     )
 
     # Get elapsed time
