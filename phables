@@ -92,14 +92,6 @@ MAX_VAL = sys.maxsize
     type=click.Path(exists=True),
 )
 @click.option(
-    "--solver",
-    "-s",
-    default="gurobi",
-    required=False,
-    help="solver to use for ILP optimisation",
-    type=str,
-)
-@click.option(
     "--minlength",
     "-ml",
     default=2000,
@@ -178,7 +170,6 @@ def main(
     phrogs,
     coverage,
     bampath,
-    solver,
     minlength,
     mincov,
     compcount,
@@ -222,7 +213,6 @@ def main(
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Contig coverage file: {coverage}")
     logger.info(f"BAM files path: {bampath}")
-    logger.info(f"Solver to use for ILP optimisation: {solver}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
     logger.info(f"minimum contig count to consider a component: {compcount}")
@@ -313,7 +303,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 17 not in candidate_nodes:
+        if 5627 not in candidate_nodes:
             continue
 
         logger.debug(f"my_count: {my_count}")
@@ -575,6 +565,9 @@ def main(
 
                 edge_list_indices = {}
 
+                subpaths = {}
+                subpath_count = 0
+
                 for u,v,cov in G_edge.edges(data=True):
 
                     print(u, contig_names_rev[u[:-1]], v, contig_names_rev[v[:-1]], cov)
@@ -595,25 +588,31 @@ def main(
 
                     if v_index == 0:
                         network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
+                        if juction_cov != 0:
+                            subpaths[subpath_count] = [u_index, len(candidate_nodes)]
+                            subpath_count += 1
                         print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
                     else:
                         network_edges.append((u_index, v_index, juction_cov, cov['weight']))
+                        if juction_cov != 0:
+                            subpaths[subpath_count] = [u_index, v_index]
+                            subpath_count += 1
                         print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
 
                     
                 print("edge_list_indices", edge_list_indices)
 
-                G = {'Nodes':len(candidate_nodes),'list of edges': network_edges}
+                G = {'Nodes':len(candidate_nodes),'list of edges': network_edges, 'subpaths': subpaths}
 
                 listOfGraphs = {}
                 listOfGraphs[0] = G
 
                 print(listOfGraphs)
 
-                outputfile = output+"results_gurobi_inexact.txt"
-                recordfile = output+"results_gurobi_inexact_details.txt"
+                outputfile = output+"results_gurobi_subpath.txt"
+                recordfile = output+"results_gurobi_subpath_details.txt"
 
-                solution_paths = SolveInstances(listOfGraphs, outputfile, recordfile, solver)
+                solution_paths = SolveInstances(listOfGraphs, outputfile, recordfile)
 
                 print()
 
