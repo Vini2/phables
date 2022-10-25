@@ -1,4 +1,6 @@
 from collections import defaultdict
+import os
+import pickle
 import pysam
 import glob
 
@@ -47,20 +49,29 @@ def read_pair_generator(bam, region_string=None):
     return read_dict
 
 
-def get_junction_pe_coverage(bam_path):
-
-    bam_files = glob.glob(bam_path+"/*.bam")
+def get_junction_pe_coverage(bam_path, output):
 
     link_counts = defaultdict(int)
-    
-    for bam_file in bam_files:
 
-        bam = pysam.AlignmentFile(bam_file, 'rb')
+    if os.path.isfile(f"{output}/junction_pe_coverage.pickle"):
+        with open(f"{output}/junction_pe_coverage.pickle", "rb") as handle:
+            link_counts = pickle.load(handle)
 
-        read_pairs = read_pair_generator(bam)
+    else:
 
-        for read1, read2 in read_pairs:
-            if read1.reference_name != read2.reference_name:
-                link_counts[(read1.reference_name, read2.reference_name)] += 1
+        bam_files = glob.glob(bam_path+"/*.bam")
+
+        for bam_file in bam_files:
+
+            bam = pysam.AlignmentFile(bam_file, 'rb')
+
+            read_pairs = read_pair_generator(bam)
+
+            for read1, read2 in read_pairs:
+                if read1.reference_name != read2.reference_name:
+                    link_counts[(read1.reference_name, read2.reference_name)] += 1
+
+        with open(f"{output}/junction_pe_coverage.pickle", "wb") as handle:
+            pickle.dump(link_counts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return link_counts

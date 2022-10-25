@@ -285,7 +285,7 @@ def main(
     # ----------------------------------------------------------------------
 
     contig_coverages = get_edge_coverage(coverage)
-    junction_pe_coverage = get_junction_pe_coverage(bampath)
+    junction_pe_coverage = get_junction_pe_coverage(bampath, output)
 
     # Resolve genomes
     # ----------------------------------------------------------------------
