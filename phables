@@ -584,6 +584,9 @@ def main(
                     print(u_index, v_index)
 
                     juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
+
+                    if juction_cov == 0:
+                        juction_cov = mincov
                     # juction_cov = cov['weight'] - 100
 
                     if v_index == 0:
