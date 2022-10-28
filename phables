@@ -5,6 +5,11 @@ import subprocess
 import os
 import sys
 import time
+from collections import defaultdict
+import os
+import pickle
+import pysam
+import glob
 
 import click
 import networkx as nx
@@ -14,7 +19,7 @@ from tqdm import tqdm
 
 from phables_utils import (component_utils, edge_graph_utils, edge_utils, gene_utils)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.coverage_utils import get_edge_coverage, get_junction_pe_coverage
+from phables_utils.coverage_utils import get_edge_coverage, get_junction_pe_coverage, get_graph_spanning_reads
 from phables_utils.output_utils import write_edges, write_component_info, write_res_genome_info, write_path, write_path_fasta
 from phables_utils.FD_Inexact import SolveInstances
 
@@ -86,9 +91,16 @@ MAX_VAL = sys.maxsize
 )
 @click.option(
     "--bampath",
-    "-b",
+    "-bam",
     required=True,
     help="path to the bam files",
+    type=click.Path(exists=True),
+)
+@click.option(
+    "--gafpath",
+    "-gaf",
+    required=True,
+    help="path to the gaf files",
     type=click.Path(exists=True),
 )
 @click.option(
@@ -170,6 +182,7 @@ def main(
     phrogs,
     coverage,
     bampath,
+    gafpath,
     minlength,
     mincov,
     compcount,
@@ -213,6 +226,7 @@ def main(
     logger.info(f"Contig phrog annotations file: {phrogs}")
     logger.info(f"Contig coverage file: {coverage}")
     logger.info(f"BAM files path: {bampath}")
+    logger.info(f"GAF files path: {gafpath}")
     logger.info(f"Minimum length of contigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
     logger.info(f"minimum contig count to consider a component: {compcount}")
@@ -276,6 +290,33 @@ def main(
 
     contig_coverages = get_edge_coverage(coverage)
     junction_pe_coverage = get_junction_pe_coverage(bampath, output)
+    # junction_read_cout = get_graph_spanning_reads(gafpath, output)
+
+    junction_read_cout = defaultdict(int)
+
+    gaf_files = glob.glob(gafpath+"/*.gaf")
+
+    for gaf_file in gaf_files:
+
+        with open(gaf_file, "r") as myfile:
+
+            for line in myfile.readlines():
+
+                strings = line.strip().split("\t")
+
+                # print(strings[15].split(":")[-1])
+
+                if float(strings[15].split(":")[-1]) > 0.9:
+
+                    if strings[5].count(">") == 2:
+                        print(strings[0], strings[5])
+                        edges = strings[5].split(">")[1:]
+                        junction_read_cout[(edges[0], edges[1])] += 1
+
+                    elif strings[5].count("<") == 2:
+                        print(strings[0], strings[5])
+                        edges = strings[5].split("<")[1:]
+                        junction_read_cout[(edges[1], edges[0])] += 1
 
     # Resolve genomes
     # ----------------------------------------------------------------------
@@ -436,6 +477,9 @@ def main(
                             cov_2 = contig_coverages[node]
 
                         min_cov = min([cov_1, cov_2])
+                        min_cov = junction_read_cout[(contig_name, node)]
+
+                        print(contig_name, node, min_cov)
 
                         for edge in oriented_links[contig_name][node]:
                             cycle_edges[(contig_name+edge[0], node+edge[1])] = int(min_cov)
@@ -584,20 +628,17 @@ def main(
                     print(u_index, v_index)
 
                     juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
-
-                    if juction_cov == 0:
-                        juction_cov = mincov
-                    # juction_cov = cov['weight'] - 100
+                    # juction_cov = cov['weight'] - int(cov['weight']*0.1)
 
                     if v_index == 0:
                         network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
-                        if juction_cov != 0:
+                        if junction_pe_coverage[(u[:-1], v[:-1])] != 0:
                             subpaths[subpath_count] = [u_index, len(candidate_nodes)]
                             subpath_count += 1
                         print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
                     else:
                         network_edges.append((u_index, v_index, juction_cov, cov['weight']))
-                        if juction_cov != 0:
+                        if junction_pe_coverage[(u[:-1], v[:-1])] != 0:
                             subpaths[subpath_count] = [u_index, v_index]
                             subpath_count += 1
                         print("EDGE:", u_index, v_index, juction_cov, cov['weight'])

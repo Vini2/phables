@@ -75,3 +75,40 @@ def get_junction_pe_coverage(bam_path, output):
             pickle.dump(link_counts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     return link_counts
+
+
+def get_graph_spanning_reads(gaf_path, output):
+
+    junction_reads = defaultdict(int)
+
+    if os.path.isfile(f"{output}/graph_spanning_reads.pickle"):
+        with open(f"{output}/graph_spanning_reads.pickle", "rb") as handle:
+            junction_reads = pickle.load(handle)
+
+    else:
+        
+        gaf_files = glob.glob(gaf_path+"/*.gaf")
+
+        for gaf_file in gaf_files:
+
+            with open(gaf_file, "r") as myfile:
+
+                for line in myfile.readlines():
+
+                    strings = line.strip().split("\t")
+
+                    print(strings[0], strings[5])
+
+                    if strings[5].count(">") == 2:
+                        edges = strings[5].split(">")[1:]
+                        junction_reads[(edges[0], edges[1])] += 1
+
+                    elif strings[5].count("<") == 2:
+                        edges = strings[5].split("<")[1:]
+                        junction_reads[(edges[1], edges[0])] += 1
+
+        with open(f"{output}/graph_spanning_reads.pickle", "wb") as handle:
+            pickle.dump(junction_reads, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    
+    return junction_reads
