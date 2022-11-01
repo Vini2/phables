@@ -2,7 +2,7 @@
   <img src="phables_logo.png" width="700" title="phables logo" alt="phables logo">
 </p>
 
-# PhaBles: Phage bubbles resolve bacteriophage genomes from metagenomic data
+# Phables: Phage bubbles resolve bacteriophage genomes from metagenomic data
 
 `phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models cyclic phage-like components in the metagenomic assembly as graphs and resolves genomic paths corresponding to cyclic paths determined. 
 
@@ -11,18 +11,6 @@ The figure below shows an example component where two genomic paths are resolved
 ![](resolve_genomes.png)
 
 `phables` requires the the assembled contigs and assembly graph files from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
-
-## Dependencies
-
-`phables` uses the following packages. These are already included in setup files.
-* python-igraph
-* biopython
-* networkx
-* scipy
-* numpy
-* tqdm
-* [CycFlowDec](https://github.com/austenb28/CycFlowDec)
-
 
 ## Setting up phables
 
