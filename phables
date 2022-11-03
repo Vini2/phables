@@ -7,9 +7,6 @@ import sys
 import time
 from collections import defaultdict
 import os
-import pickle
-import pysam
-import glob
 
 import click
 import networkx as nx
@@ -122,7 +119,7 @@ MAX_VAL = sys.maxsize
 @click.option(
     "--compcount",
     "-cc",
-    default=500,
+    default=50,
     required=False,
     help="maximum contig count to consider a component",
     type=int,
@@ -290,33 +287,8 @@ def main(
 
     contig_coverages = get_edge_coverage(coverage)
     junction_pe_coverage = get_junction_pe_coverage(bampath, output)
-    # junction_read_cout = get_graph_spanning_reads(gafpath, output)
+    junction_read_cout = get_graph_spanning_reads(gafpath, output)
 
-    junction_read_cout = defaultdict(int)
-
-    gaf_files = glob.glob(gafpath+"/*.gaf")
-
-    for gaf_file in gaf_files:
-
-        with open(gaf_file, "r") as myfile:
-
-            for line in myfile.readlines():
-
-                strings = line.strip().split("\t")
-
-                # print(strings[15].split(":")[-1])
-
-                if float(strings[15].split(":")[-1]) > 0.9:
-
-                    if strings[5].count(">") == 2:
-                        print(strings[0], strings[5])
-                        edges = strings[5].split(">")[1:]
-                        junction_read_cout[(edges[0], edges[1])] += 1
-
-                    elif strings[5].count("<") == 2:
-                        print(strings[0], strings[5])
-                        edges = strings[5].split("<")[1:]
-                        junction_read_cout[(edges[1], edges[0])] += 1
 
     # Resolve genomes
     # ----------------------------------------------------------------------
@@ -344,8 +316,8 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 5627 not in candidate_nodes:
-            continue
+        # if 503 not in candidate_nodes:
+        #     continue
 
         logger.debug(f"my_count: {my_count}")
 
@@ -477,7 +449,7 @@ def main(
                             cov_2 = contig_coverages[node]
 
                         min_cov = min([cov_1, cov_2])
-                        min_cov = junction_read_cout[(contig_name, node)]
+                        # min_cov = junction_read_cout[(contig_name, node)]
 
                         print(contig_name, node, min_cov)
 
@@ -496,6 +468,7 @@ def main(
 
             print()
             print()
+
 
             for node in list(G_edge.nodes):
 
@@ -543,18 +516,20 @@ def main(
             #         longest_st_len = len(graph_contigs[contig_names[st]])
             #         longest_st = st
 
-            # Pick the first st candidate
-            source_sink = source_sink_candidates[0]
-            print("Identified source_sink from BFS:", source_sink)
-
-            print()
-            print()
-            print()
+            
 
 
-            if source_sink != "":
+            if len(source_sink_candidates) > 0:
+
+                # Pick the first st candidate
+                source_sink = source_sink_candidates[0]
+                print("Identified source_sink from BFS:", source_sink)
 
                 print("source_sink", source_sink)
+
+                print()
+                print()
+                print()
 
                 candidate_nodes.remove(source_sink)
 
@@ -563,7 +538,25 @@ def main(
                 print("orderd candidate_nodes", candidate_nodes)
 
 
-                
+                # Remove nodes with either no incoming or outgoing edges
+
+                has_disconnected_edges = True
+
+                while has_disconnected_edges:
+
+                    to_remove = []
+
+                    for node in list(G_edge.nodes):
+                        if not (G_edge.in_degree(node) > 0 and G_edge.out_degree()(node)) > 0:
+                            to_remove.append(node)
+                    
+
+                    if len(to_remove) > 0:
+                        G_edge.remove_nodes_from(to_remove)
+                        print("remove_nodes_from", to_remove, has_disconnected_edges)
+                    else:
+                        has_disconnected_edges = False
+
 
 
                 # Create Directed Graph
@@ -632,13 +625,13 @@ def main(
 
                     if v_index == 0:
                         network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
-                        if junction_pe_coverage[(u[:-1], v[:-1])] != 0:
+                        if juction_cov != 0:
                             subpaths[subpath_count] = [u_index, len(candidate_nodes)]
                             subpath_count += 1
                         print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
                     else:
                         network_edges.append((u_index, v_index, juction_cov, cov['weight']))
-                        if junction_pe_coverage[(u[:-1], v[:-1])] != 0:
+                        if juction_cov != 0:
                             subpaths[subpath_count] = [u_index, v_index]
                             subpath_count += 1
                         print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
@@ -777,20 +770,22 @@ def main(
             path_lengths = []
             path_coverages = []
 
-            # prev_length = my_genomic_paths[0].length
+            largest_length = my_genomic_paths[0].length
 
             for genomic_path in my_genomic_paths:
 
-                logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
-                logger.debug(f"{genomic_path.node_order}")
-                path_lengths.append(genomic_path.length)
-                path_coverages.append(genomic_path.coverage)
-                final_genomic_paths.append(genomic_path)
-                visited_nodes = visited_nodes.union(set(genomic_path.node_order))
-                n_paths += 1
+                if genomic_path.length > largest_length/2:
 
-                for path_node in genomic_path.node_id_order:
-                    comp_resolved_edges.add(path_node)
+                    logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
+                    logger.debug(f"{genomic_path.node_order}")
+                    path_lengths.append(genomic_path.length)
+                    path_coverages.append(genomic_path.coverage)
+                    final_genomic_paths.append(genomic_path)
+                    visited_nodes = visited_nodes.union(set(genomic_path.node_order))
+                    n_paths += 1
+
+                    for path_node in genomic_path.node_id_order:
+                        comp_resolved_edges.add(path_node)
 
             frac_unitigs = len(visited_nodes)/len(candidate_nodes)
 
