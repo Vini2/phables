@@ -207,12 +207,50 @@ def build_assembly_graph(assembly_graph_file):
 
     return (
         assembly_graph,
-        edge_list,
         oriented_links,
         contig_names,
         contig_names_rev,
         graph_contigs,
-        edge_depths,
         self_looped_nodes,
         edges_lengths,
     )
+
+
+def get_circular(paths):
+    
+    circular = {}
+
+    with open(paths, "r") as myfile:
+
+        for line in myfile.readlines():
+            if not line.startswith("#"):
+                strings = line.strip().split()
+
+                if strings[3] == "Y":
+                    contig_name = strings[0].replace("contig", "edge")
+                    contig_length = int(strings[1])
+                    circular[contig_name] = contig_length
+
+    return circular
+
+
+def remove_dead_ends(G_edge):
+
+    has_dead_ends = True
+
+    while has_dead_ends:
+
+        to_remove = []
+
+        for node in list(G_edge.nodes):
+            if not (G_edge.in_degree(node) > 0 and G_edge.out_degree()(node)) > 0:
+                to_remove.append(node)
+        
+
+        if len(to_remove) > 0:
+            G_edge.remove_nodes_from(to_remove)
+            print("remove_nodes_from", to_remove, has_dead_ends)
+        else:
+            has_dead_ends = False
+
+    return G_edge

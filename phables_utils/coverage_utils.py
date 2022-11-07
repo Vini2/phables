@@ -100,8 +100,6 @@ def get_graph_spanning_reads(gaf_path, output):
 
                     strings = line.strip().split("\t")
 
-                    # print(strings[0], strings[5])
-
                     if strings[5].count(">") == 2:
                         edges = strings[5].split(">")[1:]
                         junction_reads[(edges[0], edges[1])] += 1

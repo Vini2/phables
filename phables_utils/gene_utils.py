@@ -1,12 +1,12 @@
-def get_smg_contigs(hmmout, mg_frac):
+def get_smg_unitigs(hmmout, mg_frac):
 
     # Commands
     # run_FragGeneScan.pl -genome=edges.fasta -out=edges.fasta.frag -complete=0 -train=complete -thread=8 1>edges.fasta.frag.out 2>edges.fasta.frag.err
     # hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 /home/mall0133/software/MetaCoAG/metacoag_utils/auxiliary/marker.hmm edges.fasta.frag.faa 1>edges.fasta.hmmout.out 2> edges.fasta.hmmout.err
 
-    smg_contigs = set()
+    smg_unitigs = set()
 
-    contig_smgs = {}
+    unitig_smgs = {}
 
     with open(hmmout, "r") as myfile:
 
@@ -14,7 +14,7 @@ def get_smg_contigs(hmmout, mg_frac):
             if not line.startswith("#"):
                 strings = line.strip().split()
 
-                contig = strings[0]
+                unitig = strings[0]
 
                 # Marker gene name
                 marker_gene = strings[3]
@@ -25,27 +25,27 @@ def get_smg_contigs(hmmout, mg_frac):
                 # Mapped marker gene length
                 mapped_marker_length = int(strings[16]) - int(strings[15])
 
-                name_strings = contig.split("_")
+                name_strings = unitig.split("_")
                 name_strings = name_strings[: len(name_strings) - 3]
 
-                # Contig name
-                contig_name = "_".join(name_strings)
+                # unitig name
+                unitig_name = "_".join(name_strings)
 
                 if mapped_marker_length > marker_gene_length * mg_frac:
-                    smg_contigs.add(contig_name)
+                    smg_unitigs.add(unitig_name)
 
-                    if contig_name not in contig_smgs:
-                        contig_smgs[contig_name] = set()
-                        contig_smgs[contig_name].add(marker_gene)
+                    if unitig_name not in unitig_smgs:
+                        unitig_smgs[unitig_name] = set()
+                        unitig_smgs[unitig_name].add(marker_gene)
                     else:
-                        contig_smgs[contig_name].add(marker_gene)
+                        unitig_smgs[unitig_name].add(marker_gene)
 
-    return smg_contigs, contig_smgs
+    return smg_unitigs
 
 
-def get_phrog_contigs(phrogs, align_score, seq_identity):
+def get_phrog_unitigs(phrogs, align_score, seq_identity):
 
-    contig_phrogs = {}
+    unitig_phrogs = {}
 
     with open(phrogs, "r") as myfile:
 
@@ -62,9 +62,9 @@ def get_phrog_contigs(phrogs, align_score, seq_identity):
 
                 if alnScore > align_score and seqIdentity > seq_identity:
 
-                    if name not in contig_phrogs:
-                        contig_phrogs[name] = set([phrog])
+                    if name not in unitig_phrogs:
+                        unitig_phrogs[name] = set([phrog])
                     else:
-                        contig_phrogs[name].add(phrog)
+                        unitig_phrogs[name].add(phrog)
 
-    return contig_phrogs
+    return unitig_phrogs

@@ -1,27 +1,21 @@
 #!/usr/bin/env python3
 
 import logging
-import subprocess
-import os
 import sys
 import time
-from collections import defaultdict
-import os
 
 import click
 import networkx as nx
-import numpy as np
 from igraph import *
 from tqdm import tqdm
 
-from phables_utils import (component_utils, edge_graph_utils, edge_utils, gene_utils)
+from phables_utils import (component_utils, edge_graph_utils, flow_utils, gene_utils)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.coverage_utils import get_edge_coverage, get_junction_pe_coverage, get_graph_spanning_reads
+from phables_utils.coverage_utils import get_edge_coverage, get_junction_pe_coverage
 from phables_utils.output_utils import write_edges, write_component_info, write_res_genome_info, write_path, write_path_fasta
-from phables_utils.FD_Inexact import SolveInstances
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2022, PhaBles Project"
+__copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
 __version__ = "0.1"
 __maintainer__ = "Vijini Mallawaarachchi"
@@ -32,10 +26,13 @@ MAX_VAL = sys.maxsize
 
 # Sample command
 # -------------------------------------------------------------------
-# python phables.py  -g /path/to/assembly_graph.gfa
-#                    -c /path/to/assembly.fasta
-#                    -p /path/to/assembly_info.txt
-#                    -o /path/to/output_folder
+# python phables    -g /path/to/assembly_graph.gfa
+#                   -p /path/to/assembly_info.txt
+#                   -hm /path/to/edges.fasta.hmmout
+#                   -ph /path/to/phrogs_annot.tsv
+#                   -c /path/to/edge_coverages.tsv
+#                   -b /path/to/bam_files
+#                   -o /path/to/output_folder
 # -------------------------------------------------------------------
 
 
@@ -52,52 +49,38 @@ MAX_VAL = sys.maxsize
     type=click.Path(exists=True),
 )
 @click.option(
-    "--contigs",
-    "-c",
-    required=True,
-    help="path to the contigs file",
-    type=click.Path(exists=True),
-)
-@click.option(
     "--paths",
     "-p",
     required=True,
-    help="path to the contig paths file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--hmmout",
-    "-hm",
-    required=True,
-    help="path to the contig .hmmout file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--phrogs",
-    "-ph",
-    required=True,
-    help="path to the contig phrog annotations file",
+    help="path to the assembly path info file",
     type=click.Path(exists=True),
 )
 @click.option(
     "--coverage",
-    "-cov",
+    "-c",
     required=True,
     help="path to the coverage file",
     type=click.Path(exists=True),
 )
 @click.option(
     "--bampath",
-    "-bam",
+    "-b",
     required=True,
     help="path to the bam files",
     type=click.Path(exists=True),
 )
 @click.option(
-    "--gafpath",
-    "-gaf",
+    "--hmmout",
+    "-hm",
     required=True,
-    help="path to the gaf files",
+    help="path to the .hmmout file",
+    type=click.Path(exists=True),
+)
+@click.option(
+    "--phrogs",
+    "-ph",
+    required=True,
+    help="path to the phrog annotations file",
     type=click.Path(exists=True),
 )
 @click.option(
@@ -105,7 +88,7 @@ MAX_VAL = sys.maxsize
     "-ml",
     default=2000,
     required=False,
-    help="minimum length of circular contigs to consider",
+    help="minimum length of circular unitigs to consider",
     type=int,
 )
 @click.option(
@@ -121,7 +104,7 @@ MAX_VAL = sys.maxsize
     "-cc",
     default=50,
     required=False,
-    help="maximum contig count to consider a component",
+    help="maximum unitig count to consider a component",
     type=int,
 )
 @click.option(
@@ -149,22 +132,6 @@ MAX_VAL = sys.maxsize
     type=float,
 )
 @click.option(
-    "--pathlendif",
-    "-pld",
-    default=5000,
-    required=False,
-    help="path length difference threshold",
-    type=int,
-)
-@click.option(
-    "--unitigfraction",
-    "-uf",
-    default=0.2,
-    required=False,
-    help="minimum unitig fraction threshold",
-    type=float,
-)
-@click.option(
     "--output",
     "-o",
     required=True,
@@ -173,25 +140,21 @@ MAX_VAL = sys.maxsize
 )
 def main(
     graph,
-    contigs,
     paths,
-    hmmout,
-    phrogs,
     coverage,
     bampath,
-    gafpath,
+    hmmout,
+    phrogs,
     minlength,
     mincov,
     compcount,
     mgfrac,
     alignscore,
     seqidentity,
-    pathlendif,
-    unitigfraction,
     output,
 ):
 
-    """PhaBles: Resolve bacteriophage genomes from phage bubbles in metagenomic data."""
+    """Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples."""
 
     # Setup logger
     # ----------------------------------------------------------------------
@@ -212,26 +175,22 @@ def main(
     logger.addHandler(fileHandler)
 
     logger.info(
-        "Welcome to PhaBles: Resolve bacteriophage genomes from phage bubbles in metagenomic data."
+        "Welcome to Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples."
     )
 
     logger.info(f"Input arguments: ")
     logger.info(f"Assembly graph file: {graph}")
-    logger.info(f"Contigs file: {contigs}")
-    logger.info(f"Contig paths file: {paths}")
-    logger.info(f"Contig .hmmout file: {hmmout}")
-    logger.info(f"Contig phrog annotations file: {phrogs}")
-    logger.info(f"Contig coverage file: {coverage}")
+    logger.info(f"Assembly paths info file: {paths}")
+    logger.info(f"Unitig coverage file: {coverage}")
     logger.info(f"BAM files path: {bampath}")
-    logger.info(f"GAF files path: {gafpath}")
-    logger.info(f"Minimum length of contigs to consider: {minlength}")
+    logger.info(f"Unitig .hmmout file: {hmmout}")
+    logger.info(f"Unitig phrog annotations file: {phrogs}")
+    logger.info(f"Minimum length of unitigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
-    logger.info(f"minimum contig count to consider a component: {compcount}")
+    logger.info(f"Minimum unitig count to consider a component: {compcount}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
-    logger.info(f"Path length difference threshold: {pathlendif}")
-    logger.info(f"Minimum unitig fraction threshold: {unitigfraction}")
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
@@ -240,12 +199,10 @@ def main(
     # ----------------------------------------------------------------------
     (
         assembly_graph,
-        edge_list,
         oriented_links,
-        contig_names,
-        contig_names_rev,
-        graph_contigs,
-        edge_depths,
+        unitig_names,
+        unitig_names_rev,
+        graph_unitigs,
         self_looped_nodes,
         edges_lengths,
     ) = edge_graph_utils.build_assembly_graph(graph)
@@ -257,37 +214,36 @@ def main(
         f"Total number of links in the assembly graph: {len(assembly_graph.es)}"
     )
 
-    # Get circular contigs
+    # Get circular unitigs
     # ----------------------------------------------------------------------
-    circular = edge_utils.get_circular(paths)
+    circular = edge_graph_utils.get_circular(paths)
 
-    # Get contigs with bacterial single copy marker genes
+    # Get unitigs with bacterial single copy marker genes
     # ----------------------------------------------------------------------
-    smg_contigs, contig_smgs = gene_utils.get_smg_contigs(hmmout, mgfrac)
+    smg_unitigs = gene_utils.get_smg_unitigs(hmmout, mgfrac)
 
-    # Get contigs with PHROGs
+    # Get unitigs with PHROGs
     # ----------------------------------------------------------------------
-    contig_phrogs = gene_utils.get_phrog_contigs(phrogs, alignscore, seqidentity)
+    unitig_phrogs = gene_utils.get_phrog_unitigs(phrogs, alignscore, seqidentity)
 
     # Get components with viral bubbles
     # ----------------------------------------------------------------------
     pruned_vs = component_utils.get_components(
         assembly_graph,
-        contig_names,
-        smg_contigs,
-        contig_phrogs,
+        unitig_names,
+        smg_unitigs,
+        unitig_phrogs,
         circular,
         edges_lengths,
         minlength,
     )
     logger.info(f"Total number of components found: {len(pruned_vs)}")
 
-    # Get contig and junction pe coverages
+    # Get unitig and junction pe coverages
     # ----------------------------------------------------------------------
 
-    contig_coverages = get_edge_coverage(coverage)
+    unitig_coverages = get_edge_coverage(coverage)
     junction_pe_coverage = get_junction_pe_coverage(bampath, output)
-    junction_read_cout = get_graph_spanning_reads(gafpath, output)
 
 
     # Resolve genomes
@@ -301,7 +257,7 @@ def main(
 
     cycle_components = set()
     resolved_components = set()
-    circular_contigs = set()
+    circular_unitigs = set()
     resolved_cyclic = set()
 
     phage_like_edges = set()
@@ -316,12 +272,12 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 503 not in candidate_nodes:
-        #     continue
+        if 5627 not in candidate_nodes:
+            continue
 
         logger.debug(f"my_count: {my_count}")
 
-        logger.debug(f"number of contigs: {len(candidate_nodes)}")
+        logger.debug(f"number of unitigs: {len(candidate_nodes)}")
         logger.debug(f"{candidate_nodes}")
 
 
@@ -334,7 +290,7 @@ def main(
             all_self_looped = True
 
             for node in candidate_nodes:
-                if contig_names[node] not in self_looped_nodes:
+                if unitig_names[node] not in self_looped_nodes:
                     all_self_looped = False
             
             if all_self_looped:
@@ -343,54 +299,54 @@ def main(
 
                 phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
-                contig1 = ""
-                contig2 = ""
+                unitig1 = ""
+                unitig2 = ""
 
                 for edge in pruned_graph.es:
                     source_vertex_id = edge.source
                     target_vertex_id = edge.target
 
                     if source_vertex_id != target_vertex_id:
-                        contig1 = candidate_nodes[source_vertex_id]
-                        contig2 = candidate_nodes[target_vertex_id]
+                        unitig1 = candidate_nodes[source_vertex_id]
+                        unitig2 = candidate_nodes[target_vertex_id]
 
-                if contig1 != "" and contig2 != "":
+                if unitig1 != "" and unitig2 != "":
 
-                    contig1_name = contig_names[contig1]
-                    contig2_name = contig_names[contig2]
+                    unitig1_name = unitig_names[unitig1]
+                    unitig2_name = unitig_names[unitig2]
 
-                    contig1_orientation = ""
-                    contig2_orientation = ""
+                    unitig1_orientation = ""
+                    unitig2_orientation = ""
 
-                    resolved_edges.add(contig1)
-                    resolved_edges.add(contig2)
+                    resolved_edges.add(unitig1)
+                    resolved_edges.add(unitig2)
 
-                    for node in oriented_links[contig1_name]:
-                        for edge in oriented_links[contig1_name][node]:
-                            contig1_orientation = edge[0]
-                            contig2_orientation = edge[1]
+                    for node in oriented_links[unitig1_name]:
+                        for edge in oriented_links[unitig1_name][node]:
+                            unitig1_orientation = edge[0]
+                            unitig2_orientation = edge[1]
                             break
 
                     path_string = ""
 
-                    if contig1_orientation == "-":
-                        path_string += str(graph_contigs[contig1_name].reverse_complement())
+                    if unitig1_orientation == "-":
+                        path_string += str(graph_unitigs[unitig1_name].reverse_complement())
                     else:
-                        path_string += str(graph_contigs[contig1_name])
+                        path_string += str(graph_unitigs[unitig1_name])
 
-                    if contig2_orientation == "-":
-                        path_string += str(graph_contigs[contig2_name].reverse_complement())
+                    if unitig2_orientation == "-":
+                        path_string += str(graph_unitigs[unitig2_name].reverse_complement())
                     else:
-                        path_string += str(graph_contigs[contig2_name])
+                        path_string += str(graph_unitigs[unitig2_name])
 
                     cycle_number = 1
 
                     genome_path = GenomePath(
                         f"phage_comp_{my_count}_cycle_{cycle_number}",
-                        [f"{contig1_name}{contig1_orientation}", f"{contig2_name}{contig2_orientation}"],
-                        [contig1_name, contig2_name],
+                        [f"{unitig1_name}{unitig1_orientation}", f"{unitig2_name}{unitig2_orientation}"],
+                        [unitig1_name, unitig2_name],
                         path_string,
-                        int(min(contig_coverages[contig1_name], contig_coverages[contig2_name])),
+                        int(min(unitig_coverages[unitig1_name], unitig_coverages[unitig2_name])),
                         len(path_string),
                         (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
                     )
@@ -400,15 +356,8 @@ def main(
 
         if len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
 
-            # Identify source/sink vertex
-            source_sink_candidates = []
-
-            source_sink = ""
-
-            print("original candidate_nodes", candidate_nodes)
-
-
-            # Create Directed Graph
+            # Create initial directed graph with coverage values
+            # ----------------------------------------------------------------------
             G_edge=nx.DiGraph()
 
             my_counter = 0
@@ -422,39 +371,35 @@ def main(
 
             for vertex in pruned_graph.vs["id"]:
 
-                contig_name = contig_names[vertex]
+                unitig_name = unitig_names[vertex]
 
-                if contig_name not in self_looped_nodes:
+                if unitig_name not in self_looped_nodes:
                     clean_node_count += 1
 
-                for node in oriented_links[contig_name]:
+                for node in oriented_links[unitig_name]:
 
                     consider_edge = False
 
-                    if not (contig_name in self_looped_nodes and node in self_looped_nodes):
+                    if not (unitig_name in self_looped_nodes and node in self_looped_nodes):
                         consider_edge = True
-                    # elif contig_name in self_looped_nodes and node not in self_looped_nodes and len(str(graph_contigs[contig_name])) > 1000:
-                    #     consider_edge = True
-                    # elif contig_name not in self_looped_nodes and node in self_looped_nodes and len(str(graph_contigs[node])) > 1000:
-                    #     consider_edge = True
 
                     if consider_edge:
 
                         cov_1 = MAX_VAL
                         cov_2 = MAX_VAL
 
-                        if contig_name in contig_coverages:
-                            cov_1 = contig_coverages[contig_name]
-                        if node in contig_coverages:
-                            cov_2 = contig_coverages[node]
+                        if unitig_name in unitig_coverages:
+                            cov_1 = unitig_coverages[unitig_name]
+                        if node in unitig_coverages:
+                            cov_2 = unitig_coverages[node]
 
                         min_cov = min([cov_1, cov_2])
-                        # min_cov = junction_read_cout[(contig_name, node)]
+                        # min_cov = junction_read_cout[(unitig_name, node)]
 
-                        print(contig_name, node, min_cov)
+                        # print(unitig_name, node, min_cov)
 
-                        for edge in oriented_links[contig_name][node]:
-                            cycle_edges[(contig_name+edge[0], node+edge[1])] = int(min_cov)
+                        for edge in oriented_links[unitig_name][node]:
+                            cycle_edges[(unitig_name+edge[0], node+edge[1])] = int(min_cov)
 
             logger.debug(f"clean_node_count: {clean_node_count}")
             
@@ -469,54 +414,16 @@ def main(
             print()
             print()
 
+            # Identify source/sink vertex
+            # ----------------------------------------------------------------------
+            source_sink_candidates = flow_utils.get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes, unitig_names_rev)
 
-            for node in list(G_edge.nodes):
+            source_sink = 0
 
-                contig_name = node[:-1]
+            print("original candidate_nodes", candidate_nodes)
 
-                if contig_name not in self_looped_nodes and len(graph_contigs[contig_name]) > minlength:
-
-                    bfs_successors = dict(enumerate(nx.bfs_successors(G_edge, node)))
-                    print(node, "-->", bfs_successors)
-                    
-                    last_layer = list(bfs_successors.keys())[-1]
-
-                    node_is_st = True
-
-                    for item in bfs_successors[last_layer][1]:
-
-                        if item[:-1] not in self_looped_nodes:
-
-                            item_successors = list(G_edge.successors(item))
-                            print(item, item_successors)
-
-                            if len(item_successors) > 0 and list(G_edge.successors(item))[0] != node:
-                                node_is_st = False
-                                break
-                            if len(item_successors) == 0:
-                                node_is_st = False
-
-                    if len(bfs_successors[last_layer][1]) == 0:
-                        node_is_st = False
-
-                    if node_is_st:
-                        source_sink_candidates.append(contig_names_rev[contig_name])
-                        # source_sink = contig_names_rev[contig_name]
-                        # break
-
-                    print()
 
             print("Identified candidate source_sinks from BFS:", source_sink_candidates)
-
-            # longest_st = 0
-            # longest_st_len = 0
-
-            # for st in source_sink_candidates:
-            #     if len(graph_contigs[contig_names[st]]) > longest_st_len:
-            #         longest_st_len = len(graph_contigs[contig_names[st]])
-            #         longest_st = st
-
-            
 
 
             if len(source_sink_candidates) > 0:
@@ -524,8 +431,6 @@ def main(
                 # Pick the first st candidate
                 source_sink = source_sink_candidates[0]
                 print("Identified source_sink from BFS:", source_sink)
-
-                print("source_sink", source_sink)
 
                 print()
                 print()
@@ -537,234 +442,224 @@ def main(
 
                 print("orderd candidate_nodes", candidate_nodes)
 
-
-                # Remove nodes with either no incoming or outgoing edges
-
-                has_disconnected_edges = True
-
-                while has_disconnected_edges:
-
-                    to_remove = []
-
-                    for node in list(G_edge.nodes):
-                        if not (G_edge.in_degree(node) > 0 and G_edge.out_degree()(node)) > 0:
-                            to_remove.append(node)
-                    
-
-                    if len(to_remove) > 0:
-                        G_edge.remove_nodes_from(to_remove)
-                        print("remove_nodes_from", to_remove, has_disconnected_edges)
-                    else:
-                        has_disconnected_edges = False
-
-
-
-                # Create Directed Graph
-                G=nx.DiGraph()
-
-                for u,v,cov in G_edge.edges(data=True):
-
-                    if u not in node_indices:
-                        node_indices[u] = my_counter
-                        node_indices_rev[my_counter] = u
-                        my_counter += 1
-                    if v not in node_indices:
-                        node_indices[v] = my_counter
-                        node_indices_rev[my_counter] = v
-                        my_counter += 1
-
-                    G.add_edge(node_indices[u], node_indices[v], weight=cov['weight'])
-
-                # Get connections and degree information
-                
-                in_degree = []
-                out_degree = []
-
-                for node in list(G.nodes):
-                    
-                    if node_indices_rev[node][:-1] not in self_looped_nodes:
-                        clean_indegree = len([x for x in G.predecessors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
-                        in_degree.append(clean_indegree)
-
-                        clean_outdegree = len([x for x in G.successors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
-                        out_degree.append(clean_outdegree)
-
-                degrees = in_degree + out_degree
-
-                if len(degrees) == 0:
-                    logger.debug(f"Skipping component as no clean connections were found")
-                    continue
-
-
-
-                # Get edges for flow network
-                network_edges = list()
-
-                edge_list_indices = {}
-
-                subpaths = {}
-                subpath_count = 0
-
-                for u,v,cov in G_edge.edges(data=True):
-
-                    print(u, contig_names_rev[u[:-1]], v, contig_names_rev[v[:-1]], cov)
-
-                    u_name = contig_names_rev[u[:-1]]
-                    v_name = contig_names_rev[v[:-1]]
-
-                    u_index = candidate_nodes.index(u_name)
-                    v_index = candidate_nodes.index(v_name)
-
-                    edge_list_indices[u_index] = u
-                    edge_list_indices[v_index] = v
-
-                    print(u_index, v_index)
-
-                    juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
-                    # juction_cov = cov['weight'] - int(cov['weight']*0.1)
-
-                    if v_index == 0:
-                        network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
-                        if juction_cov != 0:
-                            subpaths[subpath_count] = [u_index, len(candidate_nodes)]
-                            subpath_count += 1
-                        print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
-                    else:
-                        network_edges.append((u_index, v_index, juction_cov, cov['weight']))
-                        if juction_cov != 0:
-                            subpaths[subpath_count] = [u_index, v_index]
-                            subpath_count += 1
-                        print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
-
-                    
-                print("edge_list_indices", edge_list_indices)
-
-                G = {'Nodes':len(candidate_nodes),'list of edges': network_edges, 'subpaths': subpaths}
-
-                listOfGraphs = {}
-                listOfGraphs[0] = G
-
-                print(listOfGraphs)
-
-                outputfile = output+"results_gurobi_subpath.txt"
-                recordfile = output+"results_gurobi_subpath_details.txt"
-
-                solution_paths = SolveInstances(listOfGraphs, outputfile, recordfile)
-
-                print()
-
-                print(solution_paths)
-
-                print()
-
-                logger.debug(f"Number of paths found: {len(solution_paths)}")
-
-                if len(solution_paths) != 0:
-                    cycle_components.add(my_count)
-
-                    phage_like_edges = phage_like_edges.union(set(candidate_nodes))
-
-                    cycle_number = 1
-
-                    for solution_path in solution_paths:
-                        coverage_val = solution_paths[solution_path]["weight"]
-
-                        if coverage_val >= mincov:
-
-                            path_string = ""
-                            total_length = 0
-
-                            path_order = []
-
-                            # Create graph
-                            G_path = nx.Graph()
-                            # Fill graph with data
-                            G_path.add_edges_from(solution_paths[solution_path]["path"])
-
-                            # Get all simple paths from node 0 to last node
-                            candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
-
-                            print("candidate_paths", candidate_paths)
-
-                            for path_edge in candidate_paths[0]:
-                                if path_edge != len(candidate_nodes):
-                                    path_order.append(edge_list_indices[path_edge])
-
-                            print("path_order", path_order)
-
-                            for node in path_order:
-                                contig_name = node[:-1]
-                                if node.endswith("+"):
-                                    path_string += str(graph_contigs[contig_name])
-                                else:
-                                    path_string += str(graph_contigs[contig_name].reverse_complement())
-                                total_length += len(str(graph_contigs[contig_name]))
-
-                            genome_path = GenomePath(
-                                f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                [x for x in path_order],
-                                [contig_names_rev[x[:-1]] for x in path_order],
-                                path_string,
-                                int(coverage_val),
-                                total_length,
-                                (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
-                            )
-                            my_genomic_paths.append(genome_path)
-
-                            cycle_number += 1
-
-                    logger.debug(f"Number of paths selected: {cycle_number-1}")
-
-                else:
-                    logger.debug(f"No paths detected")
-                    continue
-
             else:
                 logger.debug(f"No source/sink node detected")
                 continue
 
+
+            # Remove dead-ends (nodes with no incoming or no outgoing edges)
+            # ----------------------------------------------------------------------
+            G_edge = edge_graph_utils.remove_dead_ends(G_edge)
+
+
+            # Create refined directed graph for flow network
+            # ----------------------------------------------------------------------
+            G=nx.DiGraph()
+
+            for u,v,cov in G_edge.edges(data=True):
+
+                if u not in node_indices:
+                    node_indices[u] = my_counter
+                    node_indices_rev[my_counter] = u
+                    my_counter += 1
+                if v not in node_indices:
+                    node_indices[v] = my_counter
+                    node_indices_rev[my_counter] = v
+                    my_counter += 1
+
+                G.add_edge(node_indices[u], node_indices[v], weight=cov['weight'])
+
+            # Get connections and degree information
+            # ----------------------------------------------------------------------
+            in_degree = []
+            out_degree = []
+
+            for node in list(G.nodes):
+                
+                if node_indices_rev[node][:-1] not in self_looped_nodes:
+                    clean_indegree = len([x for x in G.predecessors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
+                    in_degree.append(clean_indegree)
+
+                    clean_outdegree = len([x for x in G.successors(node) if node_indices_rev[x][:-1] not in self_looped_nodes])
+                    out_degree.append(clean_outdegree)
+
+            degrees = in_degree + out_degree
+
+            if len(degrees) == 0:
+                logger.debug(f"Skipping component as no clean connections were found")
+                continue
+
+
+            # Create flow network
+            # ----------------------------------------------------------------------
+            network_edges = list()
+
+            edge_list_indices = {}
+
+            subpaths = {}
+            subpath_count = 0
+
+            for u,v,cov in G_edge.edges(data=True):
+
+                print(u, unitig_names_rev[u[:-1]], v, unitig_names_rev[v[:-1]], cov)
+
+                u_name = unitig_names_rev[u[:-1]]
+                v_name = unitig_names_rev[v[:-1]]
+
+                u_index = candidate_nodes.index(u_name)
+                v_index = candidate_nodes.index(v_name)
+
+                edge_list_indices[u_index] = u
+                edge_list_indices[v_index] = v
+
+                print(u_index, v_index)
+
+                juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
+                # juction_cov = cov['weight'] - int(cov['weight']*0.1)
+
+                if v_index == 0:
+                    network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
+                    if juction_cov != 0:
+                        subpaths[subpath_count] = [u_index, len(candidate_nodes)]
+                        subpath_count += 1
+                    print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
+                else:
+                    network_edges.append((u_index, v_index, juction_cov, cov['weight']))
+                    if juction_cov != 0:
+                        subpaths[subpath_count] = [u_index, v_index]
+                        subpath_count += 1
+                    print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
+
+                
+            print("edge_list_indices", edge_list_indices)
+
+            # Create flow network and run MFD-ILP
+            # ----------------------------------------------------------------------
+            G_mfd = {'Nodes':len(candidate_nodes),'list of edges': network_edges, 'subpaths': subpaths}
+
+            solution_paths = flow_utils.solve_mfd(G_mfd, output)
+
+            print()
+
+            print(solution_paths)
+
+            print()
+
+            logger.debug(f"Number of paths found: {len(solution_paths)}")
+
+            # Iterate through solution paths
+            # ----------------------------------------------------------------------
+            if len(solution_paths) != 0:
+                cycle_components.add(my_count)
+
+                phage_like_edges = phage_like_edges.union(set(candidate_nodes))
+
+                cycle_number = 1
+
+                for solution_path in solution_paths:
+                    coverage_val = solution_paths[solution_path]["weight"]
+
+                    # Filter path by coverage
+                    if coverage_val >= mincov:
+
+                        # Create graph for path
+                        G_path = nx.Graph()
+
+                        # Fill graph with data
+                        G_path.add_edges_from(solution_paths[solution_path]["path"])
+
+                        # Get all simple paths from node 0 to last node
+                        candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
+
+                        print("candidate_paths", candidate_paths)
+
+                        # Get mapped unitigs in order from the flow network
+                        path_order = []
+                        for path_edge in candidate_paths[0]:
+                            if path_edge != len(candidate_nodes):
+                                path_order.append(edge_list_indices[path_edge])
+
+                        print("path_order", path_order)
+
+                        
+                        # Get the order of unitigs in path
+                        path_string = ""
+                        total_length = 0
+
+                        for node in path_order:
+                            unitig_name = node[:-1]
+                            if node.endswith("+"):
+                                path_string += str(graph_unitigs[unitig_name])
+                            else:
+                                path_string += str(graph_unitigs[unitig_name].reverse_complement())
+                            total_length += len(str(graph_unitigs[unitig_name]))
+
+                        # Create GenomePath object with path details
+                        genome_path = GenomePath(
+                            f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            [x for x in path_order],
+                            [unitig_names_rev[x[:-1]] for x in path_order],
+                            path_string,
+                            int(coverage_val),
+                            total_length,
+                            (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
+                        )
+                        my_genomic_paths.append(genome_path)
+
+                        cycle_number += 1
+
+                logger.debug(f"Number of paths selected: {cycle_number-1}")
+
+            else:
+                logger.debug(f"No paths detected")
+                continue
+
+            
+        # Circular unitigs
         elif len(candidate_nodes) == 1:
 
-            contig_name = contig_names[candidate_nodes[0]]
+            unitig_name = unitig_names[candidate_nodes[0]]
 
             resolved_edges.add(candidate_nodes[0])
 
-            path_string = str(graph_contigs[contig_name])
+            path_string = str(graph_unitigs[unitig_name])
 
             cycle_number = 1
 
+            # Create GenomePath object with path details
             genome_path = GenomePath(
                 f"phage_comp_{my_count}_cycle_{cycle_number}",
-                [contig_names[candidate_nodes[0]]],
+                [unitig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
-                int(contig_coverages[contig_name]),
-                len(graph_contigs[contig_name]),
+                int(unitig_coverages[unitig_name]),
+                len(graph_unitigs[unitig_name]),
                 (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
             )
             my_genomic_paths.append(genome_path)
             resolved_components.add(my_count)
 
-            circular_contigs.add(my_count)
+            circular_unitigs.add(my_count)
 
             phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
 
-        visited_nodes = set()
+        # Record final paths for the component
+        # ----------------------------------------------------------------------
 
-        frac_unitigs = 1
-
+        # Order resolved paths in descending order of length
         my_genomic_paths.sort(key=lambda x: (x.length, x.coverage), reverse=True)
 
         final_genomic_paths = []
-
         comp_resolved_edges = set()
+        visited_nodes = set()
 
+        frac_unitigs = 1
         n_paths = 0
 
         if len(my_genomic_paths) > 1:
 
-            # Get component stats
+            # Get the degree of the component
             graph_degree = assembly_graph.degree(candidate_nodes)
 
             path_lengths = []
@@ -772,6 +667,7 @@ def main(
 
             largest_length = my_genomic_paths[0].length
 
+            # Filter genomic paths
             for genomic_path in my_genomic_paths:
 
                 if genomic_path.length > largest_length/2:
@@ -791,8 +687,10 @@ def main(
 
             logger.debug(f"frac_unitigs: {frac_unitigs}")
 
-            if len(final_genomic_paths) > 1 and len(in_degree) > 0 and len(out_degree) > 0 and frac_unitigs > unitigfraction:
+            # Filter components
+            if len(final_genomic_paths) > 1 and len(in_degree) > 0 and len(out_degree) > 0:
 
+                # Create GenomeComponent object with component details
                 genome_comp = GenomeComponent(
                     f"phage_comp_{my_count}",
                     len(candidate_nodes),
@@ -819,7 +717,7 @@ def main(
                 all_components.append(genome_comp)
                 resolved_edges = resolved_edges.union(comp_resolved_edges)
 
-            if len(final_genomic_paths) > 0 and frac_unitigs > unitigfraction:
+            if len(final_genomic_paths) > 0:
                 resolved_cyclic.add(my_count)
                 resolved_components.add(my_count)
                 all_resolved_paths += final_genomic_paths
@@ -827,51 +725,50 @@ def main(
                 logger.debug(f"Elapsed time to resolve component {my_count} with {len(candidate_nodes)} nodes: {component_elapsed_time} seconds")
 
         else:
+            # Circular unitigs
             for genomic_path in my_genomic_paths:
                 final_genomic_paths.append(genomic_path)
                 all_resolved_paths.append(genomic_path)
                 logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
                 resolved_components.add(my_count)
 
-        # Write paths to file
-
-        if frac_unitigs > unitigfraction:
-            write_path(final_genomic_paths, output)
-            output_genomes_path = f"{output}/resolved_phages"
-            write_path_fasta(final_genomic_paths, output_genomes_path)
+        # Write genome path to file
+        # ----------------------------------------------------------------------
+        write_path(final_genomic_paths, output)
+        write_path_fasta(final_genomic_paths, f"{output}/resolved_phages")
 
 
+    # Log final summary information
+    # ----------------------------------------------------------------------
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
     logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
-    logger.info(f"Circular contigs identified: {len(circular_contigs)}")
-    logger.info(f"Total number of cyclic components found including circular contigs: {len(cycle_components) + len(circular_contigs)}")
+    logger.info(f"Circular unitigs identified: {len(circular_unitigs)}")
+    logger.info(f"Total number of cyclic components found including circular unitigs: {len(cycle_components) + len(circular_unitigs)}")
     logger.info(f"Total number of components resolved: {len(resolved_components)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
-
-    # Write phage-like edges
-    write_edges(phage_like_edges, contig_names, graph_contigs, "phage_like_edges", output)
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
-    # Write resolved phage edges
-    write_edges(resolved_edges, contig_names, graph_contigs, "resolved_edges", output)
+
+    # Write edges to file
+    # ----------------------------------------------------------------------
+
+    write_edges(phage_like_edges, unitig_names, graph_unitigs, "phage_like_edges", output)
+    write_edges(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
+
 
     # Record path information
     # ----------------------------------------------------------------------
 
     filename = write_res_genome_info(all_resolved_paths, output)
+    logger.info(f"Resolved genome information can be found in {output}/{filename}")
 
-    logger.info(
-        f"Resolved genome information can be found in {output}/{filename}"
-    )
 
     # Record component information
     # ----------------------------------------------------------------------
 
     filename = write_component_info(all_components, output)
+    logger.info(f"Resolved component information can be found in {output}/{filename}")
 
-    logger.info(
-        f"Resolved component information can be found in {output}/{filename}"
-    )
 
     # Get elapsed time
     # ----------------------------------------------------------------------
@@ -880,12 +777,13 @@ def main(
     elapsed_time = time.time() - start_time
 
     # Print elapsed time for the process
-    logger.info("Elapsed time: " + str(elapsed_time) + " seconds")
+    logger.info(f"Elapsed time: {elapsed_time} seconds")
+
 
     # Exit program
     # ----------------------------------------------------------------------
 
-    logger.info("Thank you for using phables!")
+    logger.info("Thank you for using Phables!")
 
 
 if __name__ == "__main__":
