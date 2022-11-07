@@ -37,11 +37,13 @@ setuptools.setup(
     install_requires=[
         "biopython",
         "python-igraph",
-        "networkx",
+        "networkx==2.8.6",
         "scipy",
         "numpy",
         "tqdm",
-        "click"
+        "click",
+        "pysam",
+        "gurobi"
     ],
     python_requires=">=3.8",
 )
