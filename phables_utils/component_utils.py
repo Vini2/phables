@@ -7,6 +7,9 @@ def get_components(
     edges_lengths,
     cicular_len,
 ):
+    """
+    Get connected components with PHROGs and no SMGs.
+    """
 
     pruned_vs = {}
 

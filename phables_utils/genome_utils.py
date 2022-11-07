@@ -1,3 +1,4 @@
+# Class for genome path
 class GenomePath:
     def __init__(self, id, node_order, node_id_order, path, coverage, length, gc):
         self.id = id
@@ -8,7 +9,7 @@ class GenomePath:
         self.node_id_order = node_id_order
         self.gc = gc
 
-
+# Class for genome component
 class GenomeComponent:
     def __init__(
         self,

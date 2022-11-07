@@ -4,7 +4,10 @@ import pickle
 import pysam
 import glob
 
-def get_edge_coverage(coverage):
+def get_unitig_coverage(coverage):
+    """
+    Get coverage values of unitigs
+    """
 
     contig_coverages = {}
 
@@ -14,7 +17,7 @@ def get_edge_coverage(coverage):
             if not line.startswith("Contig"):
                 strings = line.strip().split()
 
-                contig_name = strings[0].replace("contig", "edge")
+                contig_name = strings[0]
 
                 coverage_sum = sum([float(x) for x in strings[1:]])
 
@@ -50,8 +53,11 @@ def read_pair_generator(bam, region_string=None):
 
 
 def get_junction_pe_coverage(bam_path, output):
+    """
+    Get number of paired end reads supporting a junction
+    """
 
-    link_counts = defaultdict(list)
+    link_counts = defaultdict(int)
 
     if os.path.isfile(f"{output}/junction_pe_coverage.pickle"):
         with open(f"{output}/junction_pe_coverage.pickle", "rb") as handle:
@@ -69,10 +75,7 @@ def get_junction_pe_coverage(bam_path, output):
 
             for read1, read2 in read_pairs:
                 if read1.reference_name != read2.reference_name:
-                    if read1.query_alignment_length/read1.qlen >= 0.9 and read2.query_alignment_length/read2.qlen >= 0.9:
-                        if read1.reference_name=='edge_91047' and read2.reference_name=='edge_5628':
-                            print(read1.reference_start, read1.reference_end, read2.reference_start, read2.reference_end)
-                        link_counts[(read1.reference_name, read2.reference_name)].append(read1.query_name)
+                    link_counts[(read1.reference_name, read2.reference_name)] += 1
 
         with open(f"{output}/junction_pe_coverage.pickle", "wb") as handle:
             pickle.dump(link_counts, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -81,6 +84,9 @@ def get_junction_pe_coverage(bam_path, output):
 
 
 def get_graph_spanning_reads(gaf_path, output):
+    """
+    Get number of reads spanning across a junction
+    """
 
     junction_reads = defaultdict(int)
 
@@ -111,5 +117,4 @@ def get_graph_spanning_reads(gaf_path, output):
         with open(f"{output}/graph_spanning_reads.pickle", "wb") as handle:
             pickle.dump(junction_reads, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    
     return junction_reads

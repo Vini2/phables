@@ -3,6 +3,9 @@ import networkx as nx
 from .FD_Inexact import SolveInstances
 
 def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_names_rev):
+    """
+    Identify source/sink vertex
+    """
 
     source_sink_candidates = []
 
@@ -42,14 +45,17 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_
 
 
 def solve_mfd(G, output):
+    """
+    Get paths by solving MFD
+    """
 
     listOfGraphs = {}
     listOfGraphs[0] = G
 
     print(listOfGraphs)
 
-    outputfile = output+"results_gurobi_subpath.txt"
-    recordfile = output+"results_gurobi_subpath_details.txt"
+    outputfile = f"{output}/results_MFD.txt"
+    recordfile = f"{output}/results_MFD_details.txt"
 
     solution_paths = SolveInstances(listOfGraphs, outputfile, recordfile)
 

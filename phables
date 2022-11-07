@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 from phables_utils import (component_utils, edge_graph_utils, flow_utils, gene_utils)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.coverage_utils import get_edge_coverage, get_junction_pe_coverage
-from phables_utils.output_utils import write_edges, write_component_info, write_res_genome_info, write_path, write_path_fasta
+from phables_utils.coverage_utils import get_unitig_coverage, get_junction_pe_coverage
+from phables_utils.output_utils import write_unitigs, write_component_info, write_res_genome_info, write_path, write_path_fasta
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
@@ -242,7 +242,7 @@ def main(
     # Get unitig and junction pe coverages
     # ----------------------------------------------------------------------
 
-    unitig_coverages = get_edge_coverage(coverage)
+    unitig_coverages = get_unitig_coverage(coverage)
     junction_pe_coverage = get_junction_pe_coverage(bampath, output)
 
 
@@ -752,8 +752,8 @@ def main(
     # Write edges to file
     # ----------------------------------------------------------------------
 
-    write_edges(phage_like_edges, unitig_names, graph_unitigs, "phage_like_edges", output)
-    write_edges(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
+    write_unitigs(phage_like_edges, unitig_names, graph_unitigs, "phage_like_edges", output)
+    write_unitigs(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
 
 
     # Record path information

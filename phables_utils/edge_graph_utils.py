@@ -39,17 +39,23 @@ class BidirectionalMap(dict):
         super().__setitem__(key, value)
 
 
-def get_edge_lengths(edge_file):
+def get_unitig_lengths(edge_file):
+    """
+    Get length of the unitigs
+    """
 
-    contig_lengths = {}
+    unitig_lengths = {}
 
     for index, record in enumerate(SeqIO.parse(edge_file, "fasta")):
-        contig_lengths[record.id] = len(record.seq)
+        unitig_lengths[record.id] = len(record.seq)
 
-    return contig_lengths
+    return unitig_lengths
 
 
 def get_links(assembly_graph_file):
+    """
+    Get links from the assembly graph
+    """
 
     node_count = 0
 
@@ -80,7 +86,6 @@ def get_links(assembly_graph_file):
 
                 link1_orientation = strings[2]
                 link2_orientation = strings[4]
-                # read_count = int(strings[6].split(":")[-1])
 
                 link = []
                 link.append(link1)
@@ -100,23 +105,6 @@ def get_links(assembly_graph_file):
                     elif link1_orientation == "-" and link2_orientation == "+":
                         oriented_links[link1][link2].append(("-","+"))
                         oriented_links[link2][link1].append(("-","+"))
-                    
-                # if link1_orientation == "+" and link2_orientation == "+":
-                #     link = []
-                #     link.append(link1)
-                #     link.append(link2)
-                #     links.append(link)
-                # elif link1_orientation == "-" and link2_orientation == "-":
-                #     link = []
-                #     link.append(link2)
-                #     link.append(link1)
-                #     links.append(link)
-                # else:
-                #     link = []
-                #     link.append(link1)
-                #     link.append(link2)
-                #     links.append(link)
-                
 
             elif line.startswith("S"):
 
@@ -138,6 +126,9 @@ def get_links(assembly_graph_file):
 
 
 def get_graph_edges(links, contig_names_rev):
+    """
+    Returns the edges of the assembly graph
+    """
 
     self_looped_nodes = []
 
@@ -161,6 +152,9 @@ def get_graph_edges(links, contig_names_rev):
 
 
 def build_assembly_graph(assembly_graph_file):
+    """
+    Build the assembly graph
+    """
 
     (
         node_count,
@@ -217,6 +211,9 @@ def build_assembly_graph(assembly_graph_file):
 
 
 def get_circular(paths):
+    """
+    Get circular unitigs
+    """
     
     circular = {}
 
@@ -235,6 +232,9 @@ def get_circular(paths):
 
 
 def remove_dead_ends(G_edge):
+    """
+    Remove dead-ends from the component
+    """
 
     has_dead_ends = True
 

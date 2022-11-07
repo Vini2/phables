@@ -3,15 +3,18 @@ import subprocess
 
 FASTA_LINE_LEN = 60
 
-# Write edges to file
-def write_edges(nodes, contig_names, graph_contigs, filename, output):
+
+def write_unitigs(nodes, unitig_names, graph_unitigs, filename, output):
+    """
+    Write unitigs to FASTA file
+    """
 
     with open(f"{output}/{filename}.fasta", "w+") as myfile:
 
         for node in nodes:
-            contig_name= contig_names[node]
-            edge_seq = str(graph_contigs[contig_name])
-            myfile.write(">" + contig_name + "\n")
+            unitig_name= unitig_names[node]
+            edge_seq = str(graph_unitigs[unitig_name])
+            myfile.write(f">{unitig_name}\n")
 
             chunks = [
                 edge_seq[i : i + FASTA_LINE_LEN]
@@ -19,11 +22,13 @@ def write_edges(nodes, contig_names, graph_contigs, filename, output):
             ]
 
             for chunk in chunks:
-                myfile.write(chunk + "\n")
+                myfile.write(f"{chunk}\n")
 
 
-# Write component information to file
 def write_component_info(all_components, output):
+    """
+    Write component information to file
+    """
 
     with open(f"{output}/resolved_component_info.txt", "w") as myfile:
         myfile.write(f"Component\t")
@@ -72,8 +77,10 @@ def write_component_info(all_components, output):
     return "resolved_component_info.txt"
 
 
-# Write resolved genome information to file
 def write_res_genome_info(all_resolved_paths, output):
+    """
+    Write resolved genome information to file
+    """
 
     with open(f"{output}/resolved_genome_info.txt", "w") as myfile:
         myfile.write(f"Path\tCoverage\tLength\tGC content\tNode order\n")
@@ -85,8 +92,10 @@ def write_res_genome_info(all_resolved_paths, output):
     return "resolved_genome_info.txt"
 
 
-# Write resolved paths to file
 def write_path(final_genomic_paths, output):
+    """
+    Write genomic paths to a single FASTA file
+    """
 
     with open(f"{output}/resolved_paths.fasta", "a+") as myfile:
 
@@ -103,8 +112,10 @@ def write_path(final_genomic_paths, output):
                 myfile.write(f"{chunk}\n")
 
 
-# Write resolved genome paths to file
 def write_path_fasta(final_genomic_paths, output_genomes_path):
+    """
+    Write genomic paths to individual FASTA files
+    """
 
     if not os.path.isdir(f"{output_genomes_path}"):
         subprocess.run("mkdir -p " + output_genomes_path, shell=True)

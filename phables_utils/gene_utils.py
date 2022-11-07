@@ -1,4 +1,7 @@
 def get_smg_unitigs(hmmout, mg_frac):
+    """
+    Get unitigs containing bacterial single-copy marker genes
+    """
 
     # Commands
     # run_FragGeneScan.pl -genome=edges.fasta -out=edges.fasta.frag -complete=0 -train=complete -thread=8 1>edges.fasta.frag.out 2>edges.fasta.frag.err
@@ -44,6 +47,9 @@ def get_smg_unitigs(hmmout, mg_frac):
 
 
 def get_phrog_unitigs(phrogs, align_score, seq_identity):
+    """
+    Get unitigs containing PHROGs
+    """
 
     unitig_phrogs = {}
 
