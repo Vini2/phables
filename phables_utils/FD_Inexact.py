@@ -1,11 +1,11 @@
 # Source: https://github.com/algbio/MFD-ILP
 
-import itertools
 import more_itertools
-import math as m
-import os 
 import networkx as nx
-# import matplotlib.pyplot as plt
+import logging
+
+# create logger
+logger = logging.getLogger("phables 0.1")
 
 
 def read_input(graphfile,number_subpath):
@@ -250,10 +250,10 @@ def flowMultipleDecomposition(data,K):
             data['message'] = 'unsolved'
         
     except gp.GurobiError as e:
-        print('Error code ' + str(e.errno) + ': ' + str(e))
+        logger.error(f"Error code {e.errno}: {str(e)}")
 
     except AttributeError:
-        print('Encountered an attribute error')
+        logger.error(f"Encountered an attribute error")
     
     return data;
 

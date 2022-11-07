@@ -272,7 +272,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 5627 not in candidate_nodes:
+        if 6902 not in candidate_nodes:
             continue
 
         logger.debug(f"my_count: {my_count}")
@@ -394,9 +394,6 @@ def main(
                             cov_2 = unitig_coverages[node]
 
                         min_cov = min([cov_1, cov_2])
-                        # min_cov = junction_read_cout[(unitig_name, node)]
-
-                        # print(unitig_name, node, min_cov)
 
                         for edge in oriented_links[unitig_name][node]:
                             cycle_edges[(unitig_name+edge[0], node+edge[1])] = int(min_cov)
@@ -411,36 +408,24 @@ def main(
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
 
-            print()
-            print()
-
             # Identify source/sink vertex
             # ----------------------------------------------------------------------
             source_sink_candidates = flow_utils.get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes, unitig_names_rev)
 
             source_sink = 0
 
-            print("original candidate_nodes", candidate_nodes)
-
-
-            print("Identified candidate source_sinks from BFS:", source_sink_candidates)
-
+            logger.debug(f"Original candidate_nodes: {candidate_nodes}")
+            logger.debug(f"Identified candidate source_sinks from BFS: {source_sink_candidates}")
 
             if len(source_sink_candidates) > 0:
 
                 # Pick the first st candidate
                 source_sink = source_sink_candidates[0]
-                print("Identified source_sink from BFS:", source_sink)
-
-                print()
-                print()
-                print()
+                logger.debug(f"Identified source_sink from BFS: {source_sink}")
 
                 candidate_nodes.remove(source_sink)
-
                 candidate_nodes.insert(0, source_sink)
-
-                print("orderd candidate_nodes", candidate_nodes)
+                logger.debug(f"Ordered candidate_nodes: {candidate_nodes}")
 
             else:
                 logger.debug(f"No source/sink node detected")
@@ -501,8 +486,6 @@ def main(
 
             for u,v,cov in G_edge.edges(data=True):
 
-                print(u, unitig_names_rev[u[:-1]], v, unitig_names_rev[v[:-1]], cov)
-
                 u_name = unitig_names_rev[u[:-1]]
                 v_name = unitig_names_rev[v[:-1]]
 
@@ -512,39 +495,26 @@ def main(
                 edge_list_indices[u_index] = u
                 edge_list_indices[v_index] = v
 
-                print(u_index, v_index)
-
                 juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
-                # juction_cov = cov['weight'] - int(cov['weight']*0.1)
 
                 if v_index == 0:
                     network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
                     if juction_cov != 0:
                         subpaths[subpath_count] = [u_index, len(candidate_nodes)]
                         subpath_count += 1
-                    print("EDGE:", u_index, len(candidate_nodes), juction_cov, cov['weight'])
                 else:
                     network_edges.append((u_index, v_index, juction_cov, cov['weight']))
                     if juction_cov != 0:
                         subpaths[subpath_count] = [u_index, v_index]
                         subpath_count += 1
-                    print("EDGE:", u_index, v_index, juction_cov, cov['weight'])
 
                 
-            print("edge_list_indices", edge_list_indices)
+            logger.debug(f"edge_list_indices: {edge_list_indices}")
 
             # Create flow network and run MFD-ILP
             # ----------------------------------------------------------------------
             G_mfd = {'Nodes':len(candidate_nodes),'list of edges': network_edges, 'subpaths': subpaths}
-
             solution_paths = flow_utils.solve_mfd(G_mfd, output)
-
-            print()
-
-            print(solution_paths)
-
-            print()
-
             logger.debug(f"Number of paths found: {len(solution_paths)}")
 
             # Iterate through solution paths
@@ -570,8 +540,7 @@ def main(
 
                         # Get all simple paths from node 0 to last node
                         candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
-
-                        print("candidate_paths", candidate_paths)
+                        logger.debug(f"candidate_paths: {candidate_paths}")
 
                         # Get mapped unitigs in order from the flow network
                         path_order = []
@@ -579,9 +548,8 @@ def main(
                             if path_edge != len(candidate_nodes):
                                 path_order.append(edge_list_indices[path_edge])
 
-                        print("path_order", path_order)
+                        logger.debug(f"path_order: {path_order}")
 
-                        
                         # Get the order of unitigs in path
                         path_string = ""
                         total_length = 0

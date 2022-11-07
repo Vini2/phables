@@ -58,15 +58,10 @@ def get_links(assembly_graph_file):
     """
 
     node_count = 0
-
     graph_contigs = {}
-
     edge_depths = {}
-
     edges_lengths = {}
-
     oriented_links = defaultdict(lambda: defaultdict(list))
-
     links = []
 
     my_map = BidirectionalMap()
@@ -122,7 +117,7 @@ def get_links(assembly_graph_file):
 
             line = file.readline()
 
-    return node_count, graph_contigs, links, oriented_links, my_map, edge_depths, edges_lengths
+    return node_count, graph_contigs, links, oriented_links, my_map, edges_lengths
 
 
 def get_graph_edges(links, contig_names_rev):
@@ -133,8 +128,6 @@ def get_graph_edges(links, contig_names_rev):
     self_looped_nodes = []
 
     edge_list = []
-    # weights = []
-    # weights_dict = {}
 
     # Iterate links
     for link in links:
@@ -142,9 +135,6 @@ def get_graph_edges(links, contig_names_rev):
         if link[0] != link[1]:
             # Add edge to list of edges
             edge_list.append((contig_names_rev[link[0]], contig_names_rev[link[1]]))
-            # weights.append(link[2])
-            # weights_dict[(contig_names_rev[link[0]], contig_names_rev[link[1]])] = link[2]
-            # weights_dict[(contig_names_rev[link[1]], contig_names_rev[link[0]])] = link[2]
         else:
             self_looped_nodes.append(link[0])
 
@@ -162,7 +152,6 @@ def build_assembly_graph(assembly_graph_file):
         links,
         oriented_links,
         contig_names,
-        edge_depths,
         edges_lengths,
     ) = get_links(assembly_graph_file)
 
@@ -174,7 +163,6 @@ def build_assembly_graph(assembly_graph_file):
 
     # Add vertices
     assembly_graph.add_vertices(node_count)
-    # print("Total number of contigs available: " + str(len(list(assembly_graph.vs))))
 
     # Name vertices with contig identifiers
     for i in range(node_count):
@@ -186,18 +174,12 @@ def build_assembly_graph(assembly_graph_file):
         links=links, contig_names_rev=contig_names_rev
     )
 
-    # print(len(edge_list), edge_list)
 
     # Add edges to the graph
     assembly_graph.add_edges(edge_list)
-    # assembly_graph.es['weight'] = weights
-    # assembly_graph.es['label'] = weights
-    # assembly_graph.es['name'] = weights
 
     # Simplify the graph
     assembly_graph.simplify(multiple=True, loops=False, combine_edges=None)
-
-    # print("Total number of edges in the assembly graph: " + str(len(list(assembly_graph.es))))
 
     return (
         assembly_graph,
@@ -249,7 +231,6 @@ def remove_dead_ends(G_edge):
 
         if len(to_remove) > 0:
             G_edge.remove_nodes_from(to_remove)
-            print("remove_nodes_from", to_remove, has_dead_ends)
         else:
             has_dead_ends = False
 

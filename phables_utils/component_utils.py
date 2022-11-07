@@ -19,11 +19,7 @@ def get_components(
 
         if len(component) > 1:
 
-            # if 5627 in component:
-            #     print("5627 in component")
-
             has_phrog = False
-            has_long = False
 
             for contig in component:
 
@@ -38,7 +34,6 @@ def get_components(
                         or "portal protein head and packaging"
                         in contig_phrogs[contig_names[contig]]
                     ):
-                    # if "terminase large subunit head and packaging" in contig_phrogs[contig_names[contig]]:
                         has_phrog = True
 
             if has_phrog:

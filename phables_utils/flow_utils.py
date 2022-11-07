@@ -16,7 +16,6 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_
         if contig_name not in self_looped_nodes and len(graph_contigs[contig_name]) > minlength:
 
             bfs_successors = dict(enumerate(nx.bfs_successors(G_edge, node)))
-            print(node, "-->", bfs_successors)
             
             last_layer = list(bfs_successors.keys())[-1]
 
@@ -27,7 +26,6 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_
                 if item[:-1] not in self_looped_nodes:
 
                     item_successors = list(G_edge.successors(item))
-                    print(item, item_successors)
 
                     if len(item_successors) > 0 and list(G_edge.successors(item))[0] != node:
                         node_is_st = False
@@ -51,8 +49,6 @@ def solve_mfd(G, output):
 
     listOfGraphs = {}
     listOfGraphs[0] = G
-
-    print(listOfGraphs)
 
     outputfile = f"{output}/results_MFD.txt"
     recordfile = f"{output}/results_MFD_details.txt"
