@@ -59,24 +59,21 @@ You can see the following command-line options of `phables` using `python phable
 ```
 Usage: phables [OPTIONS]
 
-  PhaBles: Resolve bacteriophage genomes from phage bubbles in
-  metagenomic data.
+  Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic
+  samples.
 
 Options:
   -g, --graph PATH          path to the assembly graph file  [required]
-  -c, --contigs PATH        path to the contigs file  [required]
-  -p, --paths PATH          path to the contig paths file  [required]
-  -hm, --hmmout PATH        path to the contig .hmmout file  [required]
-  -ph, --phrogs PATH        path to the contig phrog annotations file
-                            [required]
-
-  -cov, --coverage PATH     path to the coverage file  [required]
-  -ml, --minlength INTEGER  minimum length of circular contigs to consider
+  -p, --paths PATH          path to the assembly path info file  [required]
+  -c, --coverage PATH       path to the coverage file  [required]
+  -b, --bampath PATH        path to the bam files  [required]
+  -hm, --hmmout PATH        path to the .hmmout file  [required]
+  -ph, --phrogs PATH        path to the phrog annotations file  [required]
+  -ml, --minlength INTEGER  minimum length of circular unitigs to consider
   -mcov, --mincov INTEGER   minimum coverage of paths to output
-  -cc, --compcount INTEGER  maximum contig count to consider a component
+  -cc, --compcount INTEGER  maximum unitig count to consider a component
   -mgf, --mgfrac FLOAT      length threshold to consider single copy marker
                             genes
-
   -as, --alignscore FLOAT   minimum alignment score (%) for phrog annotations
   -si, --seqidentity FLOAT  minimum sequence identity for phrog annotations
   -o, --output PATH         path to the output folder  [required]
@@ -86,5 +83,5 @@ Options:
 ### Example usage
 
 ```
-phables -g assembly_graph.gfa -c assembly.fasta -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -cov coverage.tsv -o /output/path/
+phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -c coverage.tsv -b bam_files/ -o /output/path/
 ```
