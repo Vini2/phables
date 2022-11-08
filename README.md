@@ -72,6 +72,7 @@ Options:
   -ml, --minlength INTEGER  minimum length of circular unitigs to consider
   -mcov, --mincov INTEGER   minimum coverage of paths to output
   -cc, --compcount INTEGER  maximum unitig count to consider a component
+  -mp, --maxpaths INTEGER   maximum number of paths to resolve for a component
   -mgf, --mgfrac FLOAT      length threshold to consider single copy marker
                             genes
   -as, --alignscore FLOAT   minimum alignment score (%) for phrog annotations
