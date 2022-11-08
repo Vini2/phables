@@ -257,7 +257,7 @@ def flowMultipleDecomposition(data,K):
     
     return data;
 
-def FD_Algorithm(data):
+def FD_Algorithm(data, max_paths):
         
     listOfEdges = data['edges']
     solutionMap = data['graph']
@@ -265,7 +265,7 @@ def FD_Algorithm(data):
     Kmin = data['minK']
     solutionWeights = 0
 
-    for i in range(1,len(listOfEdges)+1):
+    for i in range(1, max_paths+1):
         data = flowMultipleDecomposition(data,i)
         if data['message'] == "solved":
             solutionSet = data['solution']
@@ -282,7 +282,7 @@ def FD_Algorithm(data):
     
     return data, solution_paths    
 
-def SolveInstances(Graphs,outfile,recfile):
+def SolveInstances(Graphs, max_paths, outfile, recfile):
     
     fp = open(outfile,'w+')
     fc = open(recfile,'w+')
@@ -361,7 +361,7 @@ def SolveInstances(Graphs,outfile,recfile):
                 'runtime': 0,
         }
         
-        data, solution_paths = FD_Algorithm(data)
+        data, solution_paths = FD_Algorithm(data, max_paths)
     
     return solution_paths
 

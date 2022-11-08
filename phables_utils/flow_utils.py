@@ -42,7 +42,7 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_
     return source_sink_candidates
 
 
-def solve_mfd(G, output):
+def solve_mfd(G, max_paths, output):
     """
     Get paths by solving MFD
     """
@@ -53,6 +53,6 @@ def solve_mfd(G, output):
     outputfile = f"{output}/results_MFD.txt"
     recordfile = f"{output}/results_MFD_details.txt"
 
-    solution_paths = SolveInstances(listOfGraphs, outputfile, recordfile)
+    solution_paths = SolveInstances(listOfGraphs, max_paths, outputfile, recordfile)
 
     return solution_paths

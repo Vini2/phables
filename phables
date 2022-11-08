@@ -108,6 +108,14 @@ MAX_VAL = sys.maxsize
     type=int,
 )
 @click.option(
+    "--maxpaths",
+    "-mp",
+    default=10,
+    required=False,
+    help="maximum number of paths to resolve for a component",
+    type=int,
+)
+@click.option(
     "--mgfrac",
     "-mgf",
     default=0.2,
@@ -148,6 +156,7 @@ def main(
     minlength,
     mincov,
     compcount,
+    maxpaths,
     mgfrac,
     alignscore,
     seqidentity,
@@ -188,6 +197,7 @@ def main(
     logger.info(f"Minimum length of unitigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
     logger.info(f"Minimum unitig count to consider a component: {compcount}")
+    logger.info(f"Maximum number of paths to resolve for a component: {maxpaths}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
@@ -272,8 +282,8 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 6902 not in candidate_nodes:
-            continue
+        # if 6902 not in candidate_nodes:
+        #     continue
 
         logger.debug(f"my_count: {my_count}")
 
@@ -514,7 +524,7 @@ def main(
             # Create flow network and run MFD-ILP
             # ----------------------------------------------------------------------
             G_mfd = {'Nodes':len(candidate_nodes),'list of edges': network_edges, 'subpaths': subpaths}
-            solution_paths = flow_utils.solve_mfd(G_mfd, output)
+            solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
             logger.debug(f"Number of paths found: {len(solution_paths)}")
 
             # Iterate through solution paths
@@ -638,7 +648,7 @@ def main(
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
 
-                if genomic_path.length > largest_length/2:
+                if genomic_path.length > largest_length*0.8:
 
                     logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
                     logger.debug(f"{genomic_path.node_order}")
