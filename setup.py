@@ -45,5 +45,5 @@ setuptools.setup(
         "pysam",
         "gurobipy"
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.7",
 )
