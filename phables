@@ -8,6 +8,7 @@ import click
 import networkx as nx
 from igraph import *
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from phables_utils import (component_utils, edge_graph_utils, flow_utils, gene_utils)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
@@ -282,7 +283,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 6902 not in candidate_nodes:
+        # if 1332 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
@@ -418,9 +419,11 @@ def main(
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
 
+            
+
             # Identify source/sink vertex
             # ----------------------------------------------------------------------
-            source_sink_candidates = flow_utils.get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes, unitig_names_rev)
+            source_sink_candidates = flow_utils.get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes)
 
             source_sink = 0
 
@@ -429,8 +432,16 @@ def main(
 
             if len(source_sink_candidates) > 0:
 
-                # Pick the first st candidate
-                source_sink = source_sink_candidates[0]
+                # Identify source/sink vertex with minimum degree
+                min_degree = MAX_VAL
+                min_degree_vertex = -1
+
+                for vertex in source_sink_candidates:
+                    if G_edge.degree[vertex] < min_degree:
+                        min_degree = G_edge.degree[vertex]
+                        min_degree_vertex = vertex
+
+                source_sink = unitig_names_rev[min_degree_vertex[:-1]]
                 logger.debug(f"Identified source_sink from BFS: {source_sink}")
 
                 candidate_nodes.remove(source_sink)
@@ -445,6 +456,9 @@ def main(
             # Remove dead-ends (nodes with no incoming or no outgoing edges)
             # ----------------------------------------------------------------------
             G_edge = edge_graph_utils.remove_dead_ends(G_edge)
+
+            # nx.draw_networkx(G_edge)
+            # plt.show()
 
 
             # Create refined directed graph for flow network
@@ -494,6 +508,8 @@ def main(
             subpaths = {}
             subpath_count = 0
 
+            visited_edges = []
+
             for u,v,cov in G_edge.edges(data=True):
 
                 u_name = unitig_names_rev[u[:-1]]
@@ -508,24 +524,40 @@ def main(
                 juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
 
                 if v_index == 0:
-                    network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
-                    if juction_cov != 0:
-                        subpaths[subpath_count] = [u_index, len(candidate_nodes)]
-                        subpath_count += 1
-                else:
-                    network_edges.append((u_index, v_index, juction_cov, cov['weight']))
-                    if juction_cov != 0:
-                        subpaths[subpath_count] = [u_index, v_index]
-                        subpath_count += 1
+                    if (u_index, len(candidate_nodes)) not in visited_edges and (len(candidate_nodes), u_index) not in visited_edges:
+                        if juction_cov < cov['weight']:
+                            network_edges.append((u_index, len(candidate_nodes), juction_cov, cov['weight']))
+                        else:
+                            network_edges.append((u_index, len(candidate_nodes), 0, cov['weight']))
 
-                
+                        visited_edges.append((u_index, len(candidate_nodes)))
+
+                        if juction_cov != 0:
+                            subpaths[subpath_count] = [u_index, len(candidate_nodes)]
+                            subpath_count += 1
+                else:
+                    if (u_index, v_index) not in visited_edges and (v_index, u_index) not in visited_edges:
+                        if juction_cov < cov['weight']:
+                            network_edges.append((u_index, v_index, juction_cov, cov['weight']))
+                        else:
+                            network_edges.append((u_index, v_index, 0, cov['weight']))
+                        
+                        visited_edges.append((u_index, v_index))
+
+                        if juction_cov != 0:
+                            subpaths[subpath_count] = [u_index, v_index]
+                            subpath_count += 1
+
             logger.debug(f"edge_list_indices: {edge_list_indices}")
+
 
             # Create flow network and run MFD-ILP
             # ----------------------------------------------------------------------
-            G_mfd = {'Nodes':len(candidate_nodes),'list of edges': network_edges, 'subpaths': subpaths}
+            G_mfd = {'Nodes':len(list(G_edge.nodes)),'list of edges': network_edges, 'subpaths': subpaths}
+            logger.debug(f"G_mfd: {G_mfd}")
             solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
             logger.debug(f"Number of paths found: {len(solution_paths)}")
+
 
             # Iterate through solution paths
             # ----------------------------------------------------------------------
@@ -648,7 +680,7 @@ def main(
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
 
-                if genomic_path.length > largest_length*0.8:
+                if genomic_path.length > largest_length*0.9:
 
                     logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
                     logger.debug(f"{genomic_path.node_order}")

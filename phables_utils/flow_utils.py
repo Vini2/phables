@@ -2,7 +2,7 @@ import networkx as nx
 
 from .FD_Inexact import SolveInstances
 
-def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_names_rev):
+def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
     """
     Identify source/sink vertex
     """
@@ -37,7 +37,7 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes, contig_
                 node_is_st = False
 
             if node_is_st:
-                source_sink_candidates.append(contig_names_rev[contig_name])
+                source_sink_candidates.append(node)
 
     return source_sink_candidates
 
