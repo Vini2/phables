@@ -1,8 +1,12 @@
+import logging
+
 from Bio import SeqIO
 from Bio.Seq import Seq
 from igraph import *
 from collections import defaultdict
 
+# Create logger
+logger = logging.getLogger("phables 0.1")
 
 class BidirectionalError(Exception):
     """Must set a unique value in a BijectiveMap."""
@@ -213,7 +217,7 @@ def get_circular(paths):
     return circular
 
 
-def remove_dead_ends(G_edge):
+def remove_dead_ends(G_edge, self_looped_nodes):
     """
     Remove dead-ends from the component
     """
@@ -228,9 +232,9 @@ def remove_dead_ends(G_edge):
             if not (G_edge.in_degree(node) > 0 and G_edge.out_degree()(node)) > 0:
                 to_remove.append(node)
         
-
         if len(to_remove) > 0:
             G_edge.remove_nodes_from(to_remove)
+            logger.debug(f"Removing dead-ends: {to_remove}")
         else:
             has_dead_ends = False
 

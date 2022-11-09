@@ -103,7 +103,7 @@ MAX_VAL = sys.maxsize
 @click.option(
     "--compcount",
     "-cc",
-    default=50,
+    default=200,
     required=False,
     help="maximum unitig count to consider a component",
     type=int,
@@ -283,7 +283,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 1332 not in candidate_nodes:
+        # if 3028 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
@@ -363,6 +363,7 @@ def main(
                     )
                     my_genomic_paths.append(genome_path)
                     resolved_components.add(my_count)
+                    resolved_cyclic.add(my_count)
 
 
         if len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
@@ -455,10 +456,7 @@ def main(
 
             # Remove dead-ends (nodes with no incoming or no outgoing edges)
             # ----------------------------------------------------------------------
-            G_edge = edge_graph_utils.remove_dead_ends(G_edge)
-
-            # nx.draw_networkx(G_edge)
-            # plt.show()
+            G_edge = edge_graph_utils.remove_dead_ends(G_edge, self_looped_nodes)
 
 
             # Create refined directed graph for flow network
@@ -558,11 +556,11 @@ def main(
             solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
             logger.debug(f"Number of paths found: {len(solution_paths)}")
 
+            cycle_components.add(my_count)
 
             # Iterate through solution paths
             # ----------------------------------------------------------------------
             if len(solution_paths) != 0:
-                cycle_components.add(my_count)
 
                 phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
@@ -575,14 +573,21 @@ def main(
                     if coverage_val >= mincov:
 
                         # Create graph for path
-                        G_path = nx.Graph()
+                        G_path = nx.DiGraph()
 
                         # Fill graph with data
                         G_path.add_edges_from(solution_paths[solution_path]["path"])
+                        logger.debug(f"solution path: {solution_paths[solution_path]['path']}")
 
-                        # Get all simple paths from node 0 to last node
-                        candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
-                        logger.debug(f"candidate_paths: {candidate_paths}")
+                        # nx.draw_networkx(G_path)
+                        # plt.show()
+
+                        if 0 in list(G_path.nodes):
+
+                            # Get all simple paths from node 0 to last node
+                            candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
+
+                        logger.debug(f"candidate_paths: {candidate_paths[0]}")
 
                         # Get mapped unitigs in order from the flow network
                         path_order = []
@@ -615,6 +620,7 @@ def main(
                             (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
                         )
                         my_genomic_paths.append(genome_path)
+                        logger.debug(f"total_length: {total_length}")
 
                         cycle_number += 1
 
@@ -754,7 +760,7 @@ def main(
     logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
     logger.info(f"Circular unitigs identified: {len(circular_unitigs)}")
     logger.info(f"Total number of cyclic components found including circular unitigs: {len(cycle_components) + len(circular_unitigs)}")
-    logger.info(f"Total number of components resolved: {len(resolved_components)}")
+    logger.info(f"Total number of components resolved: {len(circular_unitigs)+len(resolved_cyclic)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
