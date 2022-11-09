@@ -1,6 +1,7 @@
 name: phables
 channels:
   - conda-forge
+  - anaconda
   - bioconda
   - gurobi
 dependencies:
@@ -11,6 +12,7 @@ dependencies:
   - networkx==2.8.6
   - scipy
   - numpy
-  - gurobi
+  - gurobipy
+  - more-itertools
   - tqdm
   - click
