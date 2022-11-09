@@ -43,7 +43,7 @@ setuptools.setup(
         "tqdm",
         "click",
         "pysam",
-        "gurobi"
+        "gurobipy"
     ],
     python_requires=">=3.8",
 )
