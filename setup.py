@@ -37,7 +37,7 @@ setuptools.setup(
     install_requires=[
         "biopython",
         "python-igraph",
-        "networkx==2.8.6",
+        "networkx",
         "scipy",
         "numpy",
         "tqdm",
