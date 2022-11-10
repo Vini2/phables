@@ -100,3 +100,7 @@ Options:
 ```
 phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -c coverage.tsv -b bam_files/ -o /output/path/
 ```
+
+## Issues
+
+`phables` is still under testing. Please report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
