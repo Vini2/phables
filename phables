@@ -9,10 +9,14 @@ import networkx as nx
 from igraph import *
 from tqdm import tqdm
 
-from phables_utils import (component_utils, edge_graph_utils, flow_utils, gene_utils)
+from phables_utils import (component_utils, edge_graph_utils, flow_utils,
+                           gene_utils)
+from phables_utils.coverage_utils import (get_junction_pe_coverage,
+                                          get_unitig_coverage)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.coverage_utils import get_unitig_coverage, get_junction_pe_coverage
-from phables_utils.output_utils import write_unitigs, write_component_info, write_res_genome_info, write_path, write_path_fasta
+from phables_utils.output_utils import (write_component_info, write_path,
+                                        write_path_fasta,
+                                        write_res_genome_info, write_unitigs)
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
@@ -582,6 +586,28 @@ def main(
                         # plt.show()
 
                         if 0 in list(G_path.nodes):
+
+                        #     start_node = -1
+                        #     end_node = -1
+
+                        #     for vertex in list(G_path.nodes):
+
+                        #         if G_path.in_degree(vertex) == 1 and G_path.out_degree(vertex) == 1:
+                        #             predecessor = list(G_path.predecessors(vertex))[0]
+
+                        #             if G_path.in_degree(predecessor) == 1 and G_path.out_degree(predecessor) == 1:
+                        #                 end_node = predecessor
+                        #                 start_node = vertex
+                        #                 break
+
+                        #     logger.debug(f"start_node: {start_node}, end_node: {end_node}")
+
+                        #     G_path.remove_edges_from([(end_node, start_node)])
+
+                        #     # Get all simple paths from start_node to end_node
+                        #     candidate_paths = list(nx.all_simple_paths(G_path, start_node, end_node))
+
+                        # else:
 
                             # Get all simple paths from node 0 to last node
                             candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))

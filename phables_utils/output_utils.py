@@ -12,7 +12,7 @@ def write_unitigs(nodes, unitig_names, graph_unitigs, filename, output):
     with open(f"{output}/{filename}.fasta", "w+") as myfile:
 
         for node in nodes:
-            unitig_name= unitig_names[node]
+            unitig_name = unitig_names[node]
             edge_seq = str(graph_unitigs[unitig_name])
             myfile.write(f">{unitig_name}\n")
 

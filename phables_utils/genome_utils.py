@@ -9,6 +9,7 @@ class GenomePath:
         self.node_id_order = node_id_order
         self.gc = gc
 
+
 # Class for genome component
 class GenomeComponent:
     def __init__(
@@ -32,7 +33,7 @@ class GenomeComponent:
         max_cov,
         min_cov,
         min_max_cov_ratio,
-        frac_unitigs
+        frac_unitigs,
     ):
         self.id = id
         self.n_nodes = n_nodes

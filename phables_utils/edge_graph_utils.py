@@ -1,12 +1,13 @@
 import logging
+from collections import defaultdict
 
 from Bio import SeqIO
 from Bio.Seq import Seq
 from igraph import *
-from collections import defaultdict
 
 # Create logger
 logger = logging.getLogger("phables 0.1")
+
 
 class BidirectionalError(Exception):
     """Must set a unique value in a BijectiveMap."""
@@ -93,17 +94,17 @@ def get_links(assembly_graph_file):
 
                 if link1 != link2:
                     if link1_orientation == "+" and link2_orientation == "+":
-                        oriented_links[link1][link2].append(("+","+"))
-                        oriented_links[link2][link1].append(("-","-"))
+                        oriented_links[link1][link2].append(("+", "+"))
+                        oriented_links[link2][link1].append(("-", "-"))
                     elif link1_orientation == "-" and link2_orientation == "-":
-                        oriented_links[link1][link2].append(("-","-"))
-                        oriented_links[link2][link1].append(("+","+"))
+                        oriented_links[link1][link2].append(("-", "-"))
+                        oriented_links[link2][link1].append(("+", "+"))
                     elif link1_orientation == "+" and link2_orientation == "-":
-                        oriented_links[link1][link2].append(("+","-"))
-                        oriented_links[link2][link1].append(("+","-"))
+                        oriented_links[link1][link2].append(("+", "-"))
+                        oriented_links[link2][link1].append(("+", "-"))
                     elif link1_orientation == "-" and link2_orientation == "+":
-                        oriented_links[link1][link2].append(("-","+"))
-                        oriented_links[link2][link1].append(("-","+"))
+                        oriented_links[link1][link2].append(("-", "+"))
+                        oriented_links[link2][link1].append(("-", "+"))
 
             elif line.startswith("S"):
 
@@ -178,7 +179,6 @@ def build_assembly_graph(assembly_graph_file):
         links=links, contig_names_rev=contig_names_rev
     )
 
-
     # Add edges to the graph
     assembly_graph.add_edges(edge_list)
 
@@ -200,7 +200,7 @@ def get_circular(paths):
     """
     Get circular unitigs
     """
-    
+
     circular = {}
 
     with open(paths, "r") as myfile:
@@ -231,7 +231,7 @@ def remove_dead_ends(G_edge, self_looped_nodes):
         for node in list(G_edge.nodes):
             if not (G_edge.in_degree(node) > 0 and G_edge.out_degree()(node)) > 0:
                 to_remove.append(node)
-        
+
         if len(to_remove) > 0:
             G_edge.remove_nodes_from(to_remove)
             logger.debug(f"Removing dead-ends: {to_remove}")

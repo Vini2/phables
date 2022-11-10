@@ -1,8 +1,10 @@
-from collections import defaultdict
+import glob
 import os
 import pickle
+from collections import defaultdict
+
 import pysam
-import glob
+
 
 def get_unitig_coverage(coverage):
     """
@@ -32,7 +34,7 @@ def read_pair_generator(bam, region_string=None):
     Reads are added to read_dict until a pair is found.
     """
     read_dict = defaultdict(lambda: [None, None])
-    
+
     for read in bam.fetch(region=region_string):
         if read.is_secondary or read.is_supplementary:
             continue
@@ -65,11 +67,11 @@ def get_junction_pe_coverage(bam_path, output):
 
     else:
 
-        bam_files = glob.glob(bam_path+"/*.bam")
+        bam_files = glob.glob(bam_path + "/*.bam")
 
         for bam_file in bam_files:
 
-            bam = pysam.AlignmentFile(bam_file, 'rb')
+            bam = pysam.AlignmentFile(bam_file, "rb")
 
             read_pairs = read_pair_generator(bam)
 
@@ -95,8 +97,8 @@ def get_graph_spanning_reads(gaf_path, output):
             junction_reads = pickle.load(handle)
 
     else:
-        
-        gaf_files = glob.glob(gaf_path+"/*.gaf")
+
+        gaf_files = glob.glob(gaf_path + "/*.gaf")
 
         for gaf_file in gaf_files:
 

@@ -44,7 +44,7 @@ setuptools.setup(
         "click",
         "pysam",
         "more-itertools",
-        "gurobipy"
+        "gurobipy",
     ],
     python_requires=">=3.7",
 )

@@ -2,6 +2,7 @@ import networkx as nx
 
 from .FD_Inexact import SolveInstances
 
+
 def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
     """
     Identify source/sink vertex
@@ -10,13 +11,16 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
     source_sink_candidates = []
 
     for node in list(G_edge.nodes):
-    
+
         contig_name = node[:-1]
 
-        if contig_name not in self_looped_nodes and len(graph_contigs[contig_name]) > minlength:
+        if (
+            contig_name not in self_looped_nodes
+            and len(graph_contigs[contig_name]) > minlength
+        ):
 
             bfs_successors = dict(enumerate(nx.bfs_successors(G_edge, node)))
-            
+
             last_layer = list(bfs_successors.keys())[-1]
 
             node_is_st = True
@@ -27,7 +31,10 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
 
                     item_successors = list(G_edge.successors(item))
 
-                    if len(item_successors) > 0 and list(G_edge.successors(item))[0] != node:
+                    if (
+                        len(item_successors) > 0
+                        and list(G_edge.successors(item))[0] != node
+                    ):
                         node_is_st = False
                         break
                     if len(item_successors) == 0:

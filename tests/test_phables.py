@@ -46,7 +46,7 @@ def exec_command(cmnd, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
 
 def test_phables(tmp_dir):
     """test phables"""
-    dir_name = TEST_ROOTDIR / "data" 
+    dir_name = TEST_ROOTDIR / "data"
     graph = dir_name / "assembly_graph.gfa"
     paths = dir_name / "assembly_info.txt"
     coverage = dir_name / "edge_coverages.tsv"
@@ -55,4 +55,3 @@ def test_phables(tmp_dir):
 
     cmd = f"{EXEC_ROOTDIR}/phables -g {graph} -p {paths} -b {dir_name} -hm {smg} -ph {phrogs} -c {coverage} -o {tmp_dir}"
     exec_command(cmd)
-
