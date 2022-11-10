@@ -2,15 +2,15 @@
   <img src="phables_logo.png" width="700" title="phables logo" alt="phables logo">
 </p>
 
-# Phables: Phage bubbles resolve bacteriophage genomes from metagenomic data
+# Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
 
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 ![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-`phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models cyclic phage-like components in the metagenomic assembly as flow networks and resolves genomic paths corresponding to flow paths determined. 
+`phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models cyclic phage-like components in the metagenomic assembly as flow networks and resolves genomic paths corresponding to flow paths determined. `phables` uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
-The figure below depicts the workflow of Phables.
+The figure below depicts the workflow of `phables`.
 
 ![](Phables_workflow.png)
 
@@ -47,6 +47,16 @@ You can run the following command to install phables using `pip`. Make sure you 
 ```
 pip install .
 ```
+
+### Setting up Gurobi
+
+The MFD implementation uses the linear programming solver [Gurobi](https://www.gurobi.com/). The `phables` environment already comes with Gurobi installed. You have to activate the (academic) license and add the key using the following command.
+
+```
+grbgetkey <KEY>
+```
+
+Please refer to further instructions at [https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
 ### Test the setup
 
