@@ -4,6 +4,10 @@
 
 # Phables: Phage bubbles resolve bacteriophage genomes from metagenomic data
 
+[![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
+![GitHub](https://img.shields.io/github/license/Vini2/phables)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 `phables` is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models cyclic phage-like components in the metagenomic assembly as flow networks and resolves genomic paths corresponding to flow paths determined. 
 
 The figure below depicts the workflow of Phables.
