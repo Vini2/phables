@@ -12,6 +12,7 @@ dependencies:
   - networkx==2.8.6
   - scipy
   - numpy
+  - pandas
   - gurobipy
   - more-itertools
   - tqdm

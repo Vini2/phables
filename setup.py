@@ -40,6 +40,7 @@ setuptools.setup(
         "networkx",
         "scipy",
         "numpy",
+        "pandas",
         "tqdm",
         "click",
         "pysam",
