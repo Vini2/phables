@@ -88,7 +88,7 @@ python gfa2fasta.py --graph assembly_graph.gfa --assembler flye --output <output
 
 ### Step 3: Map reads to unitig sequences and get BAM files
 
-Use Minimap2 to map reads to unitigs and Samtools to index BAM files.
+Use Minimap2 to map reads to unitigs in the `edges.fasta` file from step 2 and Samtools to index the BAM files.
 
 ```
 minimap2 -t 64 -N 5 -ax sr edges.fasta sample1_R1.fastq.gz sample1_R2.fastq.gz | | samtools view -F 3584 -b --threads 64 > bam_files/sample1.bam
@@ -97,7 +97,7 @@ samtools index bam_files/sample1.bam bam_files/sample1.bam.bai
 
 ### Step 4: Run CoverM to get coverage of unitig sequences
 
-Use [CoverM](https://github.com/wwood/CoverM) to obtain the coverage of unitigs in each sample.
+Use [CoverM](https://github.com/wwood/CoverM) to obtain the coverage of unitigs in the `edges.fasta` in each sample.
 
 ```
 coverm contig -m rpkm -1 sample1_R1.fastq.gz -2 sample1_R2.fastq.gz -r edges.fasta -t 64 --output-file coverage_rpkm/sample1_rpkm.tsv
