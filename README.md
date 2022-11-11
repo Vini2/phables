@@ -91,7 +91,7 @@ python gfa2fasta.py --graph assembly_graph.gfa --assembler flye --output <output
 Use Minimap2 to map reads to unitigs in the `edges.fasta` file from step 2 and Samtools to index the BAM files.
 
 ```
-minimap2 -t 64 -N 5 -ax sr edges.fasta sample1_R1.fastq.gz sample1_R2.fastq.gz | | samtools view -F 3584 -b --threads 64 > bam_files/sample1.bam
+minimap2 -t 64 -N 5 -ax sr edges.fasta sample1_R1.fastq.gz sample1_R2.fastq.gz | samtools view -F 3584 -b --threads 64 > bam_files/sample1.bam
 samtools index bam_files/sample1.bam bam_files/sample1.bam.bai
 ```
 
@@ -111,14 +111,14 @@ python combine_cov.py --covpath coverage_rpkm --output <output_path>
 
 ### Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
 
-Scan sequences for single-copy marker genes using FragGeneScan and HMMER. Then scan the sequences for [PHROGs](https://phrogs.lmge.uca.fr/READMORE.php).
+Scan sequences for single-copy marker genes using [FragGeneScan](https://omics.informatics.indiana.edu/FragGeneScan/) and [HMMER](http://hmmer.org/). Then scan the sequences for [PHROGs](https://phrogs.lmge.uca.fr/READMORE.php).
 
 ```
 # SMG
 run_FragGeneScan.pl -genome=edges.fasta -out=edges.fasta.frag -complete=0 -train=complete -thread=8 1>edges.fasta.frag.out 2>edges.fasta.frag.err
 hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 marker.hmm edges.fasta.frag.faa 1>edges.fasta.hmmout.out 2> edges.fasta.hmmout.err
 
-#PHROGs
+# PHROGs
 mmseqs createdb assembly.fasta target_seq
 mmseqs search phrogs_profile_db target_seq results_mmseqs ./tmp -s 7
 mmseqs createtsv phrogs_profile_db target_seq results_mmseqs phrog_annot.tsv
