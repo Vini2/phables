@@ -17,3 +17,5 @@ dependencies:
   - more-itertools
   - tqdm
   - click
+  - minimap2
+  - samtools
