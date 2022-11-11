@@ -55,3 +55,18 @@ def test_phables(tmp_dir):
 
     cmd = f"{EXEC_ROOTDIR}/phables -g {graph} -p {paths} -b {dir_name} -hm {smg} -ph {phrogs} -c {coverage} -o {tmp_dir}"
     exec_command(cmd)
+
+
+def test_combine_cov(tmp_dir):
+    """test phables"""
+    dir_name = TEST_ROOTDIR / "script_data"
+    cmd = f"python {EXEC_ROOTDIR}/phables_utils/support/combine_cov.py --covpath {dir_name} --output {tmp_dir}"
+    exec_command(cmd)
+
+
+def test_gfa2fasta(tmp_dir):
+    """test phables"""
+    dir_name = TEST_ROOTDIR / "data"
+    graph = dir_name / "assembly_graph.gfa"
+    cmd = f"python {EXEC_ROOTDIR}/phables_utils/support/gfa2fasta.py --graph {graph} --assembler flye --output {tmp_dir}"
+    exec_command(cmd)
