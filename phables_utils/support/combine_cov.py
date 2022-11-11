@@ -10,6 +10,13 @@ import argparse
 import os
 import subprocess
 
+__author__ = "Vijini Mallawaarachchi"
+__copyright__ = "Copyright 2022, Phables Project"
+__license__ = "MIT"
+__type__ = "Support Script"
+__maintainer__ = "Vijini Mallawaarachchi"
+__email__ = "vijini.mallawaarachchi@flinders.edu.au"
+
 def main():
 
 
