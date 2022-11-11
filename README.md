@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="phables_logo.png" width="700" title="phables logo" alt="phables logo">
+  <img src="phables_logo.png" width="600" title="phables logo" alt="phables logo">
 </p>
 
 # Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
@@ -13,8 +13,6 @@ Phables is a tool developed to resolve bacteriophage genomes using phage bubbles
 The figure below depicts the workflow of Phables.
 
 ![](Phables_workflow.png)
-
-Phables requires the assembly output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). 
 
 ## Setting up Phables
 
@@ -72,13 +70,17 @@ Phables requires the sequencing reads from viral metagenomic samples to be run t
 
 ### Step 1: Run read samples through Hecatomb
 
-
+Phables requires the assembly output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). First, run your sequencing read samples through Hecatomb using the following command.
 
 ```
 hecatomb run --reads <reads_folder>
 ```
 
+You can find the assembly output in `hecatomb.out/processing/assembly/CONTIG_DICTIONARY/FLYE/`. Phables will be using the `assembly_graph.gfa` and `assembly_info.txt` files.
+
 ### Step 2: Obtain unitig sequences from assembly graph
+
+The `assembly_graph.gfa` file contains the unitig sequences which should be extracted. For this, you can use the `gfa2fasta.py` script found in `phables_utils/support/` as follows. This script will output the unitig sequences into a FASTA file named `edges.fasta`.
 
 ```
 python gfa2fasta.py --graph assembly_graph.gfa --assembler flye --output <output_folder>
@@ -175,7 +177,7 @@ phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph ph
 The output from Phables will be as follows.
 
 * `resolved_paths.fasta` containing the resolved genomes
-* `resolved_phages` folder containing the resolved genomes in individual fasta files
+* `resolved_phages` folder containing the resolved genomes in individual FASTA files
 * `resolved_genome_info.txt` containing the path name, coverage, length, GC content and unitig order of the resolved genomes
 * `resolved_edges.fasta` containing the unitigs that make up the resolved genomes
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
