@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 packages = setuptools.find_packages()
-package_data = {"phables_utils": ["phables_utils/*"]}
+package_data = {"phables_utils": ["phables_utils/*", "phables_utils/support/*"]}
 
 data_files = [(".", ["LICENSE", "README.md"])]
 
