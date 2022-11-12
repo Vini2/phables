@@ -2,17 +2,38 @@
   <img src="phables_logo.png" width="600" title="phables logo" alt="phables logo">
 </p>
 
-# Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
+Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
+===============
 
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 ![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in metagenomic data. It models cyclic phage-like components in the metagenomic assembly as flow networks and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
-
-The figure below depicts the workflow of Phables.
+Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
 ![](Phables_workflow.png)
+
+Table of Contents
+-----------
+- [Setting up Phables](#setting-up-phables)
+  - [Downloading Phables](#downloading-phables)
+  - [Installing Phables](#installing-phables)
+  - [Setting up Gurobi](#setting-up-gurobi)
+  - [Test the setup](#test-the-setup)
+- [Pre-processing](#pre-processing)
+  - [Step 1: Run read samples through Hecatomb](#step-1-run-read-samples-through-hecatomb)
+  - [Step 2: Obtain unitig sequences from assembly graph](#step-2-obtain-unitig-sequences-from-assembly-graph)
+  - [Step 3: Map reads to unitig sequences and get BAM files](#step-3-map-reads-to-unitig-sequences-and-get-bam-files)
+  - [Step 4: Run CoverM to get coverage of unitig sequences](#step-4-run-coverm-to-get-coverage-of-unitig-sequences)
+  - [Step 5: Scan unitig sequences for single-copy marker genes and PHROGs](#step-5-scan-unitig-sequences-for-single-copy-marker-genes-and-phrogs)
+- [Phables Usage](#phables-usage)
+  - [Phables options](#phables-options)
+  - [Input](#input)
+  - [Example usage](#example-usage)
+  - [Output](#output)
+  - [Snakemake pipeline](#snakemake-pipeline)
+- [Reporting Issues](#reporting-issues)
+  
 
 ## Setting up Phables
 
@@ -30,17 +51,16 @@ Now go into the `phables` folder using the command
 cd phables/
 ```
 
-### Using `conda`
+### Installing Phables
 
-Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run Phables.
+We recommend that you use [`conda`](https://docs.conda.io/en/latest/) to install and run. Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run Phables.
 
 ```
 conda env create -f environment.yml
 conda activate phables
 ```
 
-### Using `pip`
-You can run the following command to install phables using `pip`. Make sure you are in the `phables` folder.
+If you prefer to use `pip` instead of `conda`, you can run the following command to install Phables using `pip`. Make sure you are in the `phables` folder.
 
 ```
 pip install .
@@ -48,7 +68,7 @@ pip install .
 
 ### Setting up Gurobi
 
-The MFD implementation uses the linear programming solver [Gurobi](https://www.gurobi.com/). The `phables` environment already comes with Gurobi installed. To handle large models without any model size limitations, you have to activate the (academic) license and add the key using the following command.
+The MFD implementation uses the linear programming solver [Gurobi](https://www.gurobi.com/). The `phables` conda environment and pip setup already include Gurobi. To handle large models without any model size limitations, you have to activate the (academic) license and add the key using the following command.
 
 ```
 grbgetkey <KEY>
@@ -181,10 +201,9 @@ The output from Phables will be as follows.
 * `resolved_edges.fasta` containing the unitigs that make up the resolved genomes
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
 
-## To Do
+### Snakemake pipeline
+To Do
 
-Snakemake pipeline
-
-## Issues
+## Reporting Issues
 
 Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
