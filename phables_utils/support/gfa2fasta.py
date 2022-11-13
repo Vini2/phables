@@ -34,7 +34,7 @@ __email__ = "vijini.mallawaarachchi@anu.edu.au"
 
 
 def main():
-    
+
     # Setup argument parser
     # -----------------------
 
@@ -48,9 +48,15 @@ def main():
         default="flye",
         help="type of the assembler (Flye or Miniasm)",
     )
-    ap.add_argument("--output", required=True, type=str, help="path to the output folder")
     ap.add_argument(
-        "--prefix", required=False, type=str, default="", help="prefix for the output file"
+        "--output", required=True, type=str, help="path to the output folder"
+    )
+    ap.add_argument(
+        "--prefix",
+        required=False,
+        type=str,
+        default="",
+        help="prefix for the output file",
     )
 
     args = vars(ap.parse_args())
@@ -72,7 +78,6 @@ def main():
         assembler_name = "Flye"
     elif assembler.lower() == "miniasm":
         assembler_name = "Miniasm"
-
 
     # Check if output folder exists
     # ---------------------------------------------------
@@ -101,7 +106,6 @@ def main():
         print("\nPlease enter a valid string for prefix")
         print("Exiting gfa2fasta.py...\n")
         sys.exit(1)
-
 
     # Get the sequences corresponding to edges of the graph.
     # ---------------------------------------------------
@@ -145,7 +149,6 @@ def main():
         "sequences can be found at",
         output_handle.name,
     )
-
 
     # Exit program
     # --------------

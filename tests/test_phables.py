@@ -6,10 +6,9 @@ import pytest
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "0.1"
+__type__ = "Test Script"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "vijini.mallawaarachchi@flinders.edu.au"
-__status__ = "Development"
 
 
 TEST_ROOTDIR = Path(__file__).parent
