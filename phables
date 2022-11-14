@@ -286,8 +286,8 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 6902 not in candidate_nodes:
-        #     continue
+        if 4372 not in candidate_nodes:
+            continue
 
         logger.debug(f"my_count: {my_count}")
 
@@ -329,44 +329,37 @@ def main(
                     unitig1_name = unitig_names[unitig1]
                     unitig2_name = unitig_names[unitig2]
 
-                    unitig1_orientation = ""
-                    unitig2_orientation = ""
+                    unitig1_len = len(str(graph_unitigs[unitig1_name]))
+                    unitig2_len = len(str(graph_unitigs[unitig2_name]))
 
-                    resolved_edges.add(unitig1)
-                    resolved_edges.add(unitig2)
+                    unitig_to_consider = -1
+                    unitig_name_to_consider = ""
 
-                    for node in oriented_links[unitig1_name]:
-                        for edge in oriented_links[unitig1_name][node]:
-                            unitig1_orientation = edge[0]
-                            unitig2_orientation = edge[1]
-                            break
+                    if unitig1_len > unitig2_len and unitig1_len > minlength:
+                        unitig_to_consider = unitig1
+                        unitig_name_to_consider = unitig1_name
+                    elif unitig2_len > unitig1_len and unitig2_len > minlength:
+                        unitig_to_consider = unitig2
+                        unitig_name_to_consider = unitig2_name
 
-                    path_string = ""
+                    if unitig_to_consider != -1:
+                        
+                        cycle_number = 1
+                        resolved_edges.add(unitig_to_consider)
+                        path_string = str(graph_unitigs[unitig_name_to_consider])
 
-                    if unitig1_orientation == "-":
-                        path_string += str(graph_unitigs[unitig1_name].reverse_complement())
-                    else:
-                        path_string += str(graph_unitigs[unitig1_name])
-
-                    if unitig2_orientation == "-":
-                        path_string += str(graph_unitigs[unitig2_name].reverse_complement())
-                    else:
-                        path_string += str(graph_unitigs[unitig2_name])
-
-                    cycle_number = 1
-
-                    genome_path = GenomePath(
-                        f"phage_comp_{my_count}_cycle_{cycle_number}",
-                        [f"{unitig1_name}{unitig1_orientation}", f"{unitig2_name}{unitig2_orientation}"],
-                        [unitig1_name, unitig2_name],
-                        path_string,
-                        int(min(unitig_coverages[unitig1_name], unitig_coverages[unitig2_name])),
-                        len(path_string),
-                        (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
-                    )
-                    my_genomic_paths.append(genome_path)
-                    resolved_components.add(my_count)
-                    resolved_cyclic.add(my_count)
+                        genome_path = GenomePath(
+                            f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            [f"{unitig_name_to_consider}"],
+                            [unitig_name_to_consider],
+                            path_string,
+                            int(unitig_coverages[unitig_name_to_consider]),
+                            len(path_string),
+                            (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
+                        )
+                        my_genomic_paths.append(genome_path)
+                        resolved_components.add(my_count)
+                        resolved_cyclic.add(my_count)
 
 
         if len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
