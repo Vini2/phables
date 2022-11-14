@@ -131,14 +131,14 @@ python combine_cov.py --covpath coverage_rpkm --output <output_path>
 
 ### Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
 
-Scan sequences for single-copy marker genes using [FragGeneScan](https://omics.informatics.indiana.edu/FragGeneScan/) and [HMMER](http://hmmer.org/). The  `marker.hmm` file for single-copy marker genes can be found [here](https://github.com/metagentools/MetaCoAG/tree/develop/metacoag_utils/auxiliary). Then scan the sequences for [PHROGs](https://phrogs.lmge.uca.fr). The PHROGs profile database for MMseqs can be downloaded from [here](https://phrogs.lmge.uca.fr/READMORE.php).
+Scan unitigs for single-copy marker genes using [FragGeneScan](https://omics.informatics.indiana.edu/FragGeneScan/) and [HMMER](http://hmmer.org/). The  `marker.hmm` file for single-copy marker genes can be found [here](https://github.com/metagentools/MetaCoAG/tree/develop/metacoag_utils/auxiliary). Then scan the sequences for [PHROGs](https://phrogs.lmge.uca.fr). The PHROGs profile database for MMseqs can be downloaded from [here](https://phrogs.lmge.uca.fr/READMORE.php).
 ```
 # SMG
 run_FragGeneScan.pl -genome=edges.fasta -out=edges.fasta.frag -complete=0 -train=complete -thread=8 1>edges.fasta.frag.out 2>edges.fasta.frag.err
 hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 marker.hmm edges.fasta.frag.faa 1>edges.fasta.hmmout.out 2> edges.fasta.hmmout.err
 
 # PHROGs
-mmseqs createdb assembly.fasta target_seq
+mmseqs createdb edges.fasta target_seq
 mmseqs search phrogs_profile_db target_seq results_mmseqs ./tmp -s 7
 mmseqs createtsv phrogs_profile_db target_seq results_mmseqs phrog_annot.tsv
 ```
