@@ -19,13 +19,16 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
             and len(graph_contigs[contig_name]) > minlength
         ):
 
-            bfs_successors = dict(enumerate(nx.bfs_successors(G_edge, node)))
+            # Get BFS layers
+            bfs_layers = dict(enumerate(nx.bfs_layers(G_edge, node)))
 
-            last_layer = list(bfs_successors.keys())[-1]
+            # Get last later
+            last_layer = list(bfs_layers.keys())[-1]
 
             node_is_st = True
 
-            for item in bfs_successors[last_layer][1]:
+            # Check if successors of those in last_layer is same as the node
+            for item in bfs_layers[last_layer]:
 
                 if item[:-1] not in self_looped_nodes:
 
@@ -40,7 +43,7 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
                     if len(item_successors) == 0:
                         node_is_st = False
 
-            if len(bfs_successors[last_layer][1]) == 0:
+            if len(bfs_layers[last_layer]) == 0:
                 node_is_st = False
 
             if node_is_st:

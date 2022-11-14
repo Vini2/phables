@@ -286,7 +286,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 3028 not in candidate_nodes:
+        # if 6902 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
@@ -427,6 +427,7 @@ def main(
 
             # Identify source/sink vertex
             # ----------------------------------------------------------------------
+
             source_sink_candidates = flow_utils.get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes)
 
             source_sink = 0
@@ -436,16 +437,16 @@ def main(
 
             if len(source_sink_candidates) > 0:
 
-                # Identify source/sink vertex with minimum degree
-                min_degree = MAX_VAL
-                min_degree_vertex = -1
+                # Identify the longest source/sink vertex 
+                max_length = -1
+                max_length_vertex = -1
 
                 for vertex in source_sink_candidates:
-                    if G_edge.degree[vertex] < min_degree:
-                        min_degree = G_edge.degree[vertex]
-                        min_degree_vertex = vertex
+                    if len(graph_unitigs[vertex[:-1]]) > max_length:
+                        max_length = len(graph_unitigs[vertex[:-1]])
+                        max_length_vertex = vertex
 
-                source_sink = unitig_names_rev[min_degree_vertex[:-1]]
+                source_sink = unitig_names_rev[max_length_vertex[:-1]]
                 logger.debug(f"Identified source_sink from BFS: {source_sink}")
 
                 candidate_nodes.remove(source_sink)
