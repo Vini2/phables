@@ -88,6 +88,14 @@ phables --help
 
 Phables requires the sequencing reads from viral metagenomic samples to be run through [Hecatomb](https://hecatomb.readthedocs.io/en/latest/) and be preprocessed. The following steps explain the preprocessing steps required to be carried out before running Phables.
 
+Let's assume that the paired-end read files end as `<sample_name>_R1.fastq.gz` and `<sample_name>_R2.fastq.gz`. We can save the sample names to a file using the following command.
+
+```
+ls <reads_folder> | grep "R1.fastq.gz" | sed -e 's/_R1.fastq.gz//g'  > sample-names.txt
+```
+
+Now all the sample names will be saved to the file named `sample-names.txt`. We will use this file in the following steps.
+
 ### Step 1: Run read samples through Hecatomb
 
 Phables requires the assembly output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). First, run your sequencing read samples through Hecatomb using the following command.
@@ -108,26 +116,34 @@ python gfa2fasta.py --graph assembly_graph.gfa --assembler flye --output <output
 
 ### Step 3: Map reads to unitig sequences and get BAM files
 
-Use Minimap2 to map reads to unitigs in the `edges.fasta` file from step 2 and Samtools to index the BAM files.
+Use Minimap2 to map the reads of all the samples in `sample-names.txt` to unitigs in the `edges.fasta` file from step 2 and Samtools to index the BAM files.
 
 ```
-minimap2 -t 64 -N 5 -ax sr edges.fasta sample1_R1.fastq.gz sample1_R2.fastq.gz | samtools view -F 3584 -b --threads 64 > bam_files/sample1.bam
-samtools index bam_files/sample1.bam bam_files/sample1.bam.bai
+mkdir bam_files
+
+for f in `cat sample-names.txt`; do
+  minimap2 -t 64 -N 5 -ax sr edges.fasta reads/"$f"_R1.fastq.gz reads/"$f"_R2.fastq.gz | samtools view -F 3584 -b --threads 64 > bam_files/sample1.bam
+  samtools index bam_files/sample1.bam bam_files/sample1.bam.bai
 ```
 
 ### Step 4: Run CoverM to get coverage of unitig sequences
 
-Use [CoverM](https://github.com/wwood/CoverM) to obtain the coverage of unitigs in the `edges.fasta` in each sample.
+Use [CoverM](https://github.com/wwood/CoverM) to obtain the coverage of unitigs in the `edges.fasta` in each sample found in `sample-names.txt`.
 
 ```
-coverm contig -m rpkm -1 sample1_R1.fastq.gz -2 sample1_R2.fastq.gz -r edges.fasta -t 64 --output-file coverage_rpkm/sample1_rpkm.tsv
+mkdir coverage_rpkm
+
+for f in `cat sample-names.txt`; do
+  coverm contig -m rpkm -1 reads/"$f"_R1.fastq.gz -2 reads/"$f"_R2.fastq.gz -r edges.fasta -t 64 --output-file coverage_rpkm/"$f"_rpkm.tsv
 ```
 
-This command will produce a coverage file for each sample. You can combine the coverage values of multiple samples into one file using the `combine_cov.py` script found in `phables_utils/support/`. The output file will be `coverage.tsv` where each row represents a unitig and each column represents a sample.
+This command will produce a coverage file for each sample. You can combine the coverage values of multiple samples into one file by running the `combine_cov.py` script found in `phables_utils/support/` as follows.
 
 ```
 python combine_cov.py --covpath coverage_rpkm --output <output_path>
 ```
+
+The output file will be `coverage.tsv` where each row represents a unitig and each column represents a sample.
 
 ### Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
 
@@ -139,8 +155,8 @@ hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 marker.hmm edges.fasta
 
 # PHROGs
 mmseqs createdb edges.fasta target_seq
-mmseqs search phrogs_profile_db target_seq results_mmseqs ./tmp -s 7
-mmseqs createtsv phrogs_profile_db target_seq results_mmseqs phrog_annot.tsv
+mmseqs search target_seq phrogs_profile_db results_mmseqs ./tmp -s 7
+mmseqs createtsv target_seq phrogs_profile_db results_mmseqs phrog_annot.tsv
 ```
 
 ## Phables Usage
