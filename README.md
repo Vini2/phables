@@ -121,9 +121,11 @@ Use Minimap2 to map the reads of all the samples in `sample-names.txt` to unitig
 ```bash
 mkdir bam_files
 
-for f in `cat sample-names.txt`; do
+for f in `cat sample-names.txt`
+do
   minimap2 -t 64 -N 5 -ax sr edges.fasta reads/"$f"_R1.fastq.gz reads/"$f"_R2.fastq.gz | samtools view -F 3584 -b --threads 64 > bam_files/"$f".bam
   samtools index bam_files/"$f".bam bam_files/"$f".bam.bai
+done
 ```
 
 ### Step 4: Run CoverM to get coverage of unitig sequences
@@ -133,8 +135,10 @@ Use [CoverM](https://github.com/wwood/CoverM) to obtain the coverage of unitigs 
 ```bash
 mkdir coverage_rpkm
 
-for f in `cat sample-names.txt`; do
+for f in `cat sample-names.txt`
+do
   coverm contig -m rpkm -1 reads/"$f"_R1.fastq.gz -2 reads/"$f"_R2.fastq.gz -r edges.fasta -t 64 --output-file coverage_rpkm/"$f"_rpkm.tsv
+done
 ```
 
 This command will produce a coverage file for each sample. You can combine the coverage values of multiple samples into one file by running the `combine_cov.py` script found in `phables_utils/support/` as follows.
