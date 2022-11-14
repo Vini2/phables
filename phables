@@ -286,18 +286,16 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 4372 not in candidate_nodes:
-            continue
+        # if 6902 not in candidate_nodes:
+        #     continue
 
         logger.debug(f"my_count: {my_count}")
 
         logger.debug(f"number of unitigs: {len(candidate_nodes)}")
         logger.debug(f"{candidate_nodes}")
 
-
         in_degree = []
         out_degree = []
-
         
         if len(candidate_nodes) == 2:
 
