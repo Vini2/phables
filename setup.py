@@ -47,5 +47,5 @@ setuptools.setup(
         "more-itertools",
         "gurobipy",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
