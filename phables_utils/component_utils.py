@@ -1,8 +1,8 @@
 def get_components(
     assembly_graph,
-    contig_names,
-    smg_contigs,
-    contig_phrogs,
+    unitig_names,
+    smg_unitigs,
+    unitig_phrogs,
     circular,
     edges_lengths,
     cicular_len,
@@ -21,18 +21,18 @@ def get_components(
 
             has_phrog = False
 
-            for contig in component:
+            for unitig in component:
 
-                if contig_names[contig] in smg_contigs:
+                if unitig_names[unitig] in smg_unitigs:
                     break
-                elif contig_names[contig] in contig_phrogs:
+                elif unitig_names[unitig] in unitig_phrogs:
                     if (
                         "terminase large subunit head and packaging"
-                        in contig_phrogs[contig_names[contig]]
+                        in unitig_phrogs[unitig_names[unitig]]
                         or "capsid assembly protein tail"
-                        in contig_phrogs[contig_names[contig]]
+                        in unitig_phrogs[unitig_names[unitig]]
                         or "portal protein head and packaging"
-                        in contig_phrogs[contig_names[contig]]
+                        in unitig_phrogs[unitig_names[unitig]]
                     ):
                         has_phrog = True
 
@@ -43,9 +43,9 @@ def get_components(
         if len(component) == 1:
 
             if (
-                contig_names[component[0]] in contig_phrogs
-                and contig_names[component[0]] in circular
-                and edges_lengths[contig_names[component[0]]] > cicular_len
+                unitig_names[component[0]] in unitig_phrogs
+                and unitig_names[component[0]] in circular
+                and edges_lengths[unitig_names[component[0]]] > cicular_len
             ):
                 pruned_vs[i] = component
                 i += 1

@@ -3,7 +3,7 @@ import networkx as nx
 from .FD_Inexact import SolveInstances
 
 
-def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
+def get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes):
     """
     Identify source/sink vertex
     """
@@ -12,11 +12,11 @@ def get_source_sink(G_edge, graph_contigs, minlength, self_looped_nodes):
 
     for node in list(G_edge.nodes):
 
-        contig_name = node[:-1]
+        unitig_name = node[:-1]
 
         if (
-            contig_name not in self_looped_nodes
-            and len(graph_contigs[contig_name]) > minlength
+            unitig_name not in self_looped_nodes
+            and len(graph_unitigs[unitig_name]) > minlength
         ):
 
             # Get BFS layers

@@ -57,11 +57,11 @@ def get_phrog_unitigs(phrogs, align_score, seq_identity):
 
         for line in myfile.readlines():
 
-            if line.startswith("contig_"):
+            if line.startswith("edge_"):
 
                 strings = line.strip().split()
 
-                name = strings[0].replace("contig", "edge")
+                name = strings[0].strip()
                 phrog = " ".join(strings[12:])
                 alnScore = float(strings[2])
                 seqIdentity = float(strings[3])

@@ -11,7 +11,7 @@ def get_unitig_coverage(coverage):
     Get coverage values of unitigs
     """
 
-    contig_coverages = {}
+    unitig_coverages = {}
 
     with open(coverage, "r") as myfile:
         for line in myfile.readlines():
@@ -19,13 +19,13 @@ def get_unitig_coverage(coverage):
             if not line.startswith("Contig"):
                 strings = line.strip().split()
 
-                contig_name = strings[0]
+                unitig_name = strings[0]
 
                 coverage_sum = sum([float(x) for x in strings[1:]])
 
-                contig_coverages[contig_name] = coverage_sum
+                unitig_coverages[unitig_name] = coverage_sum
 
-    return contig_coverages
+    return unitig_coverages
 
 
 def read_pair_generator(bam, region_string=None):
