@@ -1,6 +1,6 @@
 query target alnScore seqIdentity eVal qstart qend qlen tstart tend tlen annotation
-contig_2 phrog_38 197 0.944 9.032E-53 29490 30824 43464 11 446 490 29451 terminase large subunit head and packaging
-contig_2 phrog_5573 68 0.955 7.260E-12 30345 30947 43464 44 218 249 29451 terminase large subunit head and packaging
-contig_2 phrog_30251 63 0.945 2.465E-10 29499 30122 43464 15 217 798 29451 terminase large subunit head and packaging
-contig_4 phrog_30251 63 0.945 2.465E-10 29499 30122 43464 15 217 798 29451 terminase large subunit head and packaging
-contig_5 phrog_30251 63 0.945 2.465E-10 29499 30122 43464 15 217 798 29451 terminase large subunit head and packaging
+edge_2 phrog_38 197 0.944 9.032E-53 29490 30824 43464 11 446 490 29451 terminase large subunit head and packaging
+edge_2 phrog_5573 68 0.955 7.260E-12 30345 30947 43464 44 218 249 29451 terminase large subunit head and packaging
+edge_2 phrog_30251 63 0.945 2.465E-10 29499 30122 43464 15 217 798 29451 terminase large subunit head and packaging
+edge_4 phrog_30251 63 0.945 2.465E-10 29499 30122 43464 15 217 798 29451 terminase large subunit head and packaging
+edge_5 phrog_30251 63 0.945 2.465E-10 29499 30122 43464 15 217 798 29451 terminase large subunit head and packaging
