@@ -160,8 +160,8 @@ hmmsearch --domtblout edges.fasta.hmmout --cut_tc --cpu 8 marker.hmm edges.fasta
 
 # PHROGs
 mmseqs createdb edges.fasta target_seq
-mmseqs search phrogs_profile_db target_seq results_mmseqs ./tmp -s 7
-mmseqs createtsv phrogs_profile_db target_seq results_mmseqs phrog_annot.tsv
+mmseqs search target_seq phrogs_profile_db results_mmseqs ./tmp -s 7
+mmseqs createtsv target_seq phrogs_profile_db results_mmseqs phrog_annot.tsv --full-header
 ```
 
 ## Phables Usage
