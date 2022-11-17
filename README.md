@@ -164,6 +164,8 @@ mmseqs search target_seq phrogs_profile_db results_mmseqs ./tmp -s 7
 mmseqs createtsv target_seq phrogs_profile_db results_mmseqs phrog_annot.tsv --full-header
 ```
 
+**Note**: If you face problems while running your sequences against the PHROGs database using the latest MMseqs version, try running with MMseqs version 13 or lower.
+
 ## Phables Usage
 
 ### Phables options
