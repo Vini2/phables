@@ -1,0 +1,20 @@
+site_name: Phables
+site_url: "https://github.com/Vini2/phables"
+site_author: "Vijini Mallawaarachchi"
+repo_url: "https://github.com/Vini2/phables"
+repo_name: 'GitHub'
+theme:
+    name: readthedocs
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - bash
+        - shell
+        - text
+nav:
+    - HOME:
+        - Introduction: index.md
+    - RUNNING: 
+        - Install: install.md
+        - Preprocess: preprocess.md
+        - Usage: usage.md
