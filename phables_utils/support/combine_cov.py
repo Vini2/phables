@@ -56,7 +56,6 @@ def main():
     final_df = pd.DataFrame()
 
     for file in cov_files:
-        # print(file)
         df = pd.read_csv(file, sep="\t", header=0)
 
         if final_df.empty:

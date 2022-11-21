@@ -82,8 +82,6 @@ def get_phrog_unitigs(phrogs, align_score, seq_identity):
                 alnScore = float(strings[2])
                 seqIdentity = float(strings[3])
 
-                print(name, phrog_id, phrog, alnScore, seqIdentity)
-
                 if alnScore > align_score and seqIdentity > seq_identity:
 
                     if name not in unitig_phrogs:

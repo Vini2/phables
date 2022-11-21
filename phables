@@ -595,9 +595,6 @@ def main(
                         G_path.add_edges_from(solution_paths[solution_path]["path"])
                         logger.debug(f"solution path: {solution_paths[solution_path]['path']}")
 
-                        # nx.draw_networkx(G_path)
-                        # plt.show()
-
                         if 0 in list(G_path.nodes):
 
                             # Get all simple paths from node 0 to last node
