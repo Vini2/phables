@@ -35,10 +35,10 @@ Phables takes the following files/paths as input.
 
 * Assembly graph file (`assembly_graph.gfa`)
 * Path information of contigs (`assembly_info.txt`)
+* Path to BAM files (`bam_files/`) from preprocessing step 3
 * Coverage of unitig sequences in each sample in `.tsv` format (`coverage.tsv`) from preprocessing step 4
-* HMMER result for scan of single-copy marker genes (`edges.fasta.hmmout`)
-* MMseqs result for scan of PHROGs (`phrog_annot.tsv`)
-* Path to BAM files (`bam_files/`)
+* HMMER result for scan of single-copy marker genes (`edges.fasta.hmmout`) from preprocessing step 5
+* MMseqs result for scan of PHROGs (`phrog_annot.tsv`) from preprocessing step 5
 
 ## Example usage
 
