@@ -288,8 +288,8 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 789 not in candidate_nodes:
-            continue
+        # if 789 not in candidate_nodes:
+        #     continue
 
         logger.debug(f"my_count: {my_count}")
 
@@ -433,7 +433,9 @@ def main(
             if len(dead_ends_to_remove) > 0:
 
                 for node in dead_ends_to_remove:
-                    candidate_nodes.remove(unitig_names_rev[node[:-1]])
+                    node_id = unitig_names_rev[node[:-1]]
+                    if node_id in candidate_nodes:
+                        candidate_nodes.remove(node_id)
 
                 G_edge.remove_nodes_from(dead_ends_to_remove)
 

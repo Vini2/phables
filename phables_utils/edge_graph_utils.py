@@ -245,4 +245,4 @@ def remove_dead_ends(G_edge):
 
         dead_ends_to_remove += to_remove
 
-    return dead_ends_to_remove
+    return set(dead_ends_to_remove)
