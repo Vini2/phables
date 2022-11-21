@@ -286,8 +286,8 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 6902 not in candidate_nodes:
-        #     continue
+        if 6948 not in candidate_nodes:
+            continue
 
         logger.debug(f"my_count: {my_count}")
 
@@ -297,6 +297,7 @@ def main(
         in_degree = []
         out_degree = []
         
+        # Case 2 components
         if len(candidate_nodes) == 2:
 
             all_self_looped = True
@@ -331,27 +332,35 @@ def main(
                     unitig2_len = len(str(graph_unitigs[unitig2_name]))
 
                     unitig_to_consider = -1
-                    unitig_name_to_consider = ""
+                    unitig_name = ""
+
+                    repeat_unitig = -1
+                    repeat_unitig_name = ""
 
                     if unitig1_len > unitig2_len and unitig1_len > minlength:
                         unitig_to_consider = unitig1
-                        unitig_name_to_consider = unitig1_name
+                        unitig_name = unitig1_name
+                        repeat_unitig = unitig2
+                        repeat_unitig_name = unitig2_name
                     elif unitig2_len > unitig1_len and unitig2_len > minlength:
                         unitig_to_consider = unitig2
-                        unitig_name_to_consider = unitig2_name
+                        unitig_name = unitig2_name
+                        repeat_unitig = unitig1
+                        repeat_unitig_name = unitig1_name
 
                     if unitig_to_consider != -1:
                         
                         cycle_number = 1
                         resolved_edges.add(unitig_to_consider)
-                        path_string = str(graph_unitigs[unitig_name_to_consider])
+                        resolved_edges.add(repeat_unitig)
+                        path_string = str(graph_unitigs[repeat_unitig_name]) + str(graph_unitigs[unitig_name]) + str(graph_unitigs[repeat_unitig_name].reverse_complement())
 
                         genome_path = GenomePath(
                             f"phage_comp_{my_count}_cycle_{cycle_number}",
-                            [f"{unitig_name_to_consider}"],
-                            [unitig_name_to_consider],
+                            [f"{repeat_unitig_name}+", f"{unitig_name}+", f"{repeat_unitig_name}-"],
+                            [repeat_unitig, unitig_to_consider, repeat_unitig],
                             path_string,
-                            int(unitig_coverages[unitig_name_to_consider]),
+                            int(unitig_coverages[unitig_name]),
                             len(path_string),
                             (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
                         )
@@ -359,8 +368,8 @@ def main(
                         resolved_components.add(my_count)
                         resolved_cyclic.add(my_count)
 
-
-        if len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
+        # Case 3 components
+        elif len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
 
             # Create initial directed graph with coverage values
             # ----------------------------------------------------------------------
@@ -579,28 +588,6 @@ def main(
 
                         if 0 in list(G_path.nodes):
 
-                        #     start_node = -1
-                        #     end_node = -1
-
-                        #     for vertex in list(G_path.nodes):
-
-                        #         if G_path.in_degree(vertex) == 1 and G_path.out_degree(vertex) == 1:
-                        #             predecessor = list(G_path.predecessors(vertex))[0]
-
-                        #             if G_path.in_degree(predecessor) == 1 and G_path.out_degree(predecessor) == 1:
-                        #                 end_node = predecessor
-                        #                 start_node = vertex
-                        #                 break
-
-                        #     logger.debug(f"start_node: {start_node}, end_node: {end_node}")
-
-                        #     G_path.remove_edges_from([(end_node, start_node)])
-
-                        #     # Get all simple paths from start_node to end_node
-                        #     candidate_paths = list(nx.all_simple_paths(G_path, start_node, end_node))
-
-                        # else:
-
                             # Get all simple paths from node 0 to last node
                             candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
 
@@ -648,7 +635,7 @@ def main(
                 continue
 
             
-        # Circular unitigs
+        # Case 1 components - circular unitigs
         elif len(candidate_nodes) == 1:
 
             unitig_name = unitig_names[candidate_nodes[0]]
@@ -703,7 +690,7 @@ def main(
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
 
-                if genomic_path.length > largest_length*0.9:
+                if genomic_path.length > largest_length*0.95:
 
                     logger.debug(f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}")
                     logger.debug(f"{genomic_path.node_order}")
