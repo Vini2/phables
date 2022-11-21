@@ -288,7 +288,7 @@ def main(
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        # if 789 not in candidate_nodes:
+        # if 5627 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")

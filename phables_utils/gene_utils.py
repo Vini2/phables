@@ -1,3 +1,6 @@
+from collections import defaultdict
+from pathlib import Path
+
 def get_smg_unitigs(hmmout, mg_frac):
     """
     Get unitigs containing bacterial single-copy marker genes
@@ -51,20 +54,35 @@ def get_phrog_unitigs(phrogs, align_score, seq_identity):
     Get unitigs containing PHROGs
     """
 
+    # Read phrogs table and get annotations and categories
+    phrog_table_file = Path(__file__).parent / "phrogs" / "phrog_annot.tsv"
+
+    phrog_dict = defaultdict(str)
+    
+    with open(phrog_table_file, "r") as myfile:
+        for line in myfile.readlines():
+            if not line.startswith("phrog"):
+                strings = line.strip().split("\t")
+                phrog_dict[f"phrog_{strings[0]}"] = f"{strings[2]} {strings [3]}"
+
+    # Get unitigs containing phrogs
     unitig_phrogs = {}
 
     with open(phrogs, "r") as myfile:
 
         for line in myfile.readlines():
 
-            if line.startswith("edge_"):
+            if "edge_" in line:
 
-                strings = line.strip().split()
+                strings = line.strip().split("\t")
 
-                name = strings[0].strip()
-                phrog = " ".join(strings[12:])
+                name = strings[0][1:-1]
+                phrog_id = strings[1][1:-1].split()[0]
+                phrog = phrog_dict[phrog_id]
                 alnScore = float(strings[2])
                 seqIdentity = float(strings[3])
+
+                print(name, phrog_id, phrog, alnScore, seqIdentity)
 
                 if alnScore > align_score and seqIdentity > seq_identity:
 
