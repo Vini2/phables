@@ -1,3 +1,4 @@
+import copy
 import logging
 from collections import defaultdict
 
@@ -217,25 +218,31 @@ def get_circular(paths):
     return circular
 
 
-def remove_dead_ends(G_edge, self_looped_nodes):
+def remove_dead_ends(G_edge):
     """
     Remove dead-ends from the component
     """
 
+    new_G = copy.deepcopy(G_edge)
+
     has_dead_ends = True
+
+    dead_ends_to_remove = []
 
     while has_dead_ends:
 
         to_remove = []
 
-        for node in list(G_edge.nodes):
-            if not (G_edge.in_degree(node) > 0 and G_edge.out_degree()(node)) > 0:
+        for node in list(new_G.nodes):
+            if not (new_G.in_degree(node) > 0 and new_G.out_degree()(node)) > 0:
                 to_remove.append(node)
 
         if len(to_remove) > 0:
-            G_edge.remove_nodes_from(to_remove)
+            new_G.remove_nodes_from(to_remove)
             logger.debug(f"Removing dead-ends: {to_remove}")
         else:
             has_dead_ends = False
 
-    return G_edge
+        dead_ends_to_remove += to_remove
+
+    return dead_ends_to_remove

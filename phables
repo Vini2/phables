@@ -282,11 +282,13 @@ def main(
 
         my_genomic_paths = []
 
+        original_candidate_nodes = pruned_vs[my_count]
+
         candidate_nodes = pruned_vs[my_count]
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
-        if 6948 not in candidate_nodes:
+        if 789 not in candidate_nodes:
             continue
 
         logger.debug(f"my_count: {my_count}")
@@ -423,6 +425,19 @@ def main(
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
 
+
+            # Remove dead-ends (nodes with no incoming or no outgoing edges)
+            # ----------------------------------------------------------------------
+            dead_ends_to_remove = edge_graph_utils.remove_dead_ends(G_edge)
+
+            if len(dead_ends_to_remove) > 0:
+
+                for node in dead_ends_to_remove:
+                    candidate_nodes.remove(unitig_names_rev[node[:-1]])
+
+                G_edge.remove_nodes_from(dead_ends_to_remove)
+
+                logger.debug(f"Dead-ends found and removed: {dead_ends_to_remove}")
             
 
             # Identify source/sink vertex
@@ -456,11 +471,6 @@ def main(
             else:
                 logger.debug(f"No source/sink node detected")
                 continue
-
-
-            # Remove dead-ends (nodes with no incoming or no outgoing edges)
-            # ----------------------------------------------------------------------
-            G_edge = edge_graph_utils.remove_dead_ends(G_edge, self_looped_nodes)
 
 
             # Create refined directed graph for flow network
@@ -566,7 +576,7 @@ def main(
             # ----------------------------------------------------------------------
             if len(solution_paths) != 0:
 
-                phage_like_edges = phage_like_edges.union(set(candidate_nodes))
+                phage_like_edges = phage_like_edges.union(set(original_candidate_nodes))
 
                 cycle_number = 1
 
@@ -680,7 +690,7 @@ def main(
         if len(my_genomic_paths) > 1:
 
             # Get the degree of the component
-            graph_degree = assembly_graph.degree(candidate_nodes)
+            graph_degree = assembly_graph.degree(original_candidate_nodes)
 
             path_lengths = []
             path_coverages = []
@@ -703,7 +713,7 @@ def main(
                     for path_node in genomic_path.node_id_order:
                         comp_resolved_edges.add(path_node)
 
-            frac_unitigs = len(visited_nodes)/len(candidate_nodes)
+            frac_unitigs = len(visited_nodes)/len(original_candidate_nodes)
 
             logger.debug(f"frac_unitigs: {frac_unitigs}")
 
@@ -713,7 +723,7 @@ def main(
                 # Create GenomeComponent object with component details
                 genome_comp = GenomeComponent(
                     f"phage_comp_{my_count}",
-                    len(candidate_nodes),
+                    len(original_candidate_nodes),
                     len(final_genomic_paths),
                     max(graph_degree),
                     max(in_degree),
@@ -742,7 +752,7 @@ def main(
                 resolved_components.add(my_count)
                 all_resolved_paths += final_genomic_paths
                 component_elapsed_time = time.time() - component_time_start
-                logger.debug(f"Elapsed time to resolve component {my_count} with {len(candidate_nodes)} nodes: {component_elapsed_time} seconds")
+                logger.debug(f"Elapsed time to resolve component {my_count} with {len(original_candidate_nodes)} nodes: {component_elapsed_time} seconds")
 
         else:
             # Circular unitigs
