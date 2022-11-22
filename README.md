@@ -11,7 +11,7 @@ Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic sample
 
 Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
-For detailed instructions on installation and usage, please refer to the [documentation hosted at Read the Docs](https://phables.readthedocs.io/en/latest/).
+For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
 ![](Phables_workflow.png)
 
@@ -70,7 +70,7 @@ phables --help
 phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -c coverage.tsv -b bam_files/ -o /output/path/
 ```
 
-Please refer to the [documentation hosted at Read the Docs](https://phables.readthedocs.io/en/latest/) for further information on how to obtain/format the inputs.
+Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to obtain/format the inputs.
 
 ## Reporting Issues
 
