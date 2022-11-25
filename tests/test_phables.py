@@ -8,7 +8,7 @@ __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
 __type__ = "Test Script"
 __maintainer__ = "Vijini Mallawaarachchi"
-__email__ = "vijini.mallawaarachchi@flinders.edu.au"
+__email__ = "viji.mallawaarachchi@gmail.com"
 
 
 TEST_ROOTDIR = Path(__file__).parent
