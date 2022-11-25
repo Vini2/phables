@@ -2,6 +2,10 @@ include *.md
 include LICENSE
 
 recursive-include phables_utils/ *
+recursive-include phables_utils/support/ *
+recursive-include phables_utils/phrogs/ *
 
 global-exclude phables_utils/ *.pyc
 global-exclude phables_utils/__pycache__ *.pyc
+global-exclude phables_utils/support/ *.pyc
+global-exclude phables_utils/support/__pycache__ *.pyc
