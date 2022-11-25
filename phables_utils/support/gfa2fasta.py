@@ -17,12 +17,11 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2019, GraphBin Project"
-__credits__ = ["Anuradha Wickramarachchi", "Yu Lin"]
-__license__ = "BSD-3"
+__copyright__ = "Copyright 2022, Phables Project"
+__license__ = "MIT"
 __type__ = "Support Script"
 __maintainer__ = "Vijini Mallawaarachchi"
-__email__ = "vijini.mallawaarachchi@anu.edu.au"
+__email__ = "viji.mallawaarachchi@gmail.com"
 
 
 # Sample command

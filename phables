@@ -23,7 +23,7 @@ __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
 __version__ = "0.1.0"
 __maintainer__ = "Vijini Mallawaarachchi"
-__email__ = "vijini.mallawaarachchi@flinders.edu.au"
+__email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Development"
 
 MAX_VAL = sys.maxsize
