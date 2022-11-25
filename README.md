@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="phables_logo.png" width="600" title="phables logo" alt="phables logo">
+  <img src="https://raw.githubusercontent.com/Vini2/phables/master/phables_logo.png" width="600" title="phables logo" alt="phables logo">
 </p>
 
 Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
@@ -13,7 +13,9 @@ Phables is a tool developed to resolve bacteriophage genomes using phage bubbles
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
-![](Phables_workflow.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Vini2/phables/master/Phables_workflow.png" title="phables workflow" alt="phables workflow">
+</p>
 
 ## Setting up Phables
 
