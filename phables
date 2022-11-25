@@ -168,12 +168,15 @@ def main(
     output,
 ):
 
-    """Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples."""
+    """
+        Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
+        Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
+    """
 
     # Setup logger
     # ----------------------------------------------------------------------
 
-    logger = logging.getLogger("phables 0.1")
+    logger = logging.getLogger("phables 0.1.0")
     logger.setLevel(logging.DEBUG)
     logging.captureWarnings(True)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
