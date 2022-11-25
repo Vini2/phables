@@ -26,6 +26,12 @@ setuptools.setup(
     data_files=data_files,
     include_package_data=True,
     scripts=["phables"],
+    entry_points = {
+        'console_scripts': [
+            'combine_cov=phables_utils.support.combine_cov:main',
+            'gfa2fasta=phables_utils.support.gfa2fasta:main'
+        ],
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
