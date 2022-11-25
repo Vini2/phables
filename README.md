@@ -13,11 +13,15 @@ Phables is a tool developed to resolve bacteriophage genomes using phage bubbles
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
+**NEW:** Phables is now available on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/).
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/Vini2/phables/master/Phables_workflow.png" title="phables workflow" alt="phables workflow">
 </p>
 
 ## Setting up Phables
+
+If you directly installed Phables from [PyPI](https://pypi.org/project/phables/), you can skip the next two steps and go to [Setting up Gurobi](#settingup-gurobi).
 
 ### Downloading Phables
 
