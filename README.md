@@ -75,3 +75,8 @@ Please refer to the [**documentation hosted at Read the Docs**](https://phables.
 ## Reporting Issues
 
 Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
+
+
+## Acknowledgement
+
+Phables uses the Gurobi implementation of [MFD-ILP]](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin) and [MetaCoAG](https://github.com/metagentools/MetaCoAG).
