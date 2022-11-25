@@ -8,7 +8,8 @@ You can see the following command-line options of Phables using `python phables 
 Usage: phables [OPTIONS]
 
   Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic
-  samples.
+  samples. Please refer the full documentation available on Read the Docs at
+  https://phables.readthedocs.io/
 
 Options:
   -g, --graph PATH          path to the assembly graph file  [required]
@@ -23,9 +24,10 @@ Options:
   -mp, --maxpaths INTEGER   maximum number of paths to resolve for a component
   -mgf, --mgfrac FLOAT      length threshold to consider single copy marker
                             genes
-  -as, --alignscore FLOAT   minimum alignment score (%) for phrog annotations
+  -as, --alignscore FLOAT   minimum alignment score for phrog annotations
   -si, --seqidentity FLOAT  minimum sequence identity for phrog annotations
   -o, --output PATH         path to the output folder  [required]
+  --version                 Show the version and exit.
   --help                    Show this message and exit.
 ```
 
