@@ -9,7 +9,7 @@ dependencies:
   - biopython
   - python-igraph
   - pysam
-  - networkx==2.8.6
+  - networkx
   - scipy
   - numpy
   - pandas
