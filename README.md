@@ -21,7 +21,7 @@ For detailed instructions on installation and usage, please refer to the [**docu
 
 ## Setting up Phables
 
-If you directly installed Phables from [PyPI](https://pypi.org/project/phables/), you can skip the next two steps and go to [Setting up Gurobi](#settingup-gurobi).
+If you directly installed Phables from [PyPI](https://pypi.org/project/phables/), you can skip the next two steps and go to [Setting up Gurobi](#setting-up-gurobi).
 
 ### Downloading Phables
 
@@ -39,7 +39,7 @@ cd phables/
 
 ### Installing Phables
 
-We recommend that you use [`conda`](https://docs.conda.io/en/latest/) to install and run. Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run Phables.
+If you want to setup Phables from the GitHub download, we recommend that you use [`conda`](https://docs.conda.io/en/latest/). Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run Phables.
 
 ```bash
 conda env create -f environment.yml
