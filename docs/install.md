@@ -1,5 +1,7 @@
 # Setting up Phables
 
+Phables is now available on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). If you directly installed Phables from [PyPI](https://pypi.org/project/phables/), you can skip the next two steps and go to [Setting up Gurobi](#setting-up-gurobi).
+
 ## Downloading Phables
 
 You can clone the Phables repository to your machine.

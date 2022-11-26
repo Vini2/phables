@@ -26,6 +26,9 @@ The `assembly_graph.gfa` file contains the unitig sequences which should be extr
 
 ```bash
 python gfa2fasta.py --graph assembly_graph.gfa --assembler flye --output <output_folder>
+
+# If you installed using pip
+gfa2fasta --graph assembly_graph.gfa --assembler flye --output <output_folder>
 ```
 
 ## Step 3: Map reads to unitig sequences and get BAM files
@@ -59,6 +62,9 @@ This command will produce a coverage file for each sample. You can combine the c
 
 ```bash
 python combine_cov.py --covpath coverage_rpkm --output <output_path>
+
+# If you installed using pip
+combine_cov --covpath coverage_rpkm --output <output_path>
 ```
 
 The output file will be `coverage.tsv` where each row represents a unitig and each column represents a sample.
