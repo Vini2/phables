@@ -18,3 +18,5 @@ nav:
         - Install: install.md
         - Preprocess: preprocess.md
         - Usage: usage.md
+    - EVAUATION
+        - Check quality: quality.md
