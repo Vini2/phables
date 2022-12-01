@@ -90,6 +90,10 @@ phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph ph
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to obtain/format the inputs.
 
+## Snakemake Pipeline
+
+To Do
+
 ## Reporting Issues
 
 Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
