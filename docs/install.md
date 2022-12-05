@@ -16,9 +16,6 @@ conda create -n phables -c vijinim phables
 
 # activate environment
 conda activate phables
-
-# check phables installation
-phables --help 
 ```
 
 Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
