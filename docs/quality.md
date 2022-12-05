@@ -4,6 +4,6 @@ The sequences of the resolved genomic paths can be found in `resolved_paths.fast
 
 Here is an example command to run CheckV on the resolved genomes.
 
-```
+```bash
 checkv end_to_end resolved_paths.fasta checkv_resolved_paths
 ```
