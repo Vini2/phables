@@ -8,6 +8,7 @@ Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic sample
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 ![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Anaconda-Server Badge](https://anaconda.org/vijinim/phables/badges/version.svg)](https://anaconda.org/vijinim/phables)
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
 
@@ -15,7 +16,7 @@ Phables is a tool developed to resolve bacteriophage genomes using phage bubbles
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
-**NEW:** Phables is now available on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/).
+**NEW:** Phables is now available on Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables) PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/).
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Vini2/phables/master/Phables_workflow.png" title="phables workflow" alt="phables workflow">
@@ -23,7 +24,30 @@ For detailed instructions on installation and usage, please refer to the [**docu
 
 ## Setting up Phables
 
-### Option 1: Installing Phables from PyPi
+### Option 1: Installing Phables from Anaconda.org
+
+You can install Phables from Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables).
+
+```
+# add channels
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --add channels gurobi
+
+# create conda environment and install phables
+conda create -n phables -c vijinim phables
+
+# activate environment
+conda activate phables
+
+# check phables installation
+phables --help 
+```
+
+Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
+
+### Option 2: Installing Phables from PyPi
 
 You can install Phables from PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/).
 
@@ -33,7 +57,7 @@ pip install phables
 
 Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
 
-### Option 2: Downloading Phables from GitHub
+### Option 3: Downloading Phables from GitHub
 
 You can clone the Phables repository to your machine.
 
