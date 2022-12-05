@@ -6,7 +6,7 @@ Phables is available on Anaconda.org at [https://anaconda.org/vijinim/phables](h
 
 You can install Phables from Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables).
 
-```
+```bash
 # add channels
 conda config --add channels defaults
 conda config --add channels bioconda
@@ -26,7 +26,7 @@ Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
 
 You can install Phables from PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/).
 
-```
+```bash
 pip install phables
 ```
 
