@@ -2,7 +2,7 @@
 
 ## Phables options
 
-You can see the following command-line options of Phables using `python phables --help`.
+You can see the following command-line options of Phables using `phables --help`.
 
 ```
 Usage: phables [OPTIONS]
