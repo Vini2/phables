@@ -25,9 +25,6 @@ You can find the assembly output in `hecatomb.out/processing/assembly/CONTIG_DIC
 The `assembly_graph.gfa` file contains the unitig sequences which should be extracted. For this, you can use the `gfa2fasta.py` script found in `phables_utils/support/` as follows. This script will output the unitig sequences into a FASTA file named `edges.fasta`.
 
 ```bash
-python gfa2fasta.py --graph assembly_graph.gfa --assembler flye --output <output_folder>
-
-# If you installed using pip
 gfa2fasta --graph assembly_graph.gfa --assembler flye --output <output_folder>
 ```
 
@@ -61,9 +58,6 @@ done
 This command will produce a coverage file for each sample. You can combine the coverage values of multiple samples into one file by running the `combine_cov.py` script found in `phables_utils/support/` as follows.
 
 ```bash
-python combine_cov.py --covpath coverage_rpkm --output <output_path>
-
-# If you installed using pip
 combine_cov --covpath coverage_rpkm --output <output_path>
 ```
 
