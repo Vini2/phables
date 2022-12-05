@@ -1,5 +1,7 @@
 # Setting up Phables
 
+Phables is available on Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager.
+
 ### Option 1: Installing Phables from Anaconda.org
 
 You can install Phables from Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables).
