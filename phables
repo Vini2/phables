@@ -207,7 +207,7 @@ def main(
     logger.info(f"Minimum unitig count to consider a component: {compcount}")
     logger.info(f"Maximum number of paths to resolve for a component: {maxpaths}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
-    logger.info(f"Minimum alignment score (%) for phrog annotations: {alignscore}")
+    logger.info(f"Minimum alignment score for phrog annotations: {alignscore}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Output folder: {output}")
 
