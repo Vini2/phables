@@ -1,6 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
 
+
 def get_smg_unitigs(hmmout, mg_frac):
     """
     Get unitigs containing bacterial single-copy marker genes
@@ -58,7 +59,7 @@ def get_phrog_unitigs(phrogs, align_score, seq_identity):
     phrog_table_file = Path(__file__).parent / "phrogs" / "phrog_annot.tsv"
 
     phrog_dict = defaultdict(str)
-    
+
     with open(phrog_table_file, "r") as myfile:
         for line in myfile.readlines():
             if not line.startswith("phrog"):

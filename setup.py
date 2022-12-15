@@ -6,7 +6,13 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 packages = setuptools.find_packages()
-package_data = {"phables_utils": ["phables_utils/*", "phables_utils/support/*", "phables_utils/phrogs/*"]}
+package_data = {
+    "phables_utils": [
+        "phables_utils/*",
+        "phables_utils/support/*",
+        "phables_utils/phrogs/*",
+    ]
+}
 
 data_files = [(".", ["LICENSE", "README.md"])]
 
@@ -26,10 +32,10 @@ setuptools.setup(
     data_files=data_files,
     include_package_data=True,
     scripts=["phables"],
-    entry_points = {
-        'console_scripts': [
-            'combine_cov=phables_utils.support.combine_cov:main',
-            'gfa2fasta=phables_utils.support.gfa2fasta:main'
+    entry_points={
+        "console_scripts": [
+            "combine_cov=phables_utils.support.combine_cov:main",
+            "gfa2fasta=phables_utils.support.gfa2fasta:main",
         ],
     },
     classifiers=[
