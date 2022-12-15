@@ -604,42 +604,44 @@ def main(
                             # Get all simple paths from node 0 to last node
                             candidate_paths = list(nx.all_simple_paths(G_path, 0, len(candidate_nodes)))
 
-                            logger.debug(f"candidate_paths: {candidate_paths[0]}")
+                            if len(candidate_paths) > 0:
 
-                            # Get mapped unitigs in order from the flow network
-                            path_order = []
-                            for path_edge in candidate_paths[0]:
-                                if path_edge != len(candidate_nodes):
-                                    path_order.append(edge_list_indices[path_edge])
+                                logger.debug(f"candidate_paths: {candidate_paths[0]}")
 
-                            logger.debug(f"path_order: {path_order}")
+                                # Get mapped unitigs in order from the flow network
+                                path_order = []
+                                for path_edge in candidate_paths[0]:
+                                    if path_edge != len(candidate_nodes):
+                                        path_order.append(edge_list_indices[path_edge])
 
-                            # Get the order of unitigs in path
-                            path_string = ""
-                            total_length = 0
+                                logger.debug(f"path_order: {path_order}")
 
-                            for node in path_order:
-                                unitig_name = node[:-1]
-                                if node.endswith("+"):
-                                    path_string += str(graph_unitigs[unitig_name])
-                                else:
-                                    path_string += str(graph_unitigs[unitig_name].reverse_complement())
-                                total_length += len(str(graph_unitigs[unitig_name]))
+                                # Get the order of unitigs in path
+                                path_string = ""
+                                total_length = 0
 
-                            # Create GenomePath object with path details
-                            genome_path = GenomePath(
-                                f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                [x for x in path_order],
-                                [unitig_names_rev[x[:-1]] for x in path_order],
-                                path_string,
-                                int(coverage_val),
-                                total_length,
-                                (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
-                            )
-                            my_genomic_paths.append(genome_path)
-                            logger.debug(f"total_length: {total_length}")
+                                for node in path_order:
+                                    unitig_name = node[:-1]
+                                    if node.endswith("+"):
+                                        path_string += str(graph_unitigs[unitig_name])
+                                    else:
+                                        path_string += str(graph_unitigs[unitig_name].reverse_complement())
+                                    total_length += len(str(graph_unitigs[unitig_name]))
 
-                            cycle_number += 1
+                                # Create GenomePath object with path details
+                                genome_path = GenomePath(
+                                    f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                    [x for x in path_order],
+                                    [unitig_names_rev[x[:-1]] for x in path_order],
+                                    path_string,
+                                    int(coverage_val),
+                                    total_length,
+                                    (path_string.count('G') + path_string.count('C')) / len(path_string) * 100
+                                )
+                                my_genomic_paths.append(genome_path)
+                                logger.debug(f"total_length: {total_length}")
+
+                                cycle_number += 1
 
                 logger.debug(f"Number of paths selected: {cycle_number-1}")
 
