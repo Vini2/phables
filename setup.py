@@ -12,7 +12,7 @@ data_files = [(".", ["LICENSE", "README.md"])]
 
 setuptools.setup(
     name="phables",
-    version="0.1.0a2",
+    version="0.1.0a3",
     zip_safe=True,
     author="Vijini Mallawaarachchi",
     author_email="viji.mallawaarachchi@gmail.com",
