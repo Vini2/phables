@@ -1,0 +1,57 @@
+{% set name = "phables" %}
+{% set version = "0.1.0a3" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: e19bd2b2cefe6d85cb08860183335ed5d58f632817f826c18d9e55779780597d
+
+build:
+  number: 0
+  noarch: python
+  entry_points:
+    - combine_cov=phables_utils.support.combine_cov:main
+    - gfa2fasta=phables_utils.support.gfa2fasta:main
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - biopython
+    - click
+    - gurobi
+    - more-itertools
+    - networkx >=2.8.6
+    - numpy
+    - pandas
+    - pysam
+    - python-igraph
+    - scipy
+    - tqdm
+
+test:
+  imports:
+    - phables_utils
+  commands:
+    - phables --help
+    - combine_cov --help
+    - gfa2fasta --help
+
+about:
+  home: "https://github.com/Vini2/phables"
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: "Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples"
+  doc_url: "https://phables.readthedocs.io/"
+  dev_url: "https://github.com/Vini2/phables"
+
+extra:
+  recipe-maintainers:
+    - Vini2
