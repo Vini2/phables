@@ -68,7 +68,7 @@ Now we can plot the viral quality (`Complete`, `High-quality`, `Medium-quality` 
 myorder=["Complete", "High-quality", "Medium-quality", "Low-quality"]
 
 # Plot using catplot
-ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="boxen", data=checkv_res, height=3, aspect=1.5, order=myorder, showfliers = False)
+ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="boxen", data=checkv_res, height=5, aspect=1.5, order=myorder, showfliers = False)
 
 # Set axis titles
 ax.set(xlabel = 'Viral genome length (kbp)', ylabel='CheckV quality', title="Viral quality of resolved genomes and individual unitigs")
@@ -83,7 +83,7 @@ plt.savefig("checkv_qual_boxen.pdf", dpi=300, bbox_inches='tight', format='pdf')
 You can change the `kind` of the plot as you wish. For example, you can draw a violin plot by changing `kind="violin"` as follows.
 
 ```python
-ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="violin", data=checkv_res, height=3, aspect=1.5, order=myorder, showfliers = False)
+ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="violin", data=checkv_res, height=5, aspect=1.5, order=myorder, showfliers = False)
 ```
 
 ![](images/qual_resolved_genome_unitig_violin.png)
