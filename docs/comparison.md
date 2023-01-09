@@ -14,7 +14,7 @@ cat resolved_paths.fasta resolved_edges.fasta > all_sequences.fasta
 checkv end_to_end all_sequences.fasta checkv_result
 ```
 
-Now you can compare and visualise the quality of the resolved genomes and their constituent unitigs. I have used Python in the following example.
+Now you can compare and visualise the quality of the resolved genomes and their constituent unitigs. The following example code shows how to visualise the results using Python.
 
 ## Importing Python packages
 
@@ -68,10 +68,10 @@ Now we can plot the viral quality (`Complete`, `High-quality`, `Medium-quality` 
 myorder=["Complete", "High-quality", "Medium-quality", "Low-quality"]
 
 # Plot using catplot
-ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="boxen", data=checkv_res, height=5, aspect=1.5, order=myorder, showfliers = False)
+ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="boxen", data=checkv_res, height=5, aspect=1.5, order=myorder, showfliers=False)
 
 # Set axis titles
-ax.set(xlabel = 'Viral genome length (kbp)', ylabel='CheckV quality', title="Viral quality of resolved genomes and individual unitigs")
+ax.set(xlabel='Viral genome length (kbp)', ylabel='CheckV quality')
 
 # Save figure
 plt.savefig("checkv_qual_boxen.pdf", dpi=300, bbox_inches='tight', format='pdf') 
@@ -83,7 +83,7 @@ plt.savefig("checkv_qual_boxen.pdf", dpi=300, bbox_inches='tight', format='pdf')
 You can change the `kind` of the plot as you wish. For example, you can draw a violin plot by changing `kind="violin"` as follows.
 
 ```python
-ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="violin", data=checkv_res, height=5, aspect=1.5, order=myorder, showfliers = False)
+ax = sns.catplot(y="checkv_quality", x="contig_length", hue="Sequence type", kind="violin", data=checkv_res, height=5, aspect=1.5, order=myorder, showfliers=False)
 ```
 
 ![](images/qual_resolved_genome_unitig_violin.png)
