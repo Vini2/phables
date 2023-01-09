@@ -19,4 +19,5 @@ nav:
         - Preprocess: preprocess.md
         - Usage: usage.md
     - EVAUATION:
-        - Check quality: quality.md
+        - Running CheckV: quality.md
+        - Quality comparison: comparison.md
