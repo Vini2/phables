@@ -96,6 +96,12 @@ This command downloads the databases to the directory 'database'
 phables install 
 \b
 \b
+PREPROCESSING DATA REQUIRED
+This command preprocesses your data
+\b
+phables preprocess 
+\b
+\b
 CLUSTER EXECUTION:
 phables run ... --profile [profile]
 For information on Snakemake profiles see:
@@ -155,6 +161,30 @@ def install(output, **kwargs):
     )
 
 
+@click.command(
+    epilog=help_msg_extra,
+    context_settings=dict(
+        help_option_names=["-h", "--help"], ignore_unknown_options=True
+    ),
+)
+@click.option("--input", "_input", help="Input directory", type=click.Path(exists=True), required=True)
+@click.option("--reads", help="Reads directory", type=click.Path(exists=True), required=True)
+@common_options
+def preprocess(_input, reads, output, log, **kwargs):
+    """Preprocess data"""
+    # Config to add or update in configfile
+    merge_config = {"input": _input, "reads": reads, "output": output, "log": log}
+
+    # run!
+    run_snakemake(
+        # Full path to Snakefile
+        snakefile_path=snake_base(os.path.join('workflow', 'preprocess.smk')),
+        merge_config=merge_config,
+        log=log,
+        **kwargs
+    )
+
+
 @click.command()
 @common_options
 def config(configfile, **kwargs):
@@ -170,6 +200,7 @@ def citation(**kwargs):
 
 cli.add_command(run)
 cli.add_command(install)
+cli.add_command(preprocess)
 cli.add_command(config)
 cli.add_command(citation)
 

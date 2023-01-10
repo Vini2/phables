@@ -132,6 +132,7 @@ dmypy.json
 
 # Snakemake
 .snakemake/
+phables/workflow/conda/
 
 # Databases
 databases/
