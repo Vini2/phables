@@ -54,37 +54,6 @@ pip install phables
 
 Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
 
-### Option 3: Downloading Phables from GitHub
-
-You can clone the Phables repository to your machine.
-
-```bash
-git clone https://github.com/Vini2/phables.git
-```
-
-Now go into the `phables` folder using the command
-
-```bash
-cd phables/
-```
-
-#### Using conda
-
-We recommend that you use [`conda`](https://docs.conda.io/en/latest/). Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run Phables.
-
-```bash
-conda env create -f environment.yml
-conda activate phables
-```
-
-#### Using pip
-
-If you prefer to use `pip` instead of `conda`, you can run the following command to install Phables using `pip`. Make sure you are in the `phables` folder.
-
-```bash
-pip install .
-```
-
 ### Setting up Gurobi
 
 The MFD implementation uses the linear programming solver [Gurobi](https://www.gurobi.com/). We chose Gurobi over open source solvers as Gurobi is fast and can solve large models (check the performance comparison at [https://www.gurobi.com/resources/open-source-linear-and-mixed-integer-programming-software-and-solvers/](https://www.gurobi.com/resources/open-source-linear-and-mixed-integer-programming-software-and-solvers/)).
@@ -115,7 +84,7 @@ Please refer to the [**documentation hosted at Read the Docs**](https://phables.
 
 ## Snakemake Pipeline
 
-To Do
+Work in prgogress using [Snaketool](https://github.com/beardymcjohnface/Snaketool).
 
 ## Reporting Issues
 
