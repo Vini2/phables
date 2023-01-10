@@ -17,7 +17,6 @@ include: "rules/00_database_dir.smk"
 """TARGETS"""
 allDatabaseFiles = []
 
-allDatabaseFiles.append(os.path.join(databaseDir, config['phrog_annot_file']))
 allDatabaseFiles.append(os.path.join(databaseDir, config['phrogs_mmseqs_file']))
 allDatabaseFiles.append(os.path.join(databaseDir, config['smg_hmm_file']))
 
@@ -29,17 +28,6 @@ rule all:
 
 
 """RULES"""
-
-rule phrog_annot_download:
-    params:
-        url=os.path.join(config['phrog_annot'])
-    output:
-        os.path.join(databaseDir, config['phrog_annot_file'])
-    shell:
-        """
-            curl -Lo {output} {params.url}
-        """
-
 rule phrogs_mmseqs_download:
     params:
         url=os.path.join(config['phrogs_mmseqs'])
