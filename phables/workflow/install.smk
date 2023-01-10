@@ -15,27 +15,30 @@ include: "rules/00_database_dir.smk"
 
 
 """TARGETS"""
-allDatabaseFiles = []
+db_files = []
 
-allDatabaseFiles.append(os.path.join(databaseDir, config['phrogs_mmseqs_file']))
-allDatabaseFiles.append(os.path.join(databaseDir, config['smg_hmm_file']))
+db_files.append(os.path.join(databaseDir, config['phrogs_mmseqs_folder']))
+db_files.append(os.path.join(databaseDir, config['smg_hmm_file']))
 
 
 """RUN SNAKEMAKE"""
 rule all:
     input:
-        allDatabaseFiles
+        db_files
 
 
 """RULES"""
 rule phrogs_mmseqs_download:
     params:
-        url=os.path.join(config['phrogs_mmseqs'])
+        url=os.path.join(config['phrogs_mmseqs']),
+        file=os.path.join(databaseDir, config['phrogs_mmseqs_file'])
     output:
-        os.path.join(databaseDir, config['phrogs_mmseqs_file'])
+        directory(os.path.join(databaseDir, config['phrogs_mmseqs_folder']))
     shell:
         """
-            curl -Lo {output} {params.url}
+            curl -Lo {params.file} {params.url}
+            tar -xf {params.file} -C {databaseDir}
+            rm -rf {params.file}
         """
 
 rule smg_hmm_download:
