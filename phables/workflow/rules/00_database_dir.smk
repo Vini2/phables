@@ -9,12 +9,12 @@ configfile: os.path.join(workflow.basedir, '../', 'config', 'config.yaml')
 configfile: os.path.join(workflow.basedir, '../', 'config', 'databases.yaml')
 
 """CHECK IF CUSTOM DATABASE DIRECTORY"""
-databaseDir = ""
+DBPATH = ""
 if config['db_dir'] is None:
-    databaseDir = os.path.join(workflow.basedir, 'databases')
+    DBPATH = os.path.join(workflow.basedir, 'databases')
 else:
-    databaseDir = config['db_dir']
-print(f"Databases are being saved in {databaseDir} \n")
+    DBPATH = config['db_dir']
+print(f"Databases are being saved in {DBPATH} \n")
 
 
 """ONSTART/END/ERROR
