@@ -1,0 +1,7 @@
+# Snakemake config
+input:
+output: 'phables.out/'
+log: 'phables/phables.log'
+
+# Databases 
+db_dir: "databases"
