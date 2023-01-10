@@ -132,3 +132,6 @@ dmypy.json
 
 # Snakemake
 .snakemake/
+
+# Databases
+databases/

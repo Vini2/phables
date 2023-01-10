@@ -1,8 +1,11 @@
 # Bacterial single-copy marker genes HMM file
 smg_hmm: "https://github.com/metagentools/MetaCoAG/blob/develop/metacoag_utils/auxiliary/marker.hmm"
+smg_hmm_file: "marker.hmm"
 
 # PROHGs annotations
 phrog_annot: "https://phrogs.lmge.uca.fr/downloads_from_website/phrog_annot_v4.tsv"
+phrog_annot_file: "phrog_annot_v4.tsv"
 
 # PHROGs mmseqs database
 phrogs_mmseqs: "https://phrogs.lmge.uca.fr/downloads_from_website/phrogs_mmseqs_db.tar.gz"
+phrogs_mmseqs_file: "phrogs_mmseqs_db.tar.gz"
