@@ -1,0 +1,4 @@
+include phables/phables.LICENSE
+include phables/phables.CITATION
+include phables/phables.VERSION
+recursive-include phables *

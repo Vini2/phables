@@ -1,0 +1,9 @@
+name: phables
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+  - gurobi
+  - vijinim
+dependencies:
+  - phables

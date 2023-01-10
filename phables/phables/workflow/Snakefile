@@ -1,0 +1,34 @@
+
+configfile: os.path.join(workflow.basedir, '../', 'config', 'config.yaml')
+
+# Concatenate Snakemake's own log file with the master log file
+onsuccess:
+    shell("cat {log} >> " + config['log'])
+
+onerror:
+    shell("cat {log} >> " + config['log'])
+
+outTouch = os.path.join(config['output'], config['input'])
+
+# Mark target rules
+target_rules = []
+def targetRule(fn):
+    assert fn.__name__.startswith('__')
+    target_rules.append(fn.__name__[2:])
+    return fn
+
+@targetRule
+rule all:
+    input:
+        outTouch
+
+@targetRule
+rule print_targets:
+    run:
+        print("\nTop level rules are: \n", file=sys.stderr)
+        print("* " + "\n* ".join(target_rules) + "\n\n", file=sys.stderr)
+
+
+rule yeet:
+    output:
+        touch(outTouch)
