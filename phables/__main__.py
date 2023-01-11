@@ -10,7 +10,7 @@ import click
 
 from .util import (
     snake_base,
-    print_version,
+    get_version,
     default_to_output,
     copy_config,
     run_snakemake,
@@ -82,9 +82,12 @@ def common_options(func):
 @click.group(
     cls=OrderedCommands, context_settings=dict(help_option_names=["-h", "--help"])
 )
+@click.version_option(get_version())
 def cli():
-    """For more options, run:
-    phables command --help"""
+    """
+        Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
+        Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
+    """
     pass
 
 
@@ -199,10 +202,7 @@ def run(
     log, 
     **kwargs):
     
-    """
-        Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
-        Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
-    """
+    """Run Phables"""
     # Config to add or update in configfile
     merge_config = {
         "input": _input, 
@@ -290,7 +290,6 @@ cli.add_command(citation)
 
 
 def main():
-    print_version()
     cli()
 
 

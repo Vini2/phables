@@ -22,10 +22,10 @@ def snake_base(rel_path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path)
 
 
-def print_version():
+def get_version():
     with open(snake_base("phables.VERSION"), "r") as f:
         version = f.readline()
-    echo_click("\n" + "phables version " + version + "\n")
+    return version
 
 
 def echo_click(msg, log=None):
