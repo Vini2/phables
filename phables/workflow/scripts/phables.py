@@ -157,7 +157,12 @@ MAX_VAL = sys.maxsize
     help="path to the log file",
     type=str,
 )
-@click.version_option(__version__)
+@click.version_option(
+    __version__,
+    '--version',
+    '-v',
+    is_flag=True
+)
 def main(
     graph,
     paths,

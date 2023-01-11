@@ -82,7 +82,7 @@ def common_options(func):
 @click.group(
     cls=OrderedCommands, context_settings=dict(help_option_names=["-h", "--help"])
 )
-@click.version_option(get_version())
+@click.version_option(get_version(), '-v', '--version', is_flag=True)
 def cli():
     """
         Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
