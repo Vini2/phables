@@ -17,3 +17,8 @@ COVERM_PATH = os.path.join(OUTDIR, 'coverage_rpkm/')
 allTargets.append(expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES))
 
 allTargets.append(os.path.join(OUTDIR, "coverage.tsv"))
+
+allTargets.append(os.path.join(OUTDIR, "edges.fasta.hmmout"))
+
+PHROGS_PATH = os.path.join(OUTDIR, 'phrogs/')
+allTargets.append(os.path.join(PHROGS_PATH, "phrogs_annotations.tsv"))

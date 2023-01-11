@@ -15,6 +15,7 @@ configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
 """PREFLIGHT CHECKS
 Validate your inputs, set up directories, parse your config, etc.
 """
+include: "rules/00_database_dir.smk"
 include: "rules/01_preprocess_dir.smk"
 
 
@@ -42,3 +43,6 @@ include: "rules/mapping.smk"
 
 # Step 4: Run CoverM to get coverage of unitig sequences
 include: "rules/coverm.smk"
+
+# Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
+include: "rules/genes.smk"
