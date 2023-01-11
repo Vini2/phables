@@ -150,7 +150,7 @@ MAX_VAL = sys.maxsize
     help="path to the output folder",
     type=click.Path(exists=True),
 )
-@click.version_option(__version__)
+@click.version_option(__version__, '-v', '--version', is_flag=True)
 def main(
     graph,
     paths,
