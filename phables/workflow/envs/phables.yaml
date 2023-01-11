@@ -1,9 +1,19 @@
 name: phables
 channels:
-  - defaults
   - conda-forge
+  - anaconda
   - bioconda
   - gurobi
-  - vijinim
 dependencies:
-  - phables
+  - python>=3.8
+  - biopython
+  - python-igraph
+  - pysam
+  - networkx>=2.8.6
+  - scipy
+  - numpy
+  - pandas
+  - gurobi
+  - more-itertools
+  - tqdm
+  - click

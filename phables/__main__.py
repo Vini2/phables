@@ -90,16 +90,19 @@ def cli():
 
 help_msg_extra = """
 \b
-INSTALLING DATABASES REQUIRED
-This command downloads the databases to the directory 'database' 
 \b
-phables install 
+DOWNLOAD AND SETUP DATABASES
+phables install
 \b
 \b
-PREPROCESSING DATA REQUIRED
-This command preprocesses your data
+PREPROCESSING DATA
+phables preprocess <options> 
 \b
-phables preprocess 
+\b
+RUN PHABLES
+phables run <options> 
+For more information on Phables please visit:
+https://phables.readthedocs.io/
 \b
 \b
 CLUSTER EXECUTION:
@@ -108,7 +111,7 @@ For information on Snakemake profiles see:
 https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
 \b
 RUN EXAMPLES:
-Required:           phables run --input [file]
+Required:           phables run --input [folder]
 Specify threads:    phables run ... --threads [threads]
 Disable conda:      phables run ... --no-use-conda 
 Change defaults:    phables run ... --snake-default="-k --nolock"
@@ -126,17 +129,98 @@ Available targets:
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
-@click.option("--input", "_input", help="Input file/directory", type=str, required=True)
+@click.option(
+    "--input",
+    "_input",
+    help="Path to Hecatomb output",
+    type=click.Path(),
+    required=True
+)
+@click.option(
+    "--minlength",
+    default=2000,
+    required=False,
+    help="minimum length of circular unitigs to consider",
+    type=int,
+)
+@click.option(
+    "--mincov",
+    default=10,
+    required=False,
+    help="minimum coverage of paths to output",
+    type=int,
+)
+@click.option(
+    "--compcount",
+    default=200,
+    required=False,
+    help="maximum unitig count to consider a component",
+    type=int,
+)
+@click.option(
+    "--maxpaths",
+    default=10,
+    required=False,
+    help="maximum number of paths to resolve for a component",
+    type=int,
+)
+@click.option(
+    "--mgfrac",
+    default=0.2,
+    required=False,
+    help="length threshold to consider single copy marker genes",
+    type=float,
+)
+@click.option(
+    "--alignscore",
+    default=90,
+    required=False,
+    help="minimum alignment score for phrog annotations",
+    type=float,
+)
+@click.option(
+    "--seqidentity",
+    default=0.3,
+    required=False,
+    help="minimum sequence identity for phrog annotations",
+    type=float,
+)
 @common_options
-def run(_input, output, log, **kwargs):
-    """Run phables"""
+def run(
+    _input, 
+    minlength, 
+    mincov, 
+    compcount, 
+    maxpaths, 
+    mgfrac, 
+    alignscore, 
+    seqidentity, 
+    output, 
+    log, 
+    **kwargs):
+    
+    """
+        Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
+        Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
+    """
     # Config to add or update in configfile
-    merge_config = {"input": _input, "output": output, "log": log}
+    merge_config = {
+        "input": _input, 
+        "minlength": minlength,
+        "mincov": mincov,
+        "compcount": compcount,
+        "maxpaths": maxpaths,
+        "mgfrac": mgfrac,
+        "alignscore": alignscore,
+        "seqidentity": seqidentity,
+        "output": output,
+        "log": log
+    }
 
     # run!
     run_snakemake(
         # Full path to Snakefile
-        snakefile_path=snake_base(os.path.join("workflow", "Snakefile")),
+        snakefile_path=snake_base(os.path.join("workflow", "phables.smk")),
         merge_config=merge_config,
         log=log,
         **kwargs
