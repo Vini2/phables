@@ -19,6 +19,7 @@ db_files = []
 
 db_files.append(os.path.join(DBPATH, config['phrogs_mmseqs_folder']))
 db_files.append(os.path.join(DBPATH, config['smg_hmm_file']))
+db_files.append(os.path.join(DBPATH, config['phrog_annot_file']))
 
 
 """RUN SNAKEMAKE"""
@@ -46,6 +47,16 @@ rule smg_hmm_download:
         url=os.path.join(config['smg_hmm'])
     output:
         os.path.join(DBPATH, config['smg_hmm_file'])
+    shell:
+        """
+            curl -Lo {output} {params.url}
+        """
+
+rule phrog_annot_download:
+    params:
+        url=os.path.join(config['phrog_annot'])
+    output:
+        os.path.join(DBPATH, config['phrog_annot_file'])
     shell:
         """
             curl -Lo {output} {params.url}
