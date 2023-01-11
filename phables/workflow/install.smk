@@ -11,7 +11,7 @@ This is an auxiliary Snakefile to install databases or dependencies.
 configfile: os.path.join(workflow.basedir, 'config', 'config.yaml')
 configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
 
-include: "rules/00_database_dir.smk"
+include: "rules/00_database_preflight.smk"
 
 
 """TARGETS"""

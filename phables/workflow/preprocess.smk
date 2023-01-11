@@ -15,8 +15,8 @@ configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
 """PREFLIGHT CHECKS
 Validate your inputs, set up directories, parse your config, etc.
 """
-include: "rules/00_database_dir.smk"
-include: "rules/01_preprocess_dir.smk"
+include: "rules/00_database_preflight.smk"
+include: "rules/01_preprocess_preflight.smk"
 
 
 """TARGETS
