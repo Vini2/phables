@@ -23,7 +23,7 @@ rule run_coverm:
 
 rule run_combine_cov:
     input:
-        {COVERM_PATH}
+        COVERM_PATH
     output:
         os.path.join(OUTDIR, "coverage.tsv")
     log:
@@ -32,5 +32,5 @@ rule run_combine_cov:
         "../envs/phables.yaml"
     shell:
         """
-            combine_cov --covpath {input} --output {OUTDIR}
+            python phables/workflow/scripts/combine_cov.py --covpath {input} --output {OUTDIR}
         """

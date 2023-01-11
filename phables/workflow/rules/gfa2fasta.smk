@@ -17,5 +17,5 @@ rule run_gfa2fasta:
     threads: 1
     shell:
         """
-            gfa2fasta --graph {input} --assembler {params.assembler} --output {OUTDIR}
+            python phables/workflow/scripts/gfa2fasta.py --graph {input} --assembler {params.assembler} --output {OUTDIR}
         """
