@@ -4,7 +4,7 @@ output: 'phables.out/'
 log: 'phables/phables.log'
 
 # Databases 
-db_dir: "databases"
+databases:
 
 # Phable parameters
 minlength: 2000

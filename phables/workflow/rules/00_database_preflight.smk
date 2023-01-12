@@ -10,10 +10,13 @@ configfile: os.path.join(workflow.basedir, '../', 'config', 'databases.yaml')
 
 """CHECK IF CUSTOM DATABASE DIRECTORY"""
 DBPATH = ""
-if config['db_dir'] is None:
-    DBPATH = os.path.join(workflow.basedir, 'databases')
-else:
-    DBPATH = config['db_dir']
+try:
+    if config['databases'] is None:
+        DBPATH = os.path.join(workflow.basedir, '..', '..', 'databases')
+    else:
+        DBPATH = config['databases']
+except KeyError:
+    DBPATH = os.path.join(workflow.basedir,'..','..','databases')
 
 
 """ONSTART/END/ERROR
