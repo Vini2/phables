@@ -257,7 +257,7 @@ def install(output, **kwargs):
 @common_options
 def test(output, **kwargs):
     """Test Phables"""
-    test_dir = snake_base(os.path.join('..', 'tests', 'data'))
+    test_dir = snake_base('test_data')
 
     # Config to add or update in configfile
     merge_config = {
