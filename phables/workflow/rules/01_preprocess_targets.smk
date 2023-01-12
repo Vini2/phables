@@ -14,7 +14,6 @@ allTargets.append(expand(os.path.join(BAM_PATH, "{sample}.bam"), sample=SAMPLES)
 allTargets.append(expand(os.path.join(BAM_PATH, "{sample}.bam.bai"), sample=SAMPLES))
 
 COVERM_PATH = os.path.join(OUTDIR, 'coverage_rpkm/')
-#allTargets.append(COVERM_PATH)
 allTargets.append(expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES))
 
 allTargets.append(os.path.join(OUTDIR, "coverage.tsv"))
