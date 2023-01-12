@@ -9,13 +9,12 @@ rule run_gfa2fasta:
     output:
         EDGES_FILE
     params:
-        assembler = "flye"
+        assembler = "flye",
+        graph = GRAPH_FILE,
+        output = OUTDIR
     log:
         os.path.join(LOGSDIR, "gfa2fasta.log")
     conda: 
         "../envs/phables.yaml"
-    threads: 1
-    shell:
-        """
-            python phables/workflow/scripts/gfa2fasta.py --graph {input} --assembler {params.assembler} --output {OUTDIR} > {log}
-        """
+    script:
+        os.path.join('..', 'scripts', 'gfa2fasta.py')

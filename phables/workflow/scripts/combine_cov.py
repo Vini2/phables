@@ -4,7 +4,6 @@
 
 """
 
-import argparse
 import glob
 import os
 import subprocess
@@ -21,20 +20,11 @@ __email__ = "viji.mallawaarachchi@gmail.com"
 
 def main():
 
-    # Setup argument parser
+    # Get arguments
     # -----------------------
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
-        "--covpath", required=True, help="path to the .tsv files from CoverM"
-    )
-    ap.add_argument(
-        "--output", required=True, type=str, help="path to the output folder"
-    )
-
-    args = vars(ap.parse_args())
-    covpath = args["covpath"]
-    output_path = args["output"]
+    covpath = snakemake.params.covpath
+    output_path = snakemake.params.output
 
     # Validate inputs
     # ---------------------------------------------------

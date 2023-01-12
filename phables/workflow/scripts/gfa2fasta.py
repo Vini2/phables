@@ -6,7 +6,6 @@ The assembly graph file of Flye (assembly_graph.gfa) should be provided as input
 
 """
 
-import argparse
 import os
 import re
 import subprocess
@@ -24,46 +23,15 @@ __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 
 
-# Sample command
-# -------------------------------------------------------------------
-# python gfa2fasta.py  --graph /path/to/folder_with_binning_result
-#                      --assembler flye
-#                      --output /path/to/output_folder
-# -------------------------------------------------------------------
-
-
 def main():
 
-    # Setup argument parser
+    # Get arguments
     # -----------------------
 
-    ap = argparse.ArgumentParser()
-
-    ap.add_argument("--graph", required=True, help="path to the assembly graph file")
-    ap.add_argument(
-        "--assembler",
-        required=True,
-        type=str,
-        default="flye",
-        help="type of the assembler (Flye or Miniasm)",
-    )
-    ap.add_argument(
-        "--output", required=True, type=str, help="path to the output folder"
-    )
-    ap.add_argument(
-        "--prefix",
-        required=False,
-        type=str,
-        default="",
-        help="prefix for the output file",
-    )
-
-    args = vars(ap.parse_args())
-
-    assembler = args["assembler"]
+    assembler = snakemake.params.assembler
     assembler_name = ""
-    assembly_graph_file = args["graph"]
-    output_path = args["output"]
+    assembly_graph_file = snakemake.params.graph
+    output_path = snakemake.params.output
     prefix = ""
 
     # Check assembly graph file
@@ -88,23 +56,6 @@ def main():
     # Create output folder if it does not exist
     if not os.path.isdir(output_path):
         subprocess.run("mkdir -p " + output_path, shell=True)
-
-    # Validate prefix
-    # ---------------------------------------------------
-    try:
-
-        if args["prefix"] != "":
-            if args["prefix"].endswith("_"):
-                prefix = args["prefix"]
-            else:
-                prefix = args["prefix"] + "_"
-        else:
-            prefix = ""
-
-    except:
-        print("\nPlease enter a valid string for prefix")
-        print("Exiting gfa2fasta.py...\n")
-        sys.exit(1)
 
     # Get the sequences corresponding to edges of the graph.
     # ---------------------------------------------------

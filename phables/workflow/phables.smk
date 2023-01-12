@@ -48,11 +48,25 @@ rule run_phables:
         genome_info = os.path.join(OUTDIR, "resolved_genome_info.txt"),
         unitigs = os.path.join(OUTDIR, "resolved_edges.fasta"),
         component_info = os.path.join(OUTDIR, "resolved_component_info.txt")
+    params:
+        graph = GRAPH_FILE,
+        paths = INFO_FILE,
+        hmmout = SMG_FILE,
+        phrogs = PHROG_ANNOT,
+        coverage = COVERAGE_FILE,
+        bampath = BAM_PATH,
+        minlength = ML,
+        mincov = MC,
+        compcount = CC,
+        maxpaths = MP,
+        mgfrac = MGF,
+        alignscore = AS,
+        seqidentity = SI,
+        output = OUTDIR,
+        log = os.path.join(LOGSDIR, "phables_output.log")
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda: 
         "./envs/phables.yaml"
-    shell:
-        """
-            phables/workflow/scripts/phables.py -g {GRAPH_FILE} -p {INFO_FILE} -hm {SMG_FILE} -ph {PHROG_ANNOT} -c {COVERAGE_FILE} -b {BAM_PATH} -ml {ML} -mcov {MC} -cc {CC} -mp {MP} -mgf {MGF} -as {AS} -si {SI} -o {OUTDIR} -l {log}
-        """
+    script:
+        os.path.join('scripts', 'phables.py')

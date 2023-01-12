@@ -4,7 +4,6 @@ import logging
 import sys
 import time
 
-import click
 import networkx as nx
 from igraph import *
 from tqdm import tqdm
@@ -28,168 +27,34 @@ __status__ = "Development"
 
 MAX_VAL = sys.maxsize
 
-# Sample command
-# -------------------------------------------------------------------
-# python phables    -g /path/to/assembly_graph.gfa
-#                   -p /path/to/assembly_info.txt
-#                   -hm /path/to/edges.fasta.hmmout
-#                   -ph /path/to/phrogs_annot.tsv
-#                   -c /path/to/edge_coverages.tsv
-#                   -b /path/to/bam_files
-#                   -o /path/to/output_folder
-# -------------------------------------------------------------------
-
-
-# Setup arguments
+# Phables main code
 # ----------------------------------------------------------------------
 
+def main():
 
-@click.command()
-@click.option(
-    "--graph",
-    "-g",
-    required=True,
-    help="path to the assembly graph file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--paths",
-    "-p",
-    required=True,
-    help="path to the assembly path info file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--coverage",
-    "-c",
-    required=True,
-    help="path to the coverage file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--bampath",
-    "-b",
-    required=True,
-    help="path to the bam files",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--hmmout",
-    "-hm",
-    required=True,
-    help="path to the .hmmout file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--phrogs",
-    "-ph",
-    required=True,
-    help="path to the phrog annotations file",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--minlength",
-    "-ml",
-    default=2000,
-    required=False,
-    help="minimum length of circular unitigs to consider",
-    type=int,
-)
-@click.option(
-    "--mincov",
-    "-mcov",
-    default=10,
-    required=False,
-    help="minimum coverage of paths to output",
-    type=int,
-)
-@click.option(
-    "--compcount",
-    "-cc",
-    default=200,
-    required=False,
-    help="maximum unitig count to consider a component",
-    type=int,
-)
-@click.option(
-    "--maxpaths",
-    "-mp",
-    default=10,
-    required=False,
-    help="maximum number of paths to resolve for a component",
-    type=int,
-)
-@click.option(
-    "--mgfrac",
-    "-mgf",
-    default=0.2,
-    required=False,
-    help="length threshold to consider single copy marker genes",
-    type=float,
-)
-@click.option(
-    "--alignscore",
-    "-as",
-    default=90,
-    required=False,
-    help="minimum alignment score for phrog annotations",
-    type=float,
-)
-@click.option(
-    "--seqidentity",
-    "-si",
-    default=0.3,
-    required=False,
-    help="minimum sequence identity for phrog annotations",
-    type=float,
-)
-@click.option(
-    "--output",
-    "-o",
-    required=True,
-    help="path to the output folder",
-    type=click.Path(exists=True),
-)
-@click.option(
-    "--log",
-    "-l",
-    required=False,
-    help="path to the log file",
-    type=str,
-)
-@click.version_option(
-    __version__,
-    '--version',
-    '-v',
-    is_flag=True
-)
-def main(
-    graph,
-    paths,
-    coverage,
-    bampath,
-    hmmout,
-    phrogs,
-    minlength,
-    mincov,
-    compcount,
-    maxpaths,
-    mgfrac,
-    alignscore,
-    seqidentity,
-    output,
-    log,
-):
+    # Get arguments
+    # ----------------------------------------------------------------------
+    graph = snakemake.params.graph
+    paths = snakemake.params.paths
+    coverage = snakemake.params.coverage
+    bampath = snakemake.params.bampath
+    hmmout = snakemake.params.hmmout
+    phrogs = snakemake.params.phrogs
+    minlength = snakemake.params.minlength
+    mincov = snakemake.params.mincov
+    compcount = snakemake.params.compcount
+    maxpaths = snakemake.params.maxpaths
+    mgfrac = snakemake.params.mgfrac
+    alignscore = snakemake.params.alignscore
+    seqidentity = snakemake.params.seqidentity
+    output = snakemake.params.output
+    log = snakemake.params.log
 
-    """
-        Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
-        Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
-    """
 
     # Setup logger
     # ----------------------------------------------------------------------
 
-    logger = logging.getLogger("phables 0.1.0b6")
+    logger = logging.getLogger(__version__)
     logger.setLevel(logging.DEBUG)
     logging.captureWarnings(True)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")

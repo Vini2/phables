@@ -15,6 +15,18 @@ Setting the directory variables
 TESTDIR = config['dir']
 
 
+############################################################################
+# Get Phables parameters
+############################################################################
+ML = config['minlength']
+MC = config['mincov']
+CC = config['compcount']
+MP = config['maxpaths']
+MGF = config['mgfrac']
+AS = config['alignscore']
+SI = config['seqidentity']
+
+
 """ONSTART/END/ERROR
 Tasks to perform at various stages the start and end of a run.
 """

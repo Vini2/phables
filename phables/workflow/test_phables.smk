@@ -51,11 +51,25 @@ rule test_phables:
         component_info = temp(os.path.join(TESTDIR, "resolved_component_info.txt")),
         mfd = temp(os.path.join(TESTDIR, "results_MFD.txt")),
         mfd_details = temp(os.path.join(TESTDIR, "results_MFD_details.txt"))
+    params:
+        graph = os.path.join(TESTDIR, "assembly_graph.gfa"),
+        paths = os.path.join(TESTDIR, "assembly_info.txt"),
+        hmmout = os.path.join(TESTDIR, "edges.fasta.hmmout"),
+        phrogs = os.path.join(TESTDIR, "phrogs_annotations.tsv"),
+        coverage = os.path.join(TESTDIR, "edge_coverages.tsv"),
+        bampath = TESTDIR,
+        minlength = ML,
+        mincov = MC,
+        compcount = CC,
+        maxpaths = MP,
+        mgfrac = MGF,
+        alignscore = AS,
+        seqidentity = SI,
+        output = TESTDIR,
+        log = os.path.join(TESTDIR, "phables_output.log")
     log:
         temp(os.path.join(TESTDIR, "phables_output.log"))
     conda: 
         "./envs/phables.yaml"
-    shell:
-        """
-            phables/workflow/scripts/phables.py -g {input.g} -p {input.p} -hm {input.hm} -ph {input.ph} -c {input.c} -b {input.b} -o {TESTDIR} -l {log}
-        """
+    script:
+        os.path.join('scripts', 'phables.py')

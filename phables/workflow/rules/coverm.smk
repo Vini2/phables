@@ -26,11 +26,12 @@ rule run_combine_cov:
         files=expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES)
     output:
         os.path.join(OUTDIR, "coverage.tsv")
+    params:
+        covpath = COVERM_PATH,
+        output = OUTDIR
     log:
         os.path.join(LOGSDIR, "combine_cov.log")
     conda: 
         "../envs/phables.yaml"
-    shell:
-        """
-            python phables/workflow/scripts/combine_cov.py --covpath {COVERM_PATH} --output {OUTDIR} > {log}
-        """
+    script:
+        os.path.join('..', 'scripts', 'combine_cov.py')
