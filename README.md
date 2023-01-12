@@ -115,7 +115,7 @@ Please refer to the [**documentation hosted at Read the Docs**](https://phables.
 
 ## Snakemake Pipeline
 
-Work in progress
+To Do
 
 ## Reporting Issues
 
