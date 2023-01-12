@@ -126,6 +126,7 @@ Available targets:
 """
 
 
+# Run command
 @click.command(
     epilog=help_msg_extra,
     context_settings=dict(
@@ -227,6 +228,7 @@ def run(
     )
 
 
+# Install command
 @click.command(
     epilog=help_msg_extra,
     context_settings=dict(
@@ -245,6 +247,33 @@ def install(output, **kwargs):
     )
 
 
+# Test command
+@click.command(
+    epilog=help_msg_extra,
+    context_settings=dict(
+        help_option_names=["-h", "--help"], ignore_unknown_options=True
+    ),
+)
+@common_options
+def test(output, **kwargs):
+    """Test Phables"""
+    test_dir = snake_base(os.path.join('..', 'tests', 'data'))
+
+    # Config to add or update in configfile
+    merge_config = {
+        "dir": test_dir
+    }
+
+    # run!
+    run_snakemake(
+        # Full path to Snakefile
+        snakefile_path=snake_base(os.path.join('workflow', 'test_phables.smk')),
+        merge_config=merge_config,
+        **kwargs
+    )
+
+
+# Preprocess command
 @click.command(
     epilog=help_msg_extra,
     context_settings=dict(
@@ -285,6 +314,7 @@ def citation(**kwargs):
 cli.add_command(run)
 cli.add_command(install)
 cli.add_command(preprocess)
+cli.add_command(test)
 cli.add_command(config)
 cli.add_command(citation)
 
