@@ -68,26 +68,44 @@ You can refer to further instructions at [https://www.gurobi.com/academia/academ
 
 ### Test the setup
 
-After setting up, run the following command to ensure that Phables is working.
+After setting up, run the following command to print out the Phables help message.
 
 ```bash
 phables --help
 ```
 
-## Usage
+Then run the following command to launch the test run and ensure that Phables is working.
+```bash
+phables test
+```
+
+## Quick Start Guide
+
+### Setup databases
+
+Run the following command to download and setup the required databases.
 
 ```bash
-# Setup databases
 phables install
+```
 
-# Preprocess data
+### Preprocess data
+
+Next, run the following command to preprocess your data. You have to provide the output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/) and the path to the directory containing the raw paired-end reads.
+
+```bash
 phables preprocess --input hecatomb.out/ --reads reads_dir/ --threads 16
+```
 
-# Run Phables
+### Run Phables
+
+Now you can run Phables as follows.
+
+```bash
 phables --input hecatomb.out/
 ```
 
-Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to obtain/format the inputs.
+Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
 
 
 ## Reporting Issues
