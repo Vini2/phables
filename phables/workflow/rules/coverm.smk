@@ -18,6 +18,7 @@ rule run_coverm:
         """
             TMPDIR={OUTDIR}
             coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {threads} --output-file {output}
+            rm -r coverm_fifo.*
         """
 
 
