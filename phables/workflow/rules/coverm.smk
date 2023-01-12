@@ -32,5 +32,5 @@ rule run_combine_cov:
         "../envs/phables.yaml"
     shell:
         """
-            python phables/workflow/scripts/combine_cov.py --covpath {COVERM_PATH} --output {output}
+            python phables/workflow/scripts/combine_cov.py --covpath {COVERM_PATH} --output {OUTDIR}
         """
