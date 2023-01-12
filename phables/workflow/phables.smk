@@ -24,16 +24,7 @@ Declare your targets, either here, or in a separate file.
 include: "rules/02_phables_targets.smk"
 
 
-# Mark target rules
-target_rules = []
-def targetRule(fn):
-    assert fn.__name__.startswith('__')
-    target_rules.append(fn.__name__[2:])
-    return fn
-
-
 """RUN SNAKEMAKE!"""
-@targetRule
 rule all:
     input:
         allTargets
@@ -43,7 +34,6 @@ rule all:
 Add rules files with the include directive here, or add rules AFTER rule 'all'.
 """
 
-@targetRule
 rule run_phables:
     input:
         GRAPH_FILE,
