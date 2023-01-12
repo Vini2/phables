@@ -30,7 +30,7 @@ setup(
     name="phables",
     packages=find_packages(),
     url="https://github.com/Vini2/phables",
-    python_requires=">=3.8",
+    python_requires=">=3.8,<3.11",
     description="Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples",
     version=get_version(),
     author="Vijini Mallawaarachchi",
@@ -40,8 +40,7 @@ setup(
         "snakemake>=7.14.0",
         "pyyaml>=6.0",
         "click>=8.1.3",
-        "conda>=22.9.0",
-        "gurobi"
+        "gurobipy>=10.0.0"
     ],
     entry_points={
         "console_scripts": [
