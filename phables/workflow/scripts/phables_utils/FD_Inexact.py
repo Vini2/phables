@@ -6,7 +6,7 @@ import more_itertools
 import networkx as nx
 
 # create logger
-logger = logging.getLogger("phables 0.1.0b5")
+logger = logging.getLogger("phables 0.1.0b6")
 
 
 def read_input(graphfile, number_subpath):
