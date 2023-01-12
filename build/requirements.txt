@@ -9,3 +9,4 @@ click
 pysam
 more-itertools
 gurobipy>=10.0.0
+mamba

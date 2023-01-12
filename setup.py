@@ -36,7 +36,7 @@ setup(
         "snakemake>=7.14.0",
         "pyyaml>=6.0",
         "click>=8.1.3",
-        "gurobipy>=10.0.0"
+        "gurobipy>=10.0.0",
     ],
     entry_points={
         "console_scripts": [

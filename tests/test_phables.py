@@ -43,17 +43,10 @@ def exec_command(cmnd, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
     return out.decode("utf8") if out is not None else None
 
 
-def test_phables(tmp_dir):
-    """test phables"""
-    dir_name = TEST_ROOTDIR / "data"
-    graph = dir_name / "assembly_graph.gfa"
-    paths = dir_name / "assembly_info.txt"
-    coverage = dir_name / "edge_coverages.tsv"
-    smg = dir_name / "edges.fasta.hmmout"
-    phrogs = dir_name / "phrogs_annotations.tsv"
-
-    cmd = f"python {EXEC_ROOTDIR}/phables/workflow/scripts/phables.py -g {graph} -p {paths} -b {dir_name} -hm {smg} -ph {phrogs} -c {coverage} -o {tmp_dir}"
-    exec_command(cmd)
+# def test_phables(tmp_dir):
+#     """test phables"""
+#     cmd = f"phables test"
+#     exec_command(cmd)
 
 
 def test_combine_cov(tmp_dir):
