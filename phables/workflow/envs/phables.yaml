@@ -13,7 +13,7 @@ dependencies:
   - scipy
   - numpy
   - pandas
-  - gurobi
+  - gurobi>=10.0.0
   - more-itertools
   - tqdm
   - click

@@ -18,7 +18,7 @@ def get_smg_unitigs(hmmout, mg_frac):
     with open(hmmout, "r") as myfile:
 
         for line in myfile.readlines():
-            if not line.startswith("#"):
+            if not line.startswith("#") and line.startswith("edge_"):
                 strings = line.strip().split()
 
                 unitig = strings[0]

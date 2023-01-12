@@ -21,7 +21,7 @@ from phables_utils.output_utils import (write_component_info, write_path,
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "0.1.0a3"
+__version__ = "0.1.0b5"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Development"
@@ -150,7 +150,19 @@ MAX_VAL = sys.maxsize
     help="path to the output folder",
     type=click.Path(exists=True),
 )
-@click.version_option(__version__)
+@click.option(
+    "--log",
+    "-l",
+    required=False,
+    help="path to the log file",
+    type=str,
+)
+@click.version_option(
+    __version__,
+    '--version',
+    '-v',
+    is_flag=True
+)
 def main(
     graph,
     paths,
@@ -166,6 +178,7 @@ def main(
     alignscore,
     seqidentity,
     output,
+    log,
 ):
 
     """
@@ -176,7 +189,7 @@ def main(
     # Setup logger
     # ----------------------------------------------------------------------
 
-    logger = logging.getLogger("phables 0.1.0a3")
+    logger = logging.getLogger("phables 0.1.0b5")
     logger.setLevel(logging.DEBUG)
     logging.captureWarnings(True)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
@@ -186,7 +199,10 @@ def main(
     logger.addHandler(consoleHeader)
 
     # Setup output path for log file
-    fileHandler = logging.FileHandler(f"{output}/phables.log")
+    if log is None:
+        fileHandler = logging.FileHandler(f"{output}/phables.log")
+    else:
+        fileHandler = logging.FileHandler(f"{log}")
     fileHandler.setLevel(logging.DEBUG)
     fileHandler.setFormatter(formatter)
     logger.addHandler(fileHandler)

@@ -12,7 +12,7 @@ Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic sample
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
 
-Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
+Phables is a tool developed using [Snaketool](https://github.com/beardymcjohnface/Snaketool) to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
@@ -54,37 +54,6 @@ pip install phables
 
 Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
 
-### Option 3: Downloading Phables from GitHub
-
-You can clone the Phables repository to your machine.
-
-```bash
-git clone https://github.com/Vini2/phables.git
-```
-
-Now go into the `phables` folder using the command
-
-```bash
-cd phables/
-```
-
-#### Using conda
-
-We recommend that you use [`conda`](https://docs.conda.io/en/latest/). Once you have installed `conda`, make sure you are in the `phables` folder. Now run the following commands to create a `conda` environment and activate it to run Phables.
-
-```bash
-conda env create -f environment.yml
-conda activate phables
-```
-
-#### Using pip
-
-If you prefer to use `pip` instead of `conda`, you can run the following command to install Phables using `pip`. Make sure you are in the `phables` folder.
-
-```bash
-pip install .
-```
-
 ### Setting up Gurobi
 
 The MFD implementation uses the linear programming solver [Gurobi](https://www.gurobi.com/). We chose Gurobi over open source solvers as Gurobi is fast and can solve large models (check the performance comparison at [https://www.gurobi.com/resources/open-source-linear-and-mixed-integer-programming-software-and-solvers/](https://www.gurobi.com/resources/open-source-linear-and-mixed-integer-programming-software-and-solvers/)).
@@ -99,23 +68,45 @@ You can refer to further instructions at [https://www.gurobi.com/academia/academ
 
 ### Test the setup
 
-After setting up, run the following command to ensure that Phables is working.
+After setting up, run the following command to print out the Phables help message.
 
 ```bash
 phables --help
 ```
 
-## Example usage
-
+Then run the following command to launch the test run and ensure that Phables is working.
 ```bash
-phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -c coverage.tsv -b bam_files/ -o /output/path/
+phables test
 ```
 
-Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to obtain/format the inputs.
+## Quick Start Guide
 
-## Snakemake Pipeline
+### Setup databases
 
-To Do
+Run the following command to download and setup the required databases.
+
+```bash
+phables install
+```
+
+### Preprocess data
+
+Next, run the following command to preprocess your data. You have to provide the output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/) and the path to the directory containing the raw paired-end reads.
+
+```bash
+phables preprocess --input hecatomb.out/ --reads reads_dir/ --threads 16
+```
+
+### Run Phables
+
+Now you can run Phables as follows.
+
+```bash
+phables --input hecatomb.out/
+```
+
+Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
+
 
 ## Reporting Issues
 
