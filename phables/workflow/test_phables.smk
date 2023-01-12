@@ -50,7 +50,8 @@ rule test_phables:
         unitigs = temp(os.path.join(TESTDIR, "resolved_edges.fasta")),
         component_info = temp(os.path.join(TESTDIR, "resolved_component_info.txt")),
         mfd = temp(os.path.join(TESTDIR, "results_MFD.txt")),
-        mfd_details = temp(os.path.join(TESTDIR, "results_MFD_details.txt"))
+        mfd_details = temp(os.path.join(TESTDIR, "results_MFD_details.txt")),
+        log = temp(os.path.join(TESTDIR, "phables_output.log"))
     params:
         graph = os.path.join(TESTDIR, "assembly_graph.gfa"),
         paths = os.path.join(TESTDIR, "assembly_info.txt"),
@@ -66,7 +67,7 @@ rule test_phables:
         alignscore = AS,
         seqidentity = SI,
         output = TESTDIR,
-        log = os.path.join(TESTDIR, "phables_output.log")
+        log = temp(os.path.join(TESTDIR, "phables_output.log"))
     log:
         temp(os.path.join(TESTDIR, "phables_output.log"))
     conda: 
