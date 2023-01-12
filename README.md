@@ -12,7 +12,7 @@ Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic sample
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
 
-Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
+Phables is a tool developed using [Snaketool](https://github.com/beardymcjohnface/Snaketool) to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via  Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
@@ -74,17 +74,21 @@ After setting up, run the following command to ensure that Phables is working.
 phables --help
 ```
 
-## Example usage
+## Usage
 
 ```bash
-phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -c coverage.tsv -b bam_files/ -o /output/path/
+# Setup databases
+phables install
+
+# Preprocess data
+phables preprocess --input hecatomb.out/ --reads reads_dir/ --threads 16
+
+# Run Phables
+phables --input hecatomb.out/
 ```
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to obtain/format the inputs.
 
-## Snakemake Pipeline
-
-Work in prgogress using [Snaketool](https://github.com/beardymcjohnface/Snaketool).
 
 ## Reporting Issues
 
