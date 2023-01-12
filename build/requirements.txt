@@ -1,0 +1,11 @@
+biopython
+python-igraph
+networkx>=2.8.6
+scipy
+numpy
+pandas
+tqdm
+click
+pysam
+more-itertools
+gurobipy>=10.0.0

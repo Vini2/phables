@@ -52,20 +52,20 @@ def test_phables(tmp_dir):
     smg = dir_name / "edges.fasta.hmmout"
     phrogs = dir_name / "phrogs_annotations.tsv"
 
-    cmd = f"{EXEC_ROOTDIR}/phables -g {graph} -p {paths} -b {dir_name} -hm {smg} -ph {phrogs} -c {coverage} -o {tmp_dir}"
+    cmd = f"python {EXEC_ROOTDIR}/phables/workflow/scripts/phables.py -g {graph} -p {paths} -b {dir_name} -hm {smg} -ph {phrogs} -c {coverage} -o {tmp_dir}"
     exec_command(cmd)
 
 
 def test_combine_cov(tmp_dir):
-    """test phables"""
+    """test combine_cov"""
     dir_name = TEST_ROOTDIR / "script_data"
-    cmd = f"python {EXEC_ROOTDIR}/phables_utils/support/combine_cov.py --covpath {dir_name} --output {tmp_dir}"
+    cmd = f"python {EXEC_ROOTDIR}/phables/workflow/scripts/combine_cov.py --covpath {dir_name} --output {tmp_dir}"
     exec_command(cmd)
 
 
 def test_gfa2fasta(tmp_dir):
-    """test phables"""
+    """test gfa2fasta"""
     dir_name = TEST_ROOTDIR / "data"
     graph = dir_name / "assembly_graph.gfa"
-    cmd = f"python {EXEC_ROOTDIR}/phables_utils/support/gfa2fasta.py --graph {graph} --assembler flye --output {tmp_dir}"
+    cmd = f"python {EXEC_ROOTDIR}/phables/workflow/scripts/gfa2fasta.py --graph {graph} --assembler flye --output {tmp_dir}"
     exec_command(cmd)
