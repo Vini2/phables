@@ -18,7 +18,6 @@ rule run_coverm:
         """
             TMPDIR={OUTDIR}
             coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {threads} --output-file {output}
-            rm -r coverm_fifo.*
         """
 
 
@@ -33,5 +32,5 @@ rule run_combine_cov:
         "../envs/phables.yaml"
     shell:
         """
-            python phables/workflow/scripts/combine_cov.py --covpath {COVERM_PATH} --output {OUTDIR}
+            python phables/workflow/scripts/combine_cov.py --covpath {COVERM_PATH} --output {OUTDIR} > {log}
         """
