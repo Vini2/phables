@@ -12,19 +12,12 @@ def get_version():
     ) as f:
         return f.readline().strip()
 
+    
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-CLASSIFIERS = [
-    "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3",
-    "Environment :: Console",
-    "Environment :: MacOS X",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT license",
-    "Natural Language :: English",
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS :: MacOS X",
-    "Topic :: Scientific/Engineering :: Bio-Informatics",
-]
+
+data_files = [(".", ["LICENSE", "README.md"])]
 
 setup(
     name="phables",
@@ -32,9 +25,12 @@ setup(
     url="https://github.com/Vini2/phables",
     python_requires=">=3.8,<3.11",
     description="Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     version=get_version(),
     author="Vijini Mallawaarachchi",
     author_email="viji.mallawaarachchi@gmail.com",
+    data_files=data_files,
     py_modules=["phables"],
     install_requires=[
         "snakemake>=7.14.0",
@@ -48,4 +44,12 @@ setup(
         ]
     },
     include_package_data=True,
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Operating System :: OS Independent",
+    ],
 )
