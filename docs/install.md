@@ -46,8 +46,21 @@ You can refer to further instructions at [https://www.gurobi.com/academia/academ
 
 ## Test the setup
 
-After setting up, run the following command to ensure that Phables is working.
+After setting up, run the following command to print out the Phables help message.
 
 ```bash
 phables --help
+```
+
+Then run the following command to launch the test run and ensure that Phables is working.
+```bash
+phables test
+```
+
+## Setup databases
+
+Now run the following command to download and setup the required databases.
+
+```bash
+phables install
 ```

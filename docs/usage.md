@@ -1,65 +1,89 @@
 # Phables Usage
 
-## Phables options
+## Phables run options
 
-You can see the following command-line options of Phables using `phables --help`.
+You can see the following command-line options of Phables using `phables run --help`.
 
 ```
-Usage: phables [OPTIONS]
+Usage: phables run [OPTIONS] [SNAKE_ARGS]...
 
-  Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic
-  samples. Please refer the full documentation available on Read the Docs at
-  https://phables.readthedocs.io/
+  Run Phables
 
 Options:
-  -g, --graph PATH          path to the assembly graph file  [required]
-  -p, --paths PATH          path to the assembly path info file  [required]
-  -c, --coverage PATH       path to the coverage file  [required]
-  -b, --bampath PATH        path to the bam files  [required]
-  -hm, --hmmout PATH        path to the .hmmout file  [required]
-  -ph, --phrogs PATH        path to the phrog annotations file  [required]
-  -ml, --minlength INTEGER  minimum length of circular unitigs to consider
-  -mcov, --mincov INTEGER   minimum coverage of paths to output
-  -cc, --compcount INTEGER  maximum unitig count to consider a component
-  -mp, --maxpaths INTEGER   maximum number of paths to resolve for a component
-  -mgf, --mgfrac FLOAT      length threshold to consider single copy marker
-                            genes
-  -as, --alignscore FLOAT   minimum alignment score for phrog annotations
-  -si, --seqidentity FLOAT  minimum sequence identity for phrog annotations
-  -o, --output PATH         path to the output folder  [required]
-  --version                 Show the version and exit.
-  --help                    Show this message and exit.
+  --input PATH                  Path to Hecatomb output  [required]
+  --minlength INTEGER           minimum length of circular unitigs to consider
+  --mincov INTEGER              minimum coverage of paths to output
+  --compcount INTEGER           maximum unitig count to consider a component
+  --maxpaths INTEGER            maximum number of paths to resolve for a
+                                component
+  --mgfrac FLOAT                length threshold to consider single copy
+                                marker genes
+  --alignscore FLOAT            minimum alignment score for phrog annotations
+  --seqidentity FLOAT           minimum sequence identity for phrog
+                                annotations
+  --output PATH                 Output directory  [default: phables.out]
+  --configfile TEXT             Custom config file [default:
+                                (outputDir)/config.yaml]
+  --threads INTEGER             Number of threads to use  [default: 1]
+  --use-conda / --no-use-conda  Use conda for Snakemake rules  [default: use-
+                                conda]
+  --conda-prefix PATH           Custom conda env directory
+  --snake-default TEXT          Customise Snakemake runtime args  [default:
+                                --rerun-incomplete, --printshellcmds,
+                                --nolock, --show-failed-logs]
+  -h, --help                    Show this message and exit.
+
+  
+  DOWNLOAD AND SETUP DATABASES
+  phables install
+  
+  
+  PREPROCESSING DATA
+  phables preprocess <options> 
+  
+  
+  RUN PHABLES
+  phables run <options> 
+  For more information on Phables please visit:
+  https://phables.readthedocs.io/
+  
+  
+  CLUSTER EXECUTION:
+  phables run ... --profile [profile]
+  For information on Snakemake profiles see:
+  https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
+  
+  RUN EXAMPLES:
+  Required:           phables run --input [folder]
+  Specify threads:    phables run ... --threads [threads]
+  Disable conda:      phables run ... --no-use-conda 
+  Change defaults:    phables run ... --snake-default="-k --nolock"
+  Add Snakemake args: phables run ... --dry-run --keep-going --touch
+  Specify targets:    phables run ... all print_targets
+  Available targets:
+      all             Run everything (default)
+      print_targets   List available targets
 ```
-
-## Input
-
-Phables takes the following files/paths as input.
-
-* Assembly graph file (`assembly_graph.gfa`)
-* Path information of contigs (`assembly_info.txt`)
-* Path to BAM files (`bam_files/`) from preprocessing step 3
-* Coverage of unitig sequences in each sample in `.tsv` format (`coverage.tsv`) from preprocessing step 4
-* HMMER result for scan of single-copy marker genes (`edges.fasta.hmmout`) from preprocessing step 5
-* MMseqs result for scan of PHROGs (`phrog_annot.tsv`) from preprocessing step 5
 
 ## Example usage
 
 ```bash
-phables -g assembly_graph.gfa -p assembly_info.txt -hm edges.fasta.hmmout -ph phrog_annot.tsv -c coverage.tsv -b bam_files/ -o /output/path/
+phables run --input <path_to_hecatomb.out>
 ```
+
+Note that you should provide the path to the Hecatomb output folder `hecatomb.out` for `--input`.
+
+The output of Phables is set by default to `phables.out`. You can change this using the `--output` argument. If you change `--output`, please make sure to have the preprocessing outputs in the new path as well.
 
 ## Output
 
-The output from Phables will be as follows.
+The output of Phables will contain the following main files and folders.
 
 * `resolved_paths.fasta` containing the resolved genomes
 * `resolved_phages` folder containing the resolved genomes in individual FASTA files
 * `resolved_genome_info.txt` containing the path name, coverage, length, GC content and unitig order of the resolved genomes
 * `resolved_edges.fasta` containing the unitigs that make up the resolved genomes
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
-
-## Snakemake pipeline
-To Do
 
 ## Reporting Issues
 
