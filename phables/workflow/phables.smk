@@ -64,5 +64,5 @@ rule run_phables:
         "./envs/phables.yaml"
     shell:
         """
-            phables/workflow/scripts/phables.py -g {GRAPH_FILE} -p {INFO_FILE} -hm {SMG_FILE} -ph {PHROG_ANNOT} -c {COVERAGE_FILE} -b {BAM_PATH} -o {OUTDIR} -l {log}
+            phables/workflow/scripts/phables.py -g {GRAPH_FILE} -p {INFO_FILE} -hm {SMG_FILE} -ph {PHROG_ANNOT} -c {COVERAGE_FILE} -b {BAM_PATH} -ml {ML} -mcov {MC} -cc {CC} -mp {MP} -mgf {MGF} -as {AS} -si {SI} -o {OUTDIR} -l {log}
         """

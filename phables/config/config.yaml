@@ -5,3 +5,12 @@ log: 'phables/phables.log'
 
 # Databases 
 db_dir: "databases"
+
+# Phable parameters
+minlength: 2000
+mincov: 10
+compcount: 200
+maxpaths: 10
+mgfrac: 0.2
+alignscore: 90
+seqidentity: 0.3

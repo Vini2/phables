@@ -77,6 +77,18 @@ if not os.path.exists(SMG_FILE):
     sys.exit(0)
 
 
+############################################################################
+# Get Phables parameters
+############################################################################
+ML = config['minlength']
+MC = config['mincov']
+CC = config['compcount']
+MP = config['maxpaths']
+MGF = config['mgfrac']
+AS = config['alignscore']
+SI = config['seqidentity']
+
+
 """DIRECTORIES/FILES etc.
 Declare some directories for pipeline intermediates and outputs.
 """
