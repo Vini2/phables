@@ -25,13 +25,14 @@ jobs:
       # Setup env
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-update-conda: true
+          activate-environment: anaconda-client-env
+          environment-file: build/environment.yml
           python-version: ${{ matrix.python-version }}
+          auto-activate-base: false
 
       - name: "Install dependencies on ${{ matrix.os }} for Python ${{ matrix.python-version }}"
         run: |
           python -m pip install --upgrade pip
-          conda env update --file build/environment.yml --name base
           pip install .
       
       - name: "Generate coverage report on ${{ matrix.os }} for Python ${{ matrix.python-version }}"
