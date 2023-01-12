@@ -34,7 +34,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
 
-      - name: "Install dependencies on ${{ matrix.os }} for Python ${{ matrix.python-version }}"
+      - name: "Setup Phables on ${{ matrix.os }} for Python ${{ matrix.python-version }}"
         run: |
           python -m pip install --upgrade pip
           pip install .
