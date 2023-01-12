@@ -39,7 +39,9 @@ setup(
     install_requires=[
         "snakemake>=7.14.0",
         "pyyaml>=6.0",
-        "Click>=8.1.3",
+        "click>=8.1.3",
+        "conda>=22.9.0",
+        "gurobi"
     ],
     entry_points={
         "console_scripts": [
