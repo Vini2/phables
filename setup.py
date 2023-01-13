@@ -1,18 +1,17 @@
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 
 def get_version():
     with open(
         os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "phables",
-            "phables.VERSION",
+            os.path.dirname(os.path.realpath(__file__)), "phables", "phables.VERSION",
         )
     ) as f:
         return f.readline().strip()
 
-    
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -32,16 +31,8 @@ setup(
     author_email="viji.mallawaarachchi@gmail.com",
     data_files=data_files,
     py_modules=["phables"],
-    install_requires=[
-        "snakemake>=7.14.0",
-        "pyyaml>=6.0",
-        "click>=8.1.3",
-    ],
-    entry_points={
-        "console_scripts": [
-            "phables=phables.__main__:main"
-        ]
-    },
+    install_requires=["snakemake>=7.14.0", "pyyaml>=6.0", "click>=8.1.3",],
+    entry_points={"console_scripts": ["phables=phables.__main__:main"]},
     include_package_data=True,
     classifiers=[
         "Development Status :: 4 - Beta",

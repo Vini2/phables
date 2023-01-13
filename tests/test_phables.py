@@ -47,4 +47,3 @@ def test_phables(tmp_dir):
     """test phables"""
     cmd = f"phables test"
     exec_command(cmd)
-

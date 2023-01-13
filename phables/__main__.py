@@ -6,17 +6,11 @@ https://github.com/beardymcjohnface/Snaketool/wiki/Customising-your-Snaketool
 """
 
 import os
+
 import click
 
-from .util import (
-    snake_base,
-    get_version,
-    default_to_output,
-    copy_config,
-    run_snakemake,
-    OrderedCommands,
-    print_citation,
-)
+from .util import (OrderedCommands, copy_config, default_to_output,
+                   get_version, print_citation, run_snakemake, snake_base)
 
 
 def common_options(func):
@@ -67,10 +61,7 @@ def common_options(func):
             show_default=True,
         ),
         click.option(
-            "--log",
-            default="phables.log",
-            callback=default_to_output,
-            hidden=True,
+            "--log", default="phables.log", callback=default_to_output, hidden=True,
         ),
         click.argument("snake_args", nargs=-1),
     ]
@@ -82,7 +73,7 @@ def common_options(func):
 @click.group(
     cls=OrderedCommands, context_settings=dict(help_option_names=["-h", "--help"])
 )
-@click.version_option(get_version(), '-v', '--version', is_flag=True)
+@click.version_option(get_version(), "-v", "--version", is_flag=True)
 def cli():
     """
         Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
@@ -138,7 +129,7 @@ Available targets:
     "_input",
     help="Path to Hecatomb output",
     type=click.Path(),
-    required=True
+    required=True,
 )
 @click.option(
     "--minlength",
@@ -191,22 +182,23 @@ Available targets:
 )
 @common_options
 def run(
-    _input, 
-    minlength, 
-    mincov, 
-    compcount, 
-    maxpaths, 
-    mgfrac, 
-    alignscore, 
-    seqidentity, 
-    output, 
-    log, 
-    **kwargs):
-    
+    _input,
+    minlength,
+    mincov,
+    compcount,
+    maxpaths,
+    mgfrac,
+    alignscore,
+    seqidentity,
+    output,
+    log,
+    **kwargs
+):
+
     """Run Phables"""
     # Config to add or update in configfile
     merge_config = {
-        "input": _input, 
+        "input": _input,
         "minlength": minlength,
         "mincov": mincov,
         "compcount": compcount,
@@ -215,7 +207,7 @@ def run(
         "alignscore": alignscore,
         "seqidentity": seqidentity,
         "output": output,
-        "log": log
+        "log": log,
     }
 
     # run!
@@ -242,7 +234,7 @@ def install(output, **kwargs):
     # run!
     run_snakemake(
         # Full path to Snakefile
-        snakefile_path=snake_base(os.path.join('workflow', 'install.smk')),
+        snakefile_path=snake_base(os.path.join("workflow", "install.smk")),
         **kwargs
     )
 
@@ -257,17 +249,15 @@ def install(output, **kwargs):
 @common_options
 def test(output, **kwargs):
     """Test Phables"""
-    test_dir = snake_base('test_data')
+    test_dir = snake_base("test_data")
 
     # Config to add or update in configfile
-    merge_config = {
-        "dir": test_dir
-    }
+    merge_config = {"dir": test_dir}
 
     # run!
     run_snakemake(
         # Full path to Snakefile
-        snakefile_path=snake_base(os.path.join('workflow', 'test_phables.smk')),
+        snakefile_path=snake_base(os.path.join("workflow", "test_phables.smk")),
         merge_config=merge_config,
         **kwargs
     )
@@ -280,8 +270,16 @@ def test(output, **kwargs):
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
-@click.option("--input", "_input", help="Input directory", type=click.Path(exists=True), required=True)
-@click.option("--reads", help="Reads directory", type=click.Path(exists=True), required=True)
+@click.option(
+    "--input",
+    "_input",
+    help="Input directory",
+    type=click.Path(exists=True),
+    required=True,
+)
+@click.option(
+    "--reads", help="Reads directory", type=click.Path(exists=True), required=True
+)
 @common_options
 def preprocess(_input, reads, output, log, **kwargs):
     """Preprocess data"""
@@ -291,7 +289,7 @@ def preprocess(_input, reads, output, log, **kwargs):
     # run!
     run_snakemake(
         # Full path to Snakefile
-        snakefile_path=snake_base(os.path.join('workflow', 'preprocess.smk')),
+        snakefile_path=snake_base(os.path.join("workflow", "preprocess.smk")),
         merge_config=merge_config,
         log=log,
         **kwargs
