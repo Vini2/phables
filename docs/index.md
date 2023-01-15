@@ -20,5 +20,9 @@ Phables was developed to recover phage-like components called "phage bubbles" th
 
 ## Workflow
 
+Phables is powered by [Snaketool](https://github.com/beardymcjohnface/Snaketool) which packs in all the setup, testing, preprocessing and running steps into an easy-to-use pipeline. 
+
+The following diagram shows an overview of Phables.
+
 ![](images/Phables_workflow.png)
 

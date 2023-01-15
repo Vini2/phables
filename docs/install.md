@@ -83,7 +83,7 @@ Optionally, the complete documentation of Phables including these pages can be b
 pip install mkdocs
 
 # go to your installation directory
-cd /path/to/hecatomb
+cd /path/to/phables
 
 # build
 mkdocs build
