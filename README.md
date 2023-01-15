@@ -8,7 +8,7 @@ Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic sample
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 ![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Anaconda-Server Badge](https://anaconda.org/vijinim/phables/badges/version.svg)](https://anaconda.org/vijinim/phables)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/phables/badges/version.svg)](https://anaconda.org/bioconda/phables)
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
 
@@ -16,7 +16,7 @@ Phables is a tool developed to resolve bacteriophage genomes using phage bubbles
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
-**NEW:** Phables is now available on Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use conda.
+**NEW:** Phables is now available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Vini2/phables/master/Phables_workflow.png" title="phables workflow" alt="phables workflow">
@@ -24,19 +24,13 @@ For detailed instructions on installation and usage, please refer to the [**docu
 
 ## Setting up Phables
 
-### Option 1: Installing Phables using conda (preferred)
+### Option 1: Installing Phables using conda (recommended)
 
-You can install Phables from Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables). Make sure you have [`conda`](https://docs.conda.io/en/latest/) installed.
+You can install Phables from bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables). Make sure you have [`conda`](https://docs.conda.io/en/latest/) installed.
 
 ```bash
-# add channels
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-conda config --add channels gurobi
-
 # create conda environment and install phables
-conda create -n phables -c vijinim phables
+conda create -n phables -c conda-forge -c anaconda -c bioconda phables
 
 # activate environment
 conda activate phables
@@ -46,7 +40,7 @@ Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
 
 ### Option 2: Installing Phables using pip
 
-You can install Phables from PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Make sure you have [`pip`](https://pip.pypa.io/en/stable/) installed.
+You can install Phables from PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Make sure you have [`pip`](https://pip.pypa.io/en/stable/) and [`mamba`](https://mamba.readthedocs.io/en/latest/index.html) installed.
 
 ```bash
 pip install phables
@@ -62,7 +56,7 @@ The `phables` conda environment and pip setup does not include Gurobi. You have 
 
 ```bash
 # conda
-conda install gurobi
+conda install -c gurobi gurobi
 
 # pip
 pip install gurobipy
@@ -85,6 +79,8 @@ phables --help
 ```
 
 ## Quick Start Guide
+
+Phables is powered by [Snaketool](https://github.com/beardymcjohnface/Snaketool) which packs in all the setup, testing, preprocessing and running steps into an easy-to-use pipeline.
 
 ### Setup the databases
 
@@ -121,5 +117,3 @@ Phables is still under testing. If you want to test (or break) Phables give it a
 ## Acknowledgement
 
 Phables uses the Gurobi implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/).
-
-Phables is developed as an easy-to-use pipeline using [Snaketool](https://github.com/beardymcjohnface/Snaketool).

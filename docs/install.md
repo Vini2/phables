@@ -1,20 +1,14 @@
 # Setting up Phables
 
-Phables is available on Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use conda.
+Phables is available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
 
-### Option 1: Installing Phables using conda (preferred)
+### Option 1: Installing Phables using conda (recommended)
 
-You can install Phables from Anaconda.org at [https://anaconda.org/vijinim/phables](https://anaconda.org/vijinim/phables). Make sure you have [`conda`](https://docs.conda.io/en/latest/) installed.
+You can install Phables from bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables). Make sure you have [`conda`](https://docs.conda.io/en/latest/) installed.
 
 ```bash
-# add channels
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-conda config --add channels gurobi
-
 # create conda environment and install phables
-conda create -n phables -c vijinim phables
+conda create -n phables -c conda-forge -c anaconda -c bioconda phables
 
 # activate environment
 conda activate phables
@@ -40,7 +34,7 @@ The `phables` conda environment and pip setup does not include Gurobi. You have 
 
 ```bash
 # conda
-conda install gurobi
+conda install -c gurobi gurobi
 
 # pip
 pip install gurobipy
