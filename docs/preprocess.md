@@ -18,7 +18,8 @@ You can find the assembly output in `hecatomb.out/processing/assembly/CONTIG_DIC
 Phables has a `preprocess` subcommand which you can run to process your data as follows.
 
 ```bash
-phables preprocess --input <path_to_hecatomb.out> --reads <reads_folder>
+# Preprocess data using 8 threads (default is 1 thread)
+phables preprocess --input <path_to_hecatomb.out> --reads <reads_folder> --threads 8
 ```
 
 Note that you should provide the path to the Hecatomb output folder `hecatomb.out` for `--input` and the reads folder to `--reads`.
