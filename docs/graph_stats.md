@@ -66,7 +66,7 @@ You can plot histograms of the different columns. The following code plots a his
 df = component_stats["Number of nodes"]
 
 # Plot the histogram
-ax = df.plot.hist(bins=100, alpha=0.5, figsize=(10, 8))
+ax = df.plot.hist(bins=100, alpha=0.5, figsize=(12, 8))
 
 # Set axis titles
 ax.set(xlabel='Number of nodes', ylabel='Frequency')
@@ -77,9 +77,9 @@ plt.savefig("histogram_n_nodes.png", format='png', dpi=300, bbox_inches='tight')
 
 ![](images/histogram_n_nodes.png)
 
-## Plot heatmaps and hierarchically-clustered heatmaps
+## Plot heatmaps
 
-You can plot heatmaps and hierarchically-clustered heatmaps for correlations of all the graph statistics.
+You can plot heatmaps for correlations of all the graph statistics as follows.
 
 ```python
 # Use Pearson correlation
@@ -94,7 +94,9 @@ plt.savefig("pearson_heatmap.png", format='png', dpi=300, bbox_inches='tight')
 
 ![](images/pearson_heatmap.png)
 
-As this image looks a bit messy and hard to interpret, we can clean it up by clustering so we can observe some patterns. For this we can use the `clustermap` function from seaborn which produces a hierarchically-clustered heatmap.
+## Plot hierarchically-clustered heatmaps
+
+As the heatmap above looks a bit messy and hard to interpret, we can clean it up by clustering so we can observe some patterns. For this we can use the `clustermap` function from seaborn which produces a hierarchically-clustered heatmap.
 
 ```python
 # Plot the hierarchically-clustered heatmap
