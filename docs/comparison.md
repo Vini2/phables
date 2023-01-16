@@ -32,7 +32,7 @@ Now we will load the `quality_summary.tsv` file into a dataframe called `checkv_
 
 ```python
 # Load the quality_summary.tsv from the CheckV results
-checkv_res = pd.read_csv(project_path+"checkv_result/quality_summary.tsv", delimiter="\t", header=0)
+checkv_res = pd.read_csv("checkv_resolved_pathsquality_summary.tsv", delimiter="\t", header=0)
 ```
 
 ## Format the data
