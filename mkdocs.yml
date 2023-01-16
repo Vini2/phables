@@ -21,3 +21,4 @@ nav:
     - EVAUATION:
         - Running CheckV: quality.md
         - Quality comparison: comparison.md
+        - Graph statistics: graph_stats.md
