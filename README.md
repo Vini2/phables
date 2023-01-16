@@ -103,7 +103,7 @@ phables test
 phables preprocess --input hecatomb.out/ --reads reads_dir/ --threads 8
 
 # Run Phables
-phables --input hecatomb.out/
+phables run --input hecatomb.out/
 ```
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
