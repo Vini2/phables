@@ -32,7 +32,7 @@ Tasks to perform at various stages the start and end of a run.
 """
 onsuccess:
     """Print a success message"""
-    sys.stderr.write('\n\nPhables test run success!\n\n')
+    sys.stderr.write('\n\nPhables test run was successful!\n\n')
 
 onerror:
     """Print an error message"""
