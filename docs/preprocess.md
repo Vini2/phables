@@ -26,6 +26,11 @@ Note that you should provide the path to the Hecatomb output folder `hecatomb.ou
 
 The output of Phables is set by default to `phables.out`. You can change this using the `--output` argument.
 
+```bash
+# Preprocess data using 8 threads (default is 1 thread)
+phables preprocess --input <path_to_hecatomb.out> --reads <reads_folder> --output <your_output_folder> --threads 8
+```
+
 The following preprocessing steps will be carried out by the `preprocess` commands.
 
 * Obtain unitig sequences from assembly graph

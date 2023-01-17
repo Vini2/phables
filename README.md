@@ -62,7 +62,7 @@ conda install -c gurobi gurobi
 pip install gurobipy
 ```
 
-To handle large models without any model size limitations, once you have installed Gurobi, you have to activate the (academic) license and add the key using the following command.
+To handle large models without any model size limitations, once you have installed Gurobi, you have to activate the (academic) license and add the key using the following command. You only have to do this once.
 
 ```bash
 grbgetkey <KEY>

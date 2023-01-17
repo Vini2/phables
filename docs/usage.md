@@ -73,7 +73,11 @@ phables run --input <path_to_hecatomb.out>
 
 Note that you should provide the path to the Hecatomb output folder `hecatomb.out` for `--input`.
 
-The output of Phables is set by default to `phables.out`. You can change this using the `--output` argument. If you change `--output`, please make sure to have the preprocessing outputs in the new path as well.
+The output of all the Phables subcommands is set by default to `phables.out`. If you changed the `--output` path in the [preprocessing steps](https://phables.readthedocs.io/en/latest/preprocess/), make sure to change the `--output` parameter for `phables run` as follows.
+
+ ```bash
+phables run --input <path_to_hecatomb.out>  --output <your_output_folder>
+```
 
 ## Output
 
