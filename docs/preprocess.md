@@ -45,17 +45,14 @@ The output of Phables is set by default to `phables.out`. You can change this us
 phables preprocess --input hecatomb.out --reads fastq --output my_output_folder --threads 8
 ```
 
-The following preprocessing steps will be carried out by the `preprocess` commands.
+## Output of preprocessing
 
-* Obtain unitig sequences from assembly graph
-* Map reads to unitig sequences and get BAM files
-* Run CoverM to get coverage of unitig sequences
-* Scan unitig sequences for single-copy marker genes and PHROGs
+The following preprocessing steps will be carried out and your `phables.out` (by default, or `my_output_folder`) output folder will contain the corresponding files and folders.
 
-## Output
-
-If you ran Phables with the default output path, ypur `phables.out` output folder will have the following files.
-
-
+* Obtain unitig sequences from assembly graph - `edges.fasta`
+* Map reads to unitig sequences and get BAM files - `bam_files`
+* Run CoverM to get coverage of unitig sequences - `coverage.tsv`
+* Scan unitig sequences for single-copy marker genes - `edges.fasta.hmmout`
+* Scan unitig sequences for Prokaryotic Virus Remote Homologous Groups (PHROGs) - `phrogs/phrogs_annotations.tsv`
 
 Now we are ready to run Phables.
