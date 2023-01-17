@@ -171,6 +171,8 @@ def main():
 
         pruned_graph = assembly_graph.subgraph(candidate_nodes)
 
+        has_cycles = False
+
         # if 5627 not in candidate_nodes:
         #     continue
 
@@ -324,267 +326,281 @@ def main():
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
 
-            # Remove dead-ends (nodes with no incoming or no outgoing edges)
-            # ----------------------------------------------------------------------
-            dead_ends_to_remove = edge_graph_utils.remove_dead_ends(G_edge)
+            try:
+                cycles_found = nx.find_cycle(G_edge, orientation="original")
+                if len(cycles_found) > 0:
+                    has_cycles = True
+            except nx.exception.NetworkXNoCycle:
+                logger.debug(f"No cycles found in component {my_count}")
 
-            if len(dead_ends_to_remove) > 0:
+            if has_cycles:
 
-                for node in dead_ends_to_remove:
-                    node_id = unitig_names_rev[node[:-1]]
-                    if node_id in candidate_nodes:
-                        candidate_nodes.remove(node_id)
+                logger.debug(f"Potentially cycles can be detected in component {my_count}.")
 
-                G_edge.remove_nodes_from(dead_ends_to_remove)
+                # Remove dead-ends (nodes with no incoming or no outgoing edges)
+                # ----------------------------------------------------------------------
+                dead_ends_to_remove = edge_graph_utils.remove_dead_ends(G_edge)
 
-                logger.debug(f"Dead-ends found and removed: {dead_ends_to_remove}")
+                if len(dead_ends_to_remove) > 0:
 
-            # Identify source/sink vertex
-            # ----------------------------------------------------------------------
+                    for node in dead_ends_to_remove:
+                        node_id = unitig_names_rev[node[:-1]]
+                        if node_id in candidate_nodes:
+                            candidate_nodes.remove(node_id)
 
-            source_sink_candidates = flow_utils.get_source_sink(
-                G_edge, graph_unitigs, minlength, self_looped_nodes
-            )
+                    G_edge.remove_nodes_from(dead_ends_to_remove)
 
-            source_sink = 0
+                    logger.debug(f"Dead-ends found and removed: {dead_ends_to_remove}")
 
-            logger.debug(f"Original candidate_nodes: {candidate_nodes}")
-            logger.debug(
-                f"Identified candidate source_sinks from BFS: {source_sink_candidates}"
-            )
+                # Identify source/sink vertex
+                # ----------------------------------------------------------------------
 
-            if len(source_sink_candidates) > 0:
+                source_sink_candidates = flow_utils.get_source_sink(
+                    G_edge, graph_unitigs, minlength, self_looped_nodes
+                )
 
-                # Identify the longest source/sink vertex
-                max_length = -1
-                max_length_vertex = -1
+                source_sink = 0
 
-                for vertex in source_sink_candidates:
-                    if len(graph_unitigs[vertex[:-1]]) > max_length:
-                        max_length = len(graph_unitigs[vertex[:-1]])
-                        max_length_vertex = vertex
+                logger.debug(f"Original candidate_nodes: {candidate_nodes}")
+                logger.debug(
+                    f"Identified candidate source_sinks from BFS: {source_sink_candidates}"
+                )
 
-                source_sink = unitig_names_rev[max_length_vertex[:-1]]
-                logger.debug(f"Identified source_sink from BFS: {source_sink}")
+                if len(source_sink_candidates) > 0:
 
-                candidate_nodes.remove(source_sink)
-                candidate_nodes.insert(0, source_sink)
-                logger.debug(f"Ordered candidate_nodes: {candidate_nodes}")
+                    # Identify the longest source/sink vertex
+                    max_length = -1
+                    max_length_vertex = -1
 
-            else:
-                logger.debug(f"No source/sink node detected")
-                continue
+                    for vertex in source_sink_candidates:
+                        if len(graph_unitigs[vertex[:-1]]) > max_length:
+                            max_length = len(graph_unitigs[vertex[:-1]])
+                            max_length_vertex = vertex
 
-            # Create refined directed graph for flow network
-            # ----------------------------------------------------------------------
-            G = nx.DiGraph()
+                    source_sink = unitig_names_rev[max_length_vertex[:-1]]
+                    logger.debug(f"Identified source_sink from BFS: {source_sink}")
 
-            for u, v, cov in G_edge.edges(data=True):
+                    candidate_nodes.remove(source_sink)
+                    candidate_nodes.insert(0, source_sink)
+                    logger.debug(f"Ordered candidate_nodes: {candidate_nodes}")
 
-                if u not in node_indices:
-                    node_indices[u] = my_counter
-                    node_indices_rev[my_counter] = u
-                    my_counter += 1
-                if v not in node_indices:
-                    node_indices[v] = my_counter
-                    node_indices_rev[my_counter] = v
-                    my_counter += 1
-
-                G.add_edge(node_indices[u], node_indices[v], weight=cov["weight"])
-
-            # Get connections and degree information
-            # ----------------------------------------------------------------------
-            in_degree = []
-            out_degree = []
-
-            for node in list(G.nodes):
-
-                if node_indices_rev[node][:-1] not in self_looped_nodes:
-                    clean_indegree = len(
-                        [
-                            x
-                            for x in G.predecessors(node)
-                            if node_indices_rev[x][:-1] not in self_looped_nodes
-                        ]
-                    )
-                    in_degree.append(clean_indegree)
-
-                    clean_outdegree = len(
-                        [
-                            x
-                            for x in G.successors(node)
-                            if node_indices_rev[x][:-1] not in self_looped_nodes
-                        ]
-                    )
-                    out_degree.append(clean_outdegree)
-
-            degrees = in_degree + out_degree
-
-            if len(degrees) == 0:
-                logger.debug(f"Skipping component as no clean connections were found")
-                continue
-
-            # Create flow network
-            # ----------------------------------------------------------------------
-            network_edges = list()
-
-            edge_list_indices = {}
-
-            subpaths = {}
-            subpath_count = 0
-
-            visited_edges = []
-
-            for u, v, cov in G_edge.edges(data=True):
-
-                u_name = unitig_names_rev[u[:-1]]
-                v_name = unitig_names_rev[v[:-1]]
-
-                u_index = candidate_nodes.index(u_name)
-                v_index = candidate_nodes.index(v_name)
-
-                edge_list_indices[u_index] = u
-                edge_list_indices[v_index] = v
-
-                juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
-
-                if v_index == 0:
-                    if (u_index, len(candidate_nodes)) not in visited_edges and (
-                        len(candidate_nodes),
-                        u_index,
-                    ) not in visited_edges:
-                        if juction_cov < cov["weight"]:
-                            network_edges.append(
-                                (
-                                    u_index,
-                                    len(candidate_nodes),
-                                    juction_cov,
-                                    cov["weight"],
-                                )
-                            )
-                        else:
-                            network_edges.append(
-                                (u_index, len(candidate_nodes), 0, cov["weight"])
-                            )
-
-                        visited_edges.append((u_index, len(candidate_nodes)))
-
-                        if juction_cov != 0:
-                            subpaths[subpath_count] = [u_index, len(candidate_nodes)]
-                            subpath_count += 1
                 else:
-                    if (u_index, v_index) not in visited_edges and (
-                        v_index,
-                        u_index,
-                    ) not in visited_edges:
-                        if juction_cov < cov["weight"]:
-                            network_edges.append(
-                                (u_index, v_index, juction_cov, cov["weight"])
-                            )
-                        else:
-                            network_edges.append((u_index, v_index, 0, cov["weight"]))
+                    logger.debug(f"No source/sink node detected")
+                    continue
 
-                        visited_edges.append((u_index, v_index))
+                # Create refined directed graph for flow network
+                # ----------------------------------------------------------------------
+                G = nx.DiGraph()
 
-                        if juction_cov != 0:
-                            subpaths[subpath_count] = [u_index, v_index]
-                            subpath_count += 1
+                for u, v, cov in G_edge.edges(data=True):
 
-            logger.debug(f"edge_list_indices: {edge_list_indices}")
+                    if u not in node_indices:
+                        node_indices[u] = my_counter
+                        node_indices_rev[my_counter] = u
+                        my_counter += 1
+                    if v not in node_indices:
+                        node_indices[v] = my_counter
+                        node_indices_rev[my_counter] = v
+                        my_counter += 1
 
-            # Create flow network and run MFD-ILP
-            # ----------------------------------------------------------------------
-            G_mfd = {
-                "Nodes": len(list(G_edge.nodes)),
-                "list of edges": network_edges,
-                "subpaths": subpaths,
-            }
-            logger.debug(f"G_mfd: {G_mfd}")
-            solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
-            logger.debug(f"Number of paths found: {len(solution_paths)}")
+                    G.add_edge(node_indices[u], node_indices[v], weight=cov["weight"])
 
-            cycle_components.add(my_count)
+                # Get connections and degree information
+                # ----------------------------------------------------------------------
+                in_degree = []
+                out_degree = []
 
-            # Iterate through solution paths
-            # ----------------------------------------------------------------------
-            if len(solution_paths) != 0:
+                for node in list(G.nodes):
 
-                phage_like_edges = phage_like_edges.union(set(original_candidate_nodes))
-
-                cycle_number = 1
-
-                for solution_path in solution_paths:
-                    coverage_val = solution_paths[solution_path]["weight"]
-
-                    # Filter path by coverage
-                    if coverage_val >= mincov:
-
-                        # Create graph for path
-                        G_path = nx.DiGraph()
-
-                        # Fill graph with data
-                        G_path.add_edges_from(solution_paths[solution_path]["path"])
-                        logger.debug(
-                            f"solution path: {solution_paths[solution_path]['path']}"
+                    if node_indices_rev[node][:-1] not in self_looped_nodes:
+                        clean_indegree = len(
+                            [
+                                x
+                                for x in G.predecessors(node)
+                                if node_indices_rev[x][:-1] not in self_looped_nodes
+                            ]
                         )
+                        in_degree.append(clean_indegree)
 
-                        if 0 in list(G_path.nodes):
+                        clean_outdegree = len(
+                            [
+                                x
+                                for x in G.successors(node)
+                                if node_indices_rev[x][:-1] not in self_looped_nodes
+                            ]
+                        )
+                        out_degree.append(clean_outdegree)
 
-                            # Get all simple paths from node 0 to last node
-                            candidate_paths = list(
-                                nx.all_simple_paths(G_path, 0, len(candidate_nodes))
+                degrees = in_degree + out_degree
+
+                if len(degrees) == 0:
+                    logger.debug(f"Skipping component as no clean connections were found")
+                    continue
+
+                # Create flow network
+                # ----------------------------------------------------------------------
+                network_edges = list()
+
+                edge_list_indices = {}
+
+                subpaths = {}
+                subpath_count = 0
+
+                visited_edges = []
+
+                for u, v, cov in G_edge.edges(data=True):
+
+                    u_name = unitig_names_rev[u[:-1]]
+                    v_name = unitig_names_rev[v[:-1]]
+
+                    u_index = candidate_nodes.index(u_name)
+                    v_index = candidate_nodes.index(v_name)
+
+                    edge_list_indices[u_index] = u
+                    edge_list_indices[v_index] = v
+
+                    juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
+
+                    if v_index == 0:
+                        if (u_index, len(candidate_nodes)) not in visited_edges and (
+                            len(candidate_nodes),
+                            u_index,
+                        ) not in visited_edges:
+                            if juction_cov < cov["weight"]:
+                                network_edges.append(
+                                    (
+                                        u_index,
+                                        len(candidate_nodes),
+                                        juction_cov,
+                                        cov["weight"],
+                                    )
+                                )
+                            else:
+                                network_edges.append(
+                                    (u_index, len(candidate_nodes), 0, cov["weight"])
+                                )
+
+                            visited_edges.append((u_index, len(candidate_nodes)))
+
+                            if juction_cov != 0:
+                                subpaths[subpath_count] = [u_index, len(candidate_nodes)]
+                                subpath_count += 1
+                    else:
+                        if (u_index, v_index) not in visited_edges and (
+                            v_index,
+                            u_index,
+                        ) not in visited_edges:
+                            if juction_cov < cov["weight"]:
+                                network_edges.append(
+                                    (u_index, v_index, juction_cov, cov["weight"])
+                                )
+                            else:
+                                network_edges.append((u_index, v_index, 0, cov["weight"]))
+
+                            visited_edges.append((u_index, v_index))
+
+                            if juction_cov != 0:
+                                subpaths[subpath_count] = [u_index, v_index]
+                                subpath_count += 1
+
+                logger.debug(f"edge_list_indices: {edge_list_indices}")
+
+                # Create flow network and run MFD-ILP
+                # ----------------------------------------------------------------------
+                G_mfd = {
+                    "Nodes": len(list(G_edge.nodes)),
+                    "list of edges": network_edges,
+                    "subpaths": subpaths,
+                }
+                logger.debug(f"G_mfd: {G_mfd}")
+                solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
+                logger.debug(f"Number of paths found: {len(solution_paths)}")
+
+                cycle_components.add(my_count)
+
+                # Iterate through solution paths
+                # ----------------------------------------------------------------------
+                if len(solution_paths) != 0:
+
+                    phage_like_edges = phage_like_edges.union(set(original_candidate_nodes))
+
+                    cycle_number = 1
+
+                    for solution_path in solution_paths:
+                        coverage_val = solution_paths[solution_path]["weight"]
+
+                        # Filter path by coverage
+                        if coverage_val >= mincov:
+
+                            # Create graph for path
+                            G_path = nx.DiGraph()
+
+                            # Fill graph with data
+                            G_path.add_edges_from(solution_paths[solution_path]["path"])
+                            logger.debug(
+                                f"solution path: {solution_paths[solution_path]['path']}"
                             )
 
-                            if len(candidate_paths) > 0:
+                            if 0 in list(G_path.nodes):
 
-                                logger.debug(f"candidate_paths: {candidate_paths[0]}")
-
-                                # Get mapped unitigs in order from the flow network
-                                path_order = []
-                                for path_edge in candidate_paths[0]:
-                                    if path_edge != len(candidate_nodes):
-                                        path_order.append(edge_list_indices[path_edge])
-
-                                logger.debug(f"path_order: {path_order}")
-
-                                # Get the order of unitigs in path
-                                path_string = ""
-                                total_length = 0
-
-                                for node in path_order:
-                                    unitig_name = node[:-1]
-                                    if node.endswith("+"):
-                                        path_string += str(graph_unitigs[unitig_name])
-                                    else:
-                                        path_string += str(
-                                            graph_unitigs[
-                                                unitig_name
-                                            ].reverse_complement()
-                                        )
-                                    total_length += len(str(graph_unitigs[unitig_name]))
-
-                                # Create GenomePath object with path details
-                                genome_path = GenomePath(
-                                    f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                    [x for x in path_order],
-                                    [unitig_names_rev[x[:-1]] for x in path_order],
-                                    path_string,
-                                    int(coverage_val),
-                                    total_length,
-                                    (path_string.count("G") + path_string.count("C"))
-                                    / len(path_string)
-                                    * 100,
+                                # Get all simple paths from node 0 to last node
+                                candidate_paths = list(
+                                    nx.all_simple_paths(G_path, 0, len(candidate_nodes))
                                 )
-                                my_genomic_paths.append(genome_path)
-                                logger.debug(f"total_length: {total_length}")
 
-                                cycle_number += 1
+                                if len(candidate_paths) > 0:
 
-                logger.debug(f"Number of paths selected: {cycle_number-1}")
+                                    logger.debug(f"candidate_paths: {candidate_paths[0]}")
+
+                                    # Get mapped unitigs in order from the flow network
+                                    path_order = []
+                                    for path_edge in candidate_paths[0]:
+                                        if path_edge != len(candidate_nodes):
+                                            path_order.append(edge_list_indices[path_edge])
+
+                                    logger.debug(f"path_order: {path_order}")
+
+                                    # Get the order of unitigs in path
+                                    path_string = ""
+                                    total_length = 0
+
+                                    for node in path_order:
+                                        unitig_name = node[:-1]
+                                        if node.endswith("+"):
+                                            path_string += str(graph_unitigs[unitig_name])
+                                        else:
+                                            path_string += str(
+                                                graph_unitigs[
+                                                    unitig_name
+                                                ].reverse_complement()
+                                            )
+                                        total_length += len(str(graph_unitigs[unitig_name]))
+
+                                    # Create GenomePath object with path details
+                                    genome_path = GenomePath(
+                                        f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                        [x for x in path_order],
+                                        [unitig_names_rev[x[:-1]] for x in path_order],
+                                        path_string,
+                                        int(coverage_val),
+                                        total_length,
+                                        (path_string.count("G") + path_string.count("C"))
+                                        / len(path_string)
+                                        * 100,
+                                    )
+                                    my_genomic_paths.append(genome_path)
+                                    logger.debug(f"total_length: {total_length}")
+
+                                    cycle_number += 1
+
+                    logger.debug(f"Number of paths selected: {cycle_number-1}")
+
+                else:
+                    logger.debug(f"No paths detected")
+                    continue
 
             else:
-                logger.debug(f"No paths detected")
-                continue
+                logger.debug(f"No cycles detected. Maybe a linear component?")
 
         # Case 1 components - circular unitigs
         elif len(candidate_nodes) == 1:
