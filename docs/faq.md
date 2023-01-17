@@ -23,13 +23,15 @@ Once you have run Phables, check out the [EVALUATION](https://phables.readthedoc
 
 ### Q1: Model too large for size-limited license
 
-If you get the following error when running Phables, this means that you don't have a proper license to handle large models. You should get an academic license which is provided free of charge to your institutional email address. You can refer to further instructions at [https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/).
+If you get the following error when running Phables, this means that you don't have a proper license to handle large models. 
 
 ```bash
 Error code 10010: Model too large for size-limited license; visit https://www.gurobi.com/free-trial for a full license
 ```
 
-### Q2: Failed to set up a license
+You should get an academic license which is provided free of charge to your institutional email address. You can refer to further instructions at [https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/).
+
+### Q2: HostID mismatch
 
 If you get the following error when running Phables as a job on a cluster, you cannot use your academic license which is a file-based host-locked license, meaning that you can only run Gurobi on the machine that the license was obtained for.
 
