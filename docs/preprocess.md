@@ -5,7 +5,7 @@ Phables requires the sequencing reads from viral metagenomic samples to be run t
 
 ## Step 1: Run read samples through Hecatomb
 
-Phables requires the assembly output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). First, run your sequencing read samples through Hecatomb using the following command.
+Phables requires the assembly output from [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). First, run your sequencing read samples through Hecatomb (version 1.1.0 or higher) using the following command.
 
 ```bash
 hecatomb run --reads <reads_folder>
