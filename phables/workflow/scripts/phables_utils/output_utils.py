@@ -52,27 +52,31 @@ def write_component_info(all_components, output):
         myfile.write(f"Minimum coverage\t")
         myfile.write(f"Coverage ratio (highest/lowest)\n")
 
-        for component in all_components:
-            myfile.write(f"{component.id}\t")
-            myfile.write(f"{component.n_nodes}\t")
-            myfile.write(f"{component.n_paths}\t")
-            myfile.write(f"{component.frac_unitigs}\t")
-            myfile.write(f"{component.max_degree}\t")
-            myfile.write(f"{component.max_in_degree}\t")
-            myfile.write(f"{component.max_out_degree}\t")
-            myfile.write(f"{component.avg_degree}\t")
-            myfile.write(f"{component.avg_in_degree}\t")
-            myfile.write(f"{component.avg_out_degree}\t")
-            myfile.write(f"{component.density}\t")
-            myfile.write(f"{component.max_path_length}\t")
-            myfile.write(f"{component.min_path_length}\t")
-            myfile.write(f"{component.min_max_len_ratio}\t")
-            myfile.write(f"{component.max_cov_path_length}\t")
-            myfile.write(f"{component.min_cov_path_length}\t")
-            myfile.write(f"{component.min_max_cov_len_ratio}\t")
-            myfile.write(f"{component.max_cov}\t")
-            myfile.write(f"{component.min_cov}\t")
-            myfile.write(f"{component.min_max_cov_ratio}\n")
+        if len(all_components) > 0:
+
+            for component in all_components:
+                myfile.write(f"{component.id}\t")
+                myfile.write(f"{component.n_nodes}\t")
+                myfile.write(f"{component.n_paths}\t")
+                myfile.write(f"{component.frac_unitigs}\t")
+                myfile.write(f"{component.max_degree}\t")
+                myfile.write(f"{component.max_in_degree}\t")
+                myfile.write(f"{component.max_out_degree}\t")
+                myfile.write(f"{component.avg_degree}\t")
+                myfile.write(f"{component.avg_in_degree}\t")
+                myfile.write(f"{component.avg_out_degree}\t")
+                myfile.write(f"{component.density}\t")
+                myfile.write(f"{component.max_path_length}\t")
+                myfile.write(f"{component.min_path_length}\t")
+                myfile.write(f"{component.min_max_len_ratio}\t")
+                myfile.write(f"{component.max_cov_path_length}\t")
+                myfile.write(f"{component.min_cov_path_length}\t")
+                myfile.write(f"{component.min_max_cov_len_ratio}\t")
+                myfile.write(f"{component.max_cov}\t")
+                myfile.write(f"{component.min_cov}\t")
+                myfile.write(f"{component.min_max_cov_ratio}\n")
+        else:
+            myfile.write(f"No complex components were resolved.")
 
     return "resolved_component_info.txt"
 
