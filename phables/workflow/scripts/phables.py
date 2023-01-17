@@ -335,7 +335,9 @@ def main():
 
             if has_cycles:
 
-                logger.debug(f"Potentially cycles can be detected in component {my_count}.")
+                logger.debug(
+                    f"Potentially cycles can be detected in component {my_count}."
+                )
 
                 # Remove dead-ends (nodes with no incoming or no outgoing edges)
                 # ----------------------------------------------------------------------
@@ -434,7 +436,9 @@ def main():
                 degrees = in_degree + out_degree
 
                 if len(degrees) == 0:
-                    logger.debug(f"Skipping component as no clean connections were found")
+                    logger.debug(
+                        f"Skipping component as no clean connections were found"
+                    )
                     continue
 
                 # Create flow network
@@ -483,7 +487,10 @@ def main():
                             visited_edges.append((u_index, len(candidate_nodes)))
 
                             if juction_cov != 0:
-                                subpaths[subpath_count] = [u_index, len(candidate_nodes)]
+                                subpaths[subpath_count] = [
+                                    u_index,
+                                    len(candidate_nodes),
+                                ]
                                 subpath_count += 1
                     else:
                         if (u_index, v_index) not in visited_edges and (
@@ -495,7 +502,9 @@ def main():
                                     (u_index, v_index, juction_cov, cov["weight"])
                                 )
                             else:
-                                network_edges.append((u_index, v_index, 0, cov["weight"]))
+                                network_edges.append(
+                                    (u_index, v_index, 0, cov["weight"])
+                                )
 
                             visited_edges.append((u_index, v_index))
 
@@ -522,7 +531,9 @@ def main():
                 # ----------------------------------------------------------------------
                 if len(solution_paths) != 0:
 
-                    phage_like_edges = phage_like_edges.union(set(original_candidate_nodes))
+                    phage_like_edges = phage_like_edges.union(
+                        set(original_candidate_nodes)
+                    )
 
                     cycle_number = 1
 
@@ -550,13 +561,17 @@ def main():
 
                                 if len(candidate_paths) > 0:
 
-                                    logger.debug(f"candidate_paths: {candidate_paths[0]}")
+                                    logger.debug(
+                                        f"candidate_paths: {candidate_paths[0]}"
+                                    )
 
                                     # Get mapped unitigs in order from the flow network
                                     path_order = []
                                     for path_edge in candidate_paths[0]:
                                         if path_edge != len(candidate_nodes):
-                                            path_order.append(edge_list_indices[path_edge])
+                                            path_order.append(
+                                                edge_list_indices[path_edge]
+                                            )
 
                                     logger.debug(f"path_order: {path_order}")
 
@@ -567,14 +582,18 @@ def main():
                                     for node in path_order:
                                         unitig_name = node[:-1]
                                         if node.endswith("+"):
-                                            path_string += str(graph_unitigs[unitig_name])
+                                            path_string += str(
+                                                graph_unitigs[unitig_name]
+                                            )
                                         else:
                                             path_string += str(
                                                 graph_unitigs[
                                                     unitig_name
                                                 ].reverse_complement()
                                             )
-                                        total_length += len(str(graph_unitigs[unitig_name]))
+                                        total_length += len(
+                                            str(graph_unitigs[unitig_name])
+                                        )
 
                                     # Create GenomePath object with path details
                                     genome_path = GenomePath(
@@ -584,7 +603,10 @@ def main():
                                         path_string,
                                         int(coverage_val),
                                         total_length,
-                                        (path_string.count("G") + path_string.count("C"))
+                                        (
+                                            path_string.count("G")
+                                            + path_string.count("C")
+                                        )
                                         / len(path_string)
                                         * 100,
                                     )
