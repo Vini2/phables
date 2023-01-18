@@ -18,9 +18,6 @@ For detailed instructions on installation and usage, please refer to the [**docu
 
 **NEW:** Phables is now available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Vini2/phables/master/Phables_workflow.png" title="phables workflow" alt="phables workflow">
-</p>
 
 ## Setting up Phables
 
@@ -112,6 +109,11 @@ Please refer to the [**documentation hosted at Read the Docs**](https://phables.
 ## Reporting Issues
 
 Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
+
+
+## Contributing to Phables
+
+Are you interested in contributing to the Phables project? If so, you can check out the contributing guidelines in [CONTRIBUTING.md](https://github.com/Vini2/phables/blob/develop/CONTRIBUTING.md).
 
 
 ## Acknowledgement
