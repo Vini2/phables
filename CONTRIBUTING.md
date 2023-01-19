@@ -87,6 +87,7 @@ Make sure to follow the commit style of [c3dev](https://github.com/cogent3/c3dev
 | REL:              | related to a release                          |
 | MAINT:            | maintenance commit (refactoring, typos, etc.) |
 | BUG:              | bug fix                                       |
+| REV:              | revert an earlier commit                      |
 
 
 Your contribution will be reviewed before accepting it. 
