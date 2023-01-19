@@ -105,11 +105,11 @@ phables run --input hecatomb.out/
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
 
 
-## Questions and Issues
-
-If you come across any questions, please have a look at the [Phables FAQ page](https://phables.readthedocs.io/en/latest/faq/). If your questions is not here, feel free to post it under [Phables Issues](https://github.com/Vini2/phables/issues).
+##  Issues and Questions
 
 Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
+
+If you come across any questions, please have a look at the [Phables FAQ page](https://phables.readthedocs.io/en/latest/faq/). If your question is not here, feel free to post it under [Phables Issues](https://github.com/Vini2/phables/issues).
 
 
 ## Contributing to Phables
