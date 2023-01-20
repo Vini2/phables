@@ -1,6 +1,6 @@
 # Phables Usage
 
-## Phables run options
+## Run options
 
 You can see the following command-line options of Phables using `phables run --help`.
 
@@ -64,6 +64,23 @@ Options:
       all             Run everything (default)
       print_targets   List available targets
 ```
+
+## Run options explained
+
+* `--input` - path to Hecatomb output
+* `--minlength` - minimum length of circular unitigs to consider [default: 2000]
+* `--mincov` - minimum coverage of paths to output [default: 10]
+* `--compcount` - maximum unitig count to consider a component [default: 200]
+* `--maxpaths` - maximum number of paths to resolve for a component [default: 10]
+* `--mgfrac` - length threshold to consider single copy marker genes [default: 0.2]
+* `--alignscore` - minimum alignment score for phrog annotations [default: 90]
+* `--seqidentity` - minimum sequence identity for phrog annotations [default: 0.3]
+* `--output` - path to the output directory [default: `phables.out`]
+* `--configfile` - custom config file [default: `(outputDir)/config.yaml`]
+* `--threads` - number of threads to use  [default: 1]
+* `--use-conda` / `--no-use-conda` - use conda for Snakemake rules  [default: `use-conda`]
+* `--conda-prefix` - custom conda env directory
+* `--snake-default` - customise Snakemake runtime args  [default: `--rerun-incomplete, --printshellcmds, --nolock, --show-failed-logs`]
 
 ## Example usage
 

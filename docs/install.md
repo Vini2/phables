@@ -50,10 +50,26 @@ You can refer to further instructions at [https://www.gurobi.com/academia/academ
 
 ## Test the installation
 
-After setting up, run the following command to print out the Phables help message.
+After setting up, run `phables --help` to print out the Phables help message.
 
 ```bash
-phables --help
+Usage: phables [OPTIONS] COMMAND [ARGS]...
+
+  Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic
+  samples. Please refer the full documentation available on Read the Docs at
+  https://phables.readthedocs.io/
+
+Options:
+  -v, --version  Show the version and exit.
+  -h, --help     Show this message and exit.
+
+Commands:
+  run         Run Phables
+  install     Install databases
+  preprocess  Preprocess data
+  test        Test Phables
+  config      Copy the system default config file
+  citation    Print the citation(s) for this tool
 ```
 
 ## Setup the databases
