@@ -42,7 +42,7 @@ jobs:
       - name: "Generate coverage report on ${{ matrix.os }} for Python ${{ matrix.python-version }}"
         run: |
           pip install pytest pytest-cov
-          pytest --cov=tests/ --cov-report xml --cov-report lcov --cov-append
+          pytest --cov=./ --cov-report xml --cov-report lcov --cov-append
           
       - name: Coveralls Parallel
         uses: coverallsapp/github-action@master
