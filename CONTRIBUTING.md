@@ -58,6 +58,11 @@ We adhere to the [PEP 8](https://peps.python.org/pep-0008/) style guide.
 
 Before committing, make sure to run [`black`](https://pypi.org/project/black/) and [`isort`](https://pypi.org/project/isort/).
 
+```bash
+black phables/workflow/scripts
+isort --atomic phables/workflow/scripts 
+```
+
 ## Report bugs using GitHub's issues
 
 We use GitHub issues to track public bugs. Report a bug by opening a new issue in GitHub [issues](https://github.com/Vini2/phables/issues). You will get to select between templates for bug report and feature request. If none of these templates match what you want to report, you can use the custom issue template.
