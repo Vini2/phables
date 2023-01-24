@@ -6,11 +6,11 @@ The assembly graph file of Flye (assembly_graph.gfa) should be provided as input
 
 """
 
+import logging
 import os
 import re
 import subprocess
 import sys
-import logging
 
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -51,14 +51,16 @@ def main():
         fileHandler = logging.FileHandler(f"{output_path}/gfa2fasta.log")
     else:
         fileHandler = logging.FileHandler(f"{log}")
-    
+
     fileHandler.setLevel(logging.DEBUG)
     fileHandler.setFormatter(formatter)
     logger.addHandler(fileHandler)
 
     # Check assembly graph file
     if not os.path.isfile(assembly_graph_file):
-        logger.error("Failed to open the assembly graph file. Please make sure to provife the .gfa file.")
+        logger.error(
+            "Failed to open the assembly graph file. Please make sure to provife the .gfa file."
+        )
         logger.info("Exiting gfa2fasta.py...\nBye...!\n")
         sys.exit(1)
 
@@ -104,7 +106,9 @@ def main():
     with open(f"{output_path}{prefix}edges.fasta", "w") as output_handle:
         SeqIO.write(sequenceset, output_handle, "fasta")
 
-    logger.info(f"The FASTA file with unitig sequences can be found at {output_handle.name}")
+    logger.info(
+        f"The FASTA file with unitig sequences can be found at {output_handle.name}"
+    )
 
     # Exit program
     # --------------
