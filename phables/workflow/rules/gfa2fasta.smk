@@ -1,6 +1,6 @@
 """
-Run gfa2fasta to obtain the sequences corresponding to edges in the Flye and Miniasm assembly graphs in FASTA format.
-The assembly graph file of Flye (assembly_graph.gfa) should be provided as inputs.
+Run gfa2fasta to obtain the sequences corresponding to unitigs in the assembly graphs in FASTA format.
+The assembly graph file with .GFA extension should be provided as inputs.
 """
 
 rule run_gfa2fasta:
@@ -9,9 +9,9 @@ rule run_gfa2fasta:
     output:
         EDGES_FILE
     params:
-        assembler = "flye",
         graph = GRAPH_FILE,
-        output = OUTDIR
+        output = OUTDIR,
+        log = os.path.join(LOGSDIR, "gfa2fasta.log")
     log:
         os.path.join(LOGSDIR, "gfa2fasta.log")
     conda: 

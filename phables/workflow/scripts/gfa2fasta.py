@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import sys
+import logging
 
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -28,30 +29,45 @@ def main():
     # Get arguments
     # -----------------------
 
-    assembler = snakemake.params.assembler
-    assembler_name = ""
     assembly_graph_file = snakemake.params.graph
     output_path = snakemake.params.output
+    log = snakemake.params.log
     prefix = ""
+
+    # Setup logger
+    # ----------------------------------------------------------------------
+
+    logger = logging.getLogger("gfa2fasta")
+    logger.setLevel(logging.DEBUG)
+    logging.captureWarnings(True)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    consoleHeader = logging.StreamHandler()
+    consoleHeader.setFormatter(formatter)
+    consoleHeader.setLevel(logging.INFO)
+    logger.addHandler(consoleHeader)
+
+    # Setup output path for log file
+    if log is None:
+        fileHandler = logging.FileHandler(f"{output_path}/gfa2fasta.log")
+    else:
+        fileHandler = logging.FileHandler(f"{log}")
+    
+    fileHandler.setLevel(logging.DEBUG)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
 
     # Check assembly graph file
     if not os.path.isfile(assembly_graph_file):
-        print("\nFailed to open the assembly graph file.")
-        print("Exiting gfa2fasta.py...\nBye...!\n")
+        logger.error("Failed to open the assembly graph file. Please make sure to provife the .gfa file.")
+        logger.info("Exiting gfa2fasta.py...\nBye...!\n")
         sys.exit(1)
-
-    # Check assembler type
-    if assembler.lower() == "flye":
-        assembler_name = "Flye"
-    elif assembler.lower() == "miniasm":
-        assembler_name = "Miniasm"
 
     # Check if output folder exists
     # ---------------------------------------------------
 
     # Handle for missing trailing forwardslash in output folder path
     if output_path[-1:] != "/":
-        output_path = output_path + "/"
+        output_path = f"{output_path}/"
 
     # Create output folder if it does not exist
     if not os.path.isdir(output_path):
@@ -60,7 +76,7 @@ def main():
     # Get the sequences corresponding to edges of the graph.
     # ---------------------------------------------------
 
-    print("\nObtaining edge sequences")
+    logger.info("Obtaining edge sequences")
 
     sequenceset = []
 
@@ -83,27 +99,17 @@ def main():
 
             line = file.readline()
 
-    print("\nWriting edge sequences to FASTA file")
+    logger.info("Writing edge sequences to FASTA file")
 
-    if assembler.lower() == "flye":
-        final_file = "edges.fasta"
-    elif assembler.lower() == "miniasm":
-        final_file = "unitigs.fasta"
-
-    with open(output_path + prefix + final_file, "w") as output_handle:
+    with open(f"{output_path}{prefix}edges.fasta", "w") as output_handle:
         SeqIO.write(sequenceset, output_handle, "fasta")
 
-    print(
-        "\nThe FASTA file with",
-        assembler_name,
-        "sequences can be found at",
-        output_handle.name,
-    )
+    logger.info(f"The FASTA file with unitig sequences can be found at {output_handle.name}")
 
     # Exit program
     # --------------
 
-    print("\nThank you for using gfa2fasta!\n")
+    logger.info("Thank you for using gfa2fasta!")
 
 
 if __name__ == "__main__":
