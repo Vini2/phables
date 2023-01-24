@@ -12,7 +12,7 @@ configfile: os.path.join(workflow.basedir, '../', 'config', 'databases.yaml')
 Setting the directory variables
 """
 
-INDIR = config['input']
+INPUT = config['input']
 OUTDIR = config['output']
 print(f"Output files will be saved to directory, {OUTDIR}\n")
 
@@ -22,15 +22,9 @@ print(f"Output files will be saved to directory, {OUTDIR}\n")
 ############################################################################
 
 # Check for assembly_graph.gfa
-GRAPH_FILE = os.path.join(INDIR, 'processing', 'assembly', 'CONTIG_DICTIONARY', 'FLYE', 'assembly_graph.gfa')
+GRAPH_FILE = INPUT
 if not os.path.exists(GRAPH_FILE):
     sys.stderr.write("ERROR: Could not find the assembly_graph.gfa file from the input.\n")
-    sys.exit(0)
-
-# Check for assembly_info.txt
-INFO_FILE = os.path.join(INDIR, 'processing', 'assembly', 'CONTIG_DICTIONARY', 'FLYE', 'assembly_info.txt')
-if not os.path.exists(INFO_FILE):
-    sys.stderr.write("ERROR: Could not find the assembly_info.txt file from the input.\n")
     sys.exit(0)
 
 # Check for unitigs file

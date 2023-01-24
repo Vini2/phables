@@ -37,7 +37,6 @@ Add rules files with the include directive here, or add rules AFTER rule 'all'.
 rule run_phables:
     input:
         GRAPH_FILE,
-        INFO_FILE,
         COVERAGE_FILE,
         BAM_PATH,
         PHROG_ANNOT,
@@ -50,7 +49,6 @@ rule run_phables:
         component_info = os.path.join(OUTDIR, "resolved_component_info.txt")
     params:
         graph = GRAPH_FILE,
-        paths = INFO_FILE,
         hmmout = SMG_FILE,
         phrogs = PHROG_ANNOT,
         coverage = COVERAGE_FILE,

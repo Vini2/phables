@@ -54,7 +54,6 @@ rule test_phables:
         log = temp(os.path.join(TESTDIR, "phables_output.log"))
     params:
         graph = os.path.join(TESTDIR, "assembly_graph.gfa"),
-        paths = os.path.join(TESTDIR, "assembly_info.txt"),
         hmmout = os.path.join(TESTDIR, "edges.fasta.hmmout"),
         phrogs = os.path.join(TESTDIR, "phrogs_annotations.tsv"),
         coverage = os.path.join(TESTDIR, "edge_coverages.tsv"),

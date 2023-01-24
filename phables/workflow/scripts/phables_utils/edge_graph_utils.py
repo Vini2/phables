@@ -197,23 +197,26 @@ def build_assembly_graph(assembly_graph_file):
     )
 
 
-def get_circular(paths):
+def get_circular(self_looped_nodes, graph_unitigs):
     """
     Get circular unitigs
     """
 
     circular = {}
 
-    with open(paths, "r") as myfile:
+    for unitig in self_looped_nodes:
+        circular[unitig] = len(str(graph_unitigs[unitig]))
 
-        for line in myfile.readlines():
-            if not line.startswith("#"):
-                strings = line.strip().split()
+    # with open(paths, "r") as myfile:
 
-                if strings[3] == "Y":
-                    contig_name = strings[0].replace("contig", "edge")
-                    contig_length = int(strings[1])
-                    circular[contig_name] = contig_length
+    #     for line in myfile.readlines():
+    #         if not line.startswith("#"):
+    #             strings = line.strip().split()
+
+    #             if strings[3] == "Y":
+    #                 contig_name = strings[0].replace("contig", "edge")
+    #                 contig_length = int(strings[1])
+    #                 circular[contig_name] = contig_length
 
     return circular
 

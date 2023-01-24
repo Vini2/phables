@@ -35,7 +35,6 @@ def main():
     # Get arguments
     # ----------------------------------------------------------------------
     graph = snakemake.params.graph
-    paths = snakemake.params.paths
     coverage = snakemake.params.coverage
     bampath = snakemake.params.bampath
     hmmout = snakemake.params.hmmout
@@ -77,7 +76,6 @@ def main():
 
     logger.info(f"Input arguments: ")
     logger.info(f"Assembly graph file: {graph}")
-    logger.info(f"Assembly paths info file: {paths}")
     logger.info(f"Unitig coverage file: {coverage}")
     logger.info(f"BAM files path: {bampath}")
     logger.info(f"Unitig .hmmout file: {hmmout}")
@@ -114,7 +112,7 @@ def main():
 
     # Get circular unitigs
     # ----------------------------------------------------------------------
-    circular = edge_graph_utils.get_circular(paths)
+    circular = edge_graph_utils.get_circular(self_looped_nodes, graph_unitigs)
 
     # Get unitigs with bacterial single copy marker genes
     # ----------------------------------------------------------------------
