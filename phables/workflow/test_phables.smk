@@ -37,7 +37,6 @@ Add rules files with the include directive here, or add rules AFTER rule 'all'.
 rule test_phables:
     input:
         g = os.path.join(TESTDIR, "assembly_graph.gfa"),
-        p = os.path.join(TESTDIR, "assembly_info.txt"),
         c = os.path.join(TESTDIR, "edge_coverages.tsv"),
         b = TESTDIR,
         ph = os.path.join(TESTDIR, "phrogs_annotations.tsv"),
