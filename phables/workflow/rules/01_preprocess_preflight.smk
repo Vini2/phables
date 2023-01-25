@@ -12,6 +12,7 @@ configfile: os.path.join(workflow.basedir, '../', 'config', 'databases.yaml')
 Setting the directory variables
 """
 
+THREADS = config['threads']
 INPUT = config['input']
 OUTDIR = config['output']
 print(f"Output files will be saved to directory, {OUTDIR}\n")

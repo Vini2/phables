@@ -10,6 +10,8 @@ rule scan_smg:
         hmm = os.path.join(DBPATH, "marker.hmm")
     output:
         os.path.join(OUTDIR, "edges.fasta.hmmout")
+    params:
+        threads = THREADS
     log:
         frag_out=os.path.join(LOGSDIR, "smg_scan_frag_out.log"),
         frag_err=os.path.join(LOGSDIR, "smg_scan_frag_err.log"),
@@ -19,8 +21,8 @@ rule scan_smg:
         "../envs/smg.yaml"
     shell:
         """
-            run_FragGeneScan.pl -genome={input} -out={input}.frag -complete=0 -train=complete -thread={threads} 1>{log.frag_out} 2>{log.frag_err}
-            hmmsearch --domtblout {output} --cut_tc --cpu {threads} {params.hmm} {input}.frag.faa 1>{log.hmm_out} 2> {log.hmm_err}
+            run_FragGeneScan.pl -genome={input} -out={input}.frag -complete=0 -train=complete -thread={params.threads} 1>{log.frag_out} 2>{log.frag_err}
+            hmmsearch --domtblout {output} --cut_tc --cpu {params.threads} {params.hmm} {input}.frag.faa 1>{log.hmm_out} 2> {log.hmm_err}
         """
 
 
@@ -28,7 +30,8 @@ rule scan_phrogs:
     input:
         {EDGES_FILE}
     params:
-        db = os.path.join(DBPATH, "phrogs_mmseqs_db", "phrogs_profile_db")
+        db = os.path.join(DBPATH, "phrogs_mmseqs_db", "phrogs_profile_db"),
+        threads = THREADS
     output:
         os.path.join(PHROGS_PATH, "phrogs_annotations.tsv")
     log:
@@ -38,6 +41,6 @@ rule scan_phrogs:
     shell:
         """
             mmseqs createdb {input} {PHROGS_PATH}target_seq > {log}
-            mmseqs search {PHROGS_PATH}target_seq {params.db} {PHROGS_PATH}results_mmseqs {PHROGS_PATH}tmp/ -s 7 > {log}
-            mmseqs createtsv {PHROGS_PATH}target_seq {params.db} {PHROGS_PATH}results_mmseqs {output} --full-header > {log}
+            mmseqs search {PHROGS_PATH}target_seq {params.db} {PHROGS_PATH}results_mmseqs {PHROGS_PATH}tmp/ --threads {params.threads} -s 7 > {log}
+            mmseqs createtsv {PHROGS_PATH}target_seq {params.db} {PHROGS_PATH}results_mmseqs {output} --threads {params.threads} --full-header > {log}
         """

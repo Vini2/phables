@@ -10,6 +10,8 @@ rule run_coverm:
         r2 = os.path.join(READ_DIR, PATTERN_R2)
     output:
         os.path.join(COVERM_PATH, "{sample}_rpkm.tsv")
+    params:
+        threads = THREADS
     log:
         os.path.join(LOGSDIR, "{sample}_coverm.log")
     conda: 
@@ -17,7 +19,7 @@ rule run_coverm:
     shell:
         """
             TMPDIR={OUTDIR}
-            coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {threads} --output-file {output}
+            coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {params.threads} --output-file {output}
         """
 
 

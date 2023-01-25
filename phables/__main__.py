@@ -105,7 +105,7 @@ For information on Snakemake profiles see:
 https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
 \b
 RUN EXAMPLES:
-Required:           phables run --input [folder]
+Required:           phables run --input [assembly graph file]
 Specify threads:    phables run ... --threads [threads]
 Disable conda:      phables run ... --no-use-conda 
 Change defaults:    phables run ... --snake-default="-k --nolock"
@@ -126,8 +126,7 @@ Available targets:
 )
 @click.option(
     "--input",
-    "_input",
-    help="Path to Hecatomb output",
+    help="Path to assembly graph file in .GFA format",
     type=click.Path(),
     required=True,
 )
@@ -182,7 +181,7 @@ Available targets:
 )
 @common_options
 def run(
-    _input,
+    input,
     minlength,
     mincov,
     compcount,
@@ -198,7 +197,7 @@ def run(
     """Run Phables"""
     # Config to add or update in configfile
     merge_config = {
-        "input": _input,
+        "input": input,
         "minlength": minlength,
         "mincov": mincov,
         "compcount": compcount,
@@ -272,19 +271,24 @@ def test(output, **kwargs):
 )
 @click.option(
     "--input",
-    "_input",
-    help="Input directory",
+    help="Path to assembly graph file in .GFA format",
     type=click.Path(exists=True),
     required=True,
 )
 @click.option(
-    "--reads", help="Reads directory", type=click.Path(exists=True), required=True
+    "--reads", help="Path to directory containing paired-end reads", type=click.Path(exists=True), required=True
 )
 @common_options
-def preprocess(_input, reads, output, log, **kwargs):
+def preprocess(input, reads, output, log, threads, **kwargs):
     """Preprocess data"""
     # Config to add or update in configfile
-    merge_config = {"input": _input, "reads": reads, "output": output, "log": log}
+    merge_config = {
+        "input": input,
+        "reads": reads,
+        "output": output,
+        "log": log,
+        "threads": threads
+    }
 
     # run!
     run_snakemake(

@@ -6,6 +6,9 @@ log: 'phables/phables.log'
 # Databases 
 databases:
 
+# Threads
+threads: 1
+
 # Phable parameters
 minlength: 2000
 mincov: 10

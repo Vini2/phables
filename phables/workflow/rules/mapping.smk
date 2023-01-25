@@ -11,12 +11,14 @@ rule map_reads_to_unitigs:
     output:
         bam = os.path.join(BAM_PATH, "{sample}.bam"),
         index = os.path.join(BAM_PATH, "{sample}.bam.bai")
+    params:
+        threads = THREADS
     log:
         os.path.join(LOGSDIR, "{sample}_mapping.log")
     conda: 
         "../envs/mapping.yaml"
     shell:
         """
-            minimap2 -t {threads} -N 5 -ax sr {input.edges} {input.r1} {input.r2} | samtools sort -@ {threads} > {output.bam}
+            minimap2 -t {params.threads} -N 5 -ax sr {input.edges} {input.r1} {input.r2} | samtools sort -@ {params.threads} > {output.bam}
             samtools index {output.bam} {output.index}
         """
