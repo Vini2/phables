@@ -32,13 +32,14 @@ rule all:
 rule phrogs_mmseqs_download:
     params:
         url=os.path.join(config['phrogs_mmseqs']),
-        file=os.path.join(DBPATH, config['phrogs_mmseqs_file'])
+        file=os.path.join(DBPATH, config['phrogs_mmseqs_file']),
+        db_path = DBPATH
     output:
         directory(os.path.join(DBPATH, config['phrogs_mmseqs_folder']))
     shell:
         """
             curl -Lo {params.file} {params.url}
-            tar -xf {params.file} -C {DBPATH}
+            tar -xf {params.file} -C {params.db_path}
             rm -rf {params.file}
         """
 
