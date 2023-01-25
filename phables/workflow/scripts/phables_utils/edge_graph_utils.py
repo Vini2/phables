@@ -65,7 +65,6 @@ def get_links(assembly_graph_file):
 
     node_count = 0
     graph_contigs = {}
-    edge_depths = {}
     edges_lengths = {}
     oriented_links = defaultdict(lambda: defaultdict(list))
     links = []
@@ -110,15 +109,9 @@ def get_links(assembly_graph_file):
             elif line.startswith("S"):
 
                 strings = line.strip().split()
-
                 my_map[node_count] = strings[1]
-
                 graph_contigs[strings[1]] = Seq(strings[2])
-
-                depth = int(strings[3].split(":")[-1])
-                edge_depths[strings[1]] = depth
                 edges_lengths[strings[1]] = len(strings[2])
-
                 node_count += 1
 
             line = file.readline()
