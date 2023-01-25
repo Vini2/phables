@@ -5,6 +5,7 @@
 """
 
 import glob
+import logging
 import os
 import subprocess
 
@@ -25,6 +26,29 @@ def main():
 
     covpath = snakemake.params.covpath
     output_path = snakemake.params.output
+    log = snakemake.params.log
+
+    # Setup logger
+    # ----------------------------------------------------------------------
+
+    logger = logging.getLogger("combine_cov")
+    logger.setLevel(logging.DEBUG)
+    logging.captureWarnings(True)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    consoleHeader = logging.StreamHandler()
+    consoleHeader.setFormatter(formatter)
+    consoleHeader.setLevel(logging.INFO)
+    logger.addHandler(consoleHeader)
+
+    # Setup output path for log file
+    if log is None:
+        fileHandler = logging.FileHandler(f"{output_path}/combine_cov.log")
+    else:
+        fileHandler = logging.FileHandler(f"{log}")
+
+    fileHandler.setLevel(logging.DEBUG)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
 
     # Validate inputs
     # ---------------------------------------------------
@@ -46,6 +70,7 @@ def main():
     final_df = pd.DataFrame()
 
     for file in cov_files:
+        logger.info(f"Reading file {file}")
         df = pd.read_csv(file, sep="\t", header=0)
 
         if final_df.empty:
@@ -55,16 +80,16 @@ def main():
                 [final_df, df[list(df.columns)[1]]], axis=1, join="inner"
             )
 
-    print(f"Dataframe shape: {final_df.shape}")
+    logger.info(f"Dataframe shape: {final_df.shape}")
 
     # Save dataframe to file
     final_df.to_csv(output_path + "coverage.tsv", sep="\t", index=False)
-    print(f"The combined coverage values can be found at {output_path}coverage.tsv")
+    logger.info(f"The combined coverage values can be found at {output_path}coverage.tsv")
 
     # Exit program
     # --------------
 
-    print("Thank you for using combine_cov!")
+    logger.info("Thank you for using combine_cov!")
 
 
 if __name__ == "__main__":

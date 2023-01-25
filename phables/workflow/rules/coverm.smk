@@ -28,7 +28,8 @@ rule run_combine_cov:
         os.path.join(OUTDIR, "coverage.tsv")
     params:
         covpath = COVERM_PATH,
-        output = OUTDIR
+        output = OUTDIR,
+        log = os.path.join(LOGSDIR, "combine_cov.log")
     log:
         os.path.join(LOGSDIR, "combine_cov.log")
     conda: 
