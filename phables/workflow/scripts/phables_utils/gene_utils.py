@@ -73,21 +73,21 @@ def get_phrog_unitigs(phrogs, align_score, seq_identity):
 
         for line in myfile.readlines():
 
-            if "edge_" in line:
+            # if "edge_" in line:
 
-                strings = line.strip().split("\t")
+            strings = line.strip().split("\t")
 
-                name = strings[0][1:-1]
-                phrog_id = strings[1][1:-1].split()[0]
-                phrog = phrog_dict[phrog_id]
-                alnScore = float(strings[2])
-                seqIdentity = float(strings[3])
+            name = strings[0][1:-1]
+            phrog_id = strings[1][1:-1].split()[0]
+            phrog = phrog_dict[phrog_id]
+            alnScore = float(strings[2])
+            seqIdentity = float(strings[3])
 
-                if alnScore > align_score and seqIdentity > seq_identity:
+            if alnScore > align_score and seqIdentity > seq_identity:
 
-                    if name not in unitig_phrogs:
-                        unitig_phrogs[name] = set([phrog])
-                    else:
-                        unitig_phrogs[name].add(phrog)
+                if name not in unitig_phrogs:
+                    unitig_phrogs[name] = set([phrog])
+                else:
+                    unitig_phrogs[name].add(phrog)
 
     return unitig_phrogs
