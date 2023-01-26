@@ -11,15 +11,18 @@ rule run_coverm:
     output:
         os.path.join(COVERM_PATH, "{sample}_rpkm.tsv")
     params:
-        threads = THREADS
+        threads = THREADS,
+        tempdir = os.path.join(OUTDIR, "coverm_temp")
     log:
         os.path.join(LOGSDIR, "{sample}_coverm.log")
     conda: 
         "../envs/mapping.yaml"
     shell:
         """
-            TMPDIR={OUTDIR}
-            coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {params.threads} --output-file {output}
+            mkdir {params.tempdir}
+            TMPDIR={params.tempdir}
+            coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {params.threads} --output-file {output} 2>&1 | tee {log}
+            rm -r {params.tempdir}
         """
 
 
