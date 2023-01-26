@@ -7,11 +7,10 @@ rule scan_smg:
     input:
         {EDGES_FILE}
     params:
-        hmm = os.path.join(DBPATH, "marker.hmm")
+        hmm = os.path.join(DBPATH, "marker.hmm"),
+        threads = THREADS
     output:
         os.path.join(OUTDIR, "edges.fasta.hmmout")
-    params:
-        threads = THREADS
     log:
         frag_out=os.path.join(LOGSDIR, "smg_scan_frag_out.log"),
         frag_err=os.path.join(LOGSDIR, "smg_scan_frag_err.log"),
