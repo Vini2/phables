@@ -495,13 +495,21 @@ def main():
                             v_index,
                             u_index,
                         ) not in visited_edges:
-                            if juction_cov < cov["weight"]:
+                            
+                            cov_upper_bound = 0
+
+                            if cov["weight"] > 0:
+                                cov_upper_bound = cov["weight"]
+                            else:
+                                cov_upper_bound = mincov
+
+                            if juction_cov <= cov_upper_bound:
                                 network_edges.append(
-                                    (u_index, v_index, juction_cov, cov["weight"])
+                                    (u_index, v_index, juction_cov, cov_upper_bound)
                                 )
                             else:
                                 network_edges.append(
-                                    (u_index, v_index, 0, cov["weight"])
+                                    (u_index, v_index, 0, cov_upper_bound)
                                 )
 
                             visited_edges.append((u_index, v_index))
@@ -614,6 +622,8 @@ def main():
                                     cycle_number += 1
 
                     logger.debug(f"Number of paths selected: {cycle_number-1}")
+                    resolved_components.add(my_count)
+                    resolved_cyclic.add(my_count)
 
                 else:
                     logger.debug(f"No paths detected")
