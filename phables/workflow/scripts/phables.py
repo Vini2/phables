@@ -155,6 +155,13 @@ def main():
     circular_unitigs = set()
     resolved_cyclic = set()
 
+    case1_found = set()
+    case1_resolved = set()
+    case2_found = set()
+    case2_resolved = set()
+    case3_found = set()
+    case3_resolved = set()
+
     phage_like_edges = set()
 
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
@@ -192,6 +199,8 @@ def main():
                     all_self_looped = False
 
             if all_self_looped:
+
+                case2_found.add(my_count)
 
                 cycle_components.add(my_count)
 
@@ -264,6 +273,7 @@ def main():
                         my_genomic_paths.append(genome_path)
                         resolved_components.add(my_count)
                         resolved_cyclic.add(my_count)
+                        case2_resolved.add(my_count)
 
         # Case 3 components
         elif len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
@@ -532,6 +542,7 @@ def main():
                 logger.debug(f"Number of paths found: {len(solution_paths)}")
 
                 cycle_components.add(my_count)
+                case3_found.add(my_count)
 
                 # Iterate through solution paths
                 # ----------------------------------------------------------------------
@@ -624,6 +635,7 @@ def main():
                     logger.debug(f"Number of paths selected: {cycle_number-1}")
                     resolved_components.add(my_count)
                     resolved_cyclic.add(my_count)
+                    case3_resolved.add(my_count)
 
                 else:
                     logger.debug(f"No paths detected")
@@ -634,6 +646,8 @@ def main():
 
         # Case 1 components - circular unitigs
         elif len(candidate_nodes) == 1:
+
+            case1_found.add(my_count)
 
             unitig_name = unitig_names[candidate_nodes[0]]
 
@@ -657,8 +671,8 @@ def main():
             )
             my_genomic_paths.append(genome_path)
             resolved_components.add(my_count)
-
             circular_unitigs.add(my_count)
+            case1_resolved.add(my_count)
 
             phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
@@ -774,6 +788,9 @@ def main():
     logger.info(
         f"Total number of components resolved: {len(circular_unitigs)+len(resolved_cyclic)}"
     )
+    logger.info(f"Case 1 (resolved/found): {len(case1_resolved)}/{len(case1_found)}")
+    logger.info(f"Case 2 (resolved/found): {len(case2_resolved)}/{len(case2_found)}")
+    logger.info(f"Case 3 (resolved/found): {len(case3_resolved)}/{len(case3_found)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
     logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
