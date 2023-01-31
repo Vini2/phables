@@ -136,6 +136,7 @@ Available targets:
     required=False,
     help="minimum length of circular unitigs to consider",
     type=int,
+    show_default=True,
 )
 @click.option(
     "--mincov",
@@ -143,6 +144,7 @@ Available targets:
     required=False,
     help="minimum coverage of paths to output",
     type=int,
+    show_default=True,
 )
 @click.option(
     "--compcount",
@@ -150,6 +152,7 @@ Available targets:
     required=False,
     help="maximum unitig count to consider a component",
     type=int,
+    show_default=True,
 )
 @click.option(
     "--maxpaths",
@@ -157,6 +160,7 @@ Available targets:
     required=False,
     help="maximum number of paths to resolve for a component",
     type=int,
+    show_default=True,
 )
 @click.option(
     "--mgfrac",
@@ -164,6 +168,7 @@ Available targets:
     required=False,
     help="length threshold to consider single copy marker genes",
     type=float,
+    show_default=True,
 )
 @click.option(
     "--alignscore",
@@ -171,6 +176,7 @@ Available targets:
     required=False,
     help="minimum alignment score for phrog annotations",
     type=float,
+    show_default=True,
 )
 @click.option(
     "--seqidentity",
@@ -178,6 +184,7 @@ Available targets:
     required=False,
     help="minimum sequence identity for phrog annotations",
     type=float,
+    show_default=True,
 )
 @common_options
 def run(
