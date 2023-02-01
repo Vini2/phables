@@ -20,9 +20,7 @@ class GenomeComponent:
         max_degree,
         min_degree,
         max_in_degree,
-        min_in_degree,
         max_out_degree,
-        min_out_degree,
         avg_degree,
         avg_in_degree,
         avg_out_degree,
@@ -44,9 +42,7 @@ class GenomeComponent:
         self.max_degree = max_degree
         self.min_degree = min_degree
         self.max_in_degree = max_in_degree
-        self.min_in_degree = min_in_degree
         self.max_out_degree = max_out_degree
-        self.min_out_degree = min_out_degree
         self.avg_degree = avg_degree
         self.avg_in_degree = avg_in_degree
         self.avg_out_degree = avg_out_degree
