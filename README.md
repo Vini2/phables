@@ -96,10 +96,10 @@ phables test
 ```bash
 # Preprocess data
 # locally: using 8 threads (default is 1 thread)
-phables preprocess --input hecatomb.out/ --reads reads_dir/ --threads 8
+phables preprocess --input assembly_graph.gfa --reads reads_dir/ --threads 8
 
 # Run Phables
-phables run --input hecatomb.out/
+phables run --input assembly_graph.gfa 
 ```
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
@@ -122,4 +122,4 @@ Are you interested in contributing to the Phables project? If so, you can check 
 Phables uses the Gurobi implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/).
 
 ## Citation
-The Phables manuscript is still under preparation. If you use Phables in your work, please contact Rob Edwards [raedwards@gmail.com](mailto:raedwards@gmail.com) for an appropriate citation.
+The Phables manuscript is still under preparation. If you use Phables in your work, please contact Rob Edwards at [raedwards@gmail.com](mailto:raedwards@gmail.com) for an appropriate citation.
