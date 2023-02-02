@@ -21,7 +21,22 @@ Once you have run Phables, check out the [EVALUATION](https://phables.readthedoc
 
 ## Gurobi FAQs
 
-### Q1: Model too large for size-limited license
+### Q1: Gurobi installation conflicts and `grbgetkey` fails to run
+
+If you come across conflicts when installing Gurobi in the phables environment and could not run the `grbgetkey` command properly, please follow the steps given below.
+
+```bash
+# Deactivate the phables environment
+conda deactivate
+
+# Remove phables environemnt
+conda remove -n phables --all
+
+# Create conda environment with phables and gurobi
+conda create -n phables -c conda-forge -c anaconda -c bioconda -c gurobi phables gurobi
+```
+
+### Q2: Model too large for size-limited license
 
 If you get the following error when running Phables, this means that you don't have a proper license to handle large models. 
 
@@ -31,7 +46,7 @@ Error code 10010: Model too large for size-limited license; visit https://www.gu
 
 You should get an academic license which is provided free of charge to your institutional email address. You can refer to further instructions at [https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
-### Q2: HostID mismatch
+### Q3: HostID mismatch
 
 If you get the following error when running Phables as a job on a cluster, you cannot use your academic license which is a file-based host-locked license, meaning that you can only run Gurobi on the machine that the license was obtained for.
 
@@ -42,7 +57,7 @@ Error 10009: HostID mismatch (licensed to <host_1>, hostid is <host_2>)
 
 You will have to contact your system admin and setup a floating network license. You can find more details at [https://support.gurobi.com/hc/en-us/articles/360013195412-How-do-I-obtain-a-free-academic-license-for-a-cluster-or-a-shared-computer-lab-](https://support.gurobi.com/hc/en-us/articles/360013195412-How-do-I-obtain-a-free-academic-license-for-a-cluster-or-a-shared-computer-lab-).
 
-### Q3: How can I get a Gurobi license for a cluster?
+### Q4: How can I get a Gurobi license for a cluster?
 
 If you want to run Phables on a cluster, your cluster should have a [floating network license](https://en.wikipedia.org/wiki/Floating_licensing) for Gurobi for the `run` subcommand to execute properly.
 
