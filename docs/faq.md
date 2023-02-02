@@ -6,13 +6,9 @@
 
 If you come across any issues while using Phables, you can open an [issue on GitHub](https://github.com/Vini2/phables/issues) and we will look into it. Phables is still under development and testing, so we expect that there will still be bugs and unhandled exceptions in the code. 
 
-### Q2: Should I run Hecatomb before running Phables?
+### Q2: Can I use the assembly graph from any assembler?
 
-Yes, you have to run [Hecatomb](https://hecatomb.readthedocs.io/en/latest/) on your your raw reads and provide the `hecatomb.out` folder as inputs to the `phables run` command. Phables will scan through the `hecatomb.out` folder and automatically track down the assembly files.
-
-### Q3: Can I use SPAdes assemblies as input?
-
-At the moment you can't use SPAdes assemblies for Phables. Currently, Phables supports only Flye which produces the graph files `assembly_graph.gfa` and `assembly_info.txt`. These files and their formats are different in the SPAdes output. 
+Phables supports any assembly graph in GFA (`.gfa`) format. You can use any assembler that produces the assembly graph in GFA format to assemble your samples OR you can convert an assembly graph in FASTG format to GFA format using a tool such as [fastg2gfa](https://github.com/lh3/gfa1/blob/master/misc/fastg2gfa.c).
 
 ### Q4: What can I do after running Phables?
 
