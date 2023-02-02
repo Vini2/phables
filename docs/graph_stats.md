@@ -6,21 +6,22 @@ Phables outputs a file named `resolved_component_info.txt` that contains the fol
 * Number of paths resolved
 * Fraction of unitigs recovered in the paths
 * Maximum degree of the graph
+* Minimum degree of the graph
 * Maximum in degree of the graph
 * Maximum out degree of the graph
 * Average degree of the graph
 * Average in degree of the graph
 * Average out degree of the graph
 * Density of the graph
-* Maximum path length - length of the longest path
-* Minimum path length - length of the shortest path
-* Length ratio (long/short) - (Maximum path length / Minimum path length)
-* Maximum coverage path length - length of the path with the highest coverage
-* Minimum coverage path length - length of the path with the lowest coverage
-* Length ratio (highest cov/lowest cov) - (Maximum coverage path length / Minimum coverage path length)
+* Maximum path length: length of the longest path
+* Minimum path length: length of the shortest path
+* Length ratio (long/short): (Maximum path length / Minimum path length)
+* Maximum coverage path length: length of the path with the highest coverage
+* Minimum coverage path length: length of the path with the lowest coverage
+* Length ratio (highest cov/lowest cov): (Maximum coverage path length / Minimum coverage path length)
 * Maximum coverage
 * Minimum coverage
-* Coverage ratio (highest/lowest) - (Maximum coverage / Minimum coverage)
+* Coverage ratio (highest/lowest): (Maximum coverage / Minimum coverage)
 
 You can compare and visualise the graph statistics of the resolved components using this information. The following example code shows how to visualise the results using Python.
 

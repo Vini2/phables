@@ -4,23 +4,28 @@
 
 You can see the following command-line options of Phables using `phables run --help`.
 
-```
+```bash
 Usage: phables run [OPTIONS] [SNAKE_ARGS]...
 
   Run Phables
 
 Options:
-  --input PATH                  Path to Hecatomb output  [required]
+  --input PATH                  Path to assembly graph file in .GFA format
+                                [required]
   --minlength INTEGER           minimum length of circular unitigs to consider
-  --mincov INTEGER              minimum coverage of paths to output
+                                [default: 2000]
+  --mincov INTEGER              minimum coverage of paths to output  [default:
+                                10]
   --compcount INTEGER           maximum unitig count to consider a component
+                                [default: 200]
   --maxpaths INTEGER            maximum number of paths to resolve for a
-                                component
+                                component  [default: 10]
   --mgfrac FLOAT                length threshold to consider single copy
-                                marker genes
+                                marker genes  [default: 0.2]
   --alignscore FLOAT            minimum alignment score for phrog annotations
+                                [default: 90]
   --seqidentity FLOAT           minimum sequence identity for phrog
-                                annotations
+                                annotations  [default: 0.3]
   --output PATH                 Output directory  [default: phables.out]
   --configfile TEXT             Custom config file [default:
                                 (outputDir)/config.yaml]
@@ -33,41 +38,11 @@ Options:
                                 --nolock, --show-failed-logs]
   -h, --help                    Show this message and exit.
 
-  
-  DOWNLOAD AND SETUP DATABASES
-  phables install
-  
-  
-  PREPROCESSING DATA
-  phables preprocess <options> 
-  
-  
-  RUN PHABLES
-  phables run <options> 
-  For more information on Phables please visit:
-  https://phables.readthedocs.io/
-  
-  
-  CLUSTER EXECUTION:
-  phables run ... --profile [profile]
-  For information on Snakemake profiles see:
-  https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
-  
-  RUN EXAMPLES:
-  Required:           phables run --input [folder]
-  Specify threads:    phables run ... --threads [threads]
-  Disable conda:      phables run ... --no-use-conda 
-  Change defaults:    phables run ... --snake-default="-k --nolock"
-  Add Snakemake args: phables run ... --dry-run --keep-going --touch
-  Specify targets:    phables run ... all print_targets
-  Available targets:
-      all             Run everything (default)
-      print_targets   List available targets
 ```
 
 ## Run options explained
 
-* `--input` - path to Hecatomb output
+* `--input` - to assembly graph file in .GFA format
 * `--minlength` - minimum length of circular unitigs to consider [default: 2000]
 * `--mincov` - minimum coverage of paths to output [default: 10]
 * `--compcount` - maximum unitig count to consider a component [default: 200]
@@ -85,15 +60,15 @@ Options:
 ## Example usage
 
 ```bash
-phables run --input hecatomb.out
+phables run --input assembly_graph.gfa
 ```
 
-Note that you should provide the path to the Hecatomb output folder `hecatomb.out` for `--input`.
+Note that you should provide the path to the assembly graph file in .GFA format for `--input` parameter.
 
 The output of all the Phables subcommands is set by default to `phables.out`. If you changed the `--output` path in the [preprocessing steps](https://phables.readthedocs.io/en/latest/preprocess/) to `my_output_folder` for example, make sure to change the `--output` parameter for `phables run` as follows.
 
 ```bash
-phables run --input hecatomb.out  --output my_output_folder
+phables run --input assembly_graph.gfa  --output my_output_folder
 ```
 
 ## Output
