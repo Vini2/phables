@@ -67,7 +67,7 @@ rule test_phables:
         output = TESTDIR,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))
     log:
-        temp(os.path.join(TESTDIR, "phables_output.log"))
+        os.path.join(TESTDIR, "phables_output.log")
     conda: 
         "./envs/phables.yaml"
     script:

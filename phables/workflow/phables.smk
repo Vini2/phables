@@ -11,29 +11,71 @@ configfile: os.path.join(workflow.basedir, 'config', 'config.yaml')
 configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
 
 
-"""PREFLIGHT CHECKS
-Validate your inputs, set up directories, parse your config, etc.
-"""
-include: "rules/00_database_preflight.smk"
-include: "rules/02_phables_preflight.smk"
+"""PREFLIGHT CHECKS"""
+include: os.path.join("rules", "00_database_preflight.smk")
+include: os.path.join("rules", "02_phables_preflight.smk")
 
 
-"""TARGETS
-Declare your targets, either here, or in a separate file.
-"""
-include: "rules/02_phables_targets.smk"
+"""TARGETS"""
+include: os.path.join("rules", "02_phables_targets.smk")
 
 
-"""RUN SNAKEMAKE!"""
+"""Target rules"""
+target_rules = []
+
+def targetRule(fn):
+    assert fn.__name__.startswith("__")
+    target_rules.append(fn.__name__[2:])
+    return fn
+
+localrules: all, preprocess, phables, print_stages
+
+
+"""Run stages"""
+@targetRule
 rule all:
     input:
-        allTargets
+        preprocessTargets,
+        phablesTargets
 
 
-"""RULES
-Add rules files with the include directive here, or add rules AFTER rule 'all'.
-"""
+@targetRule
+rule preprocess:
+    input:
+        preprocessTargets
 
+
+@targetRule
+rule phables:
+    input:
+        phablesTargets
+
+
+@targetRule
+rule print_stages:
+    run:
+        print("\nIndividual Phables stages to run: \n", file=sys.stderr)
+        print("* " + "\n* ".join(target_rules) + "\n\n", file=sys.stderr)
+
+
+"""RULES"""
+# Step 2: Obtain unitig sequences from assembly graph
+include: os.path.join("rules", "rules/gfa2fasta.smk")
+
+
+# Step 3: Map reads to unitig sequences and get BAM files
+include: os.path.join("rules", "rules/mapping.smk")
+
+
+# Step 4: Run CoverM to get coverage of unitig sequences
+include: os.path.join("rules", "rules/coverm.smk")
+
+
+# Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
+include: os.path.join("rules", "rules/genes.smk")
+
+
+# Step 6: Run Phables
 rule run_phables:
     input:
         GRAPH_FILE,
@@ -65,6 +107,6 @@ rule run_phables:
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda: 
-        "./envs/phables.yaml"
+        os.path.join("envs", "phables.yaml")
     script:
         os.path.join('scripts', 'phables.py')
