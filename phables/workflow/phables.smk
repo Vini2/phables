@@ -7,8 +7,8 @@ This is the main Snakefile to run phables.
 """
 
 """CONFIGURATION"""
-configfile: os.path.join(workflow.basedir, 'config', 'config.yaml')
-configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
+configfile: os.path.join(workflow.basedir, "..", "config", "config.yaml")
+configfile: os.path.join(workflow.basedir, "..", "config", "databases.yaml")
 
 
 """PREFLIGHT CHECKS"""

@@ -8,8 +8,8 @@ This is an auxiliary Snakefile to install databases or dependencies.
 
 
 """CONFIGURATION"""
-configfile: os.path.join(workflow.basedir, 'config', 'config.yaml')
-configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
+configfile: os.path.join(workflow.basedir, "..", "config", "config.yaml")
+configfile: os.path.join(workflow.basedir, "..", "config", "databases.yaml")
 
 include: "rules/00_database_preflight.smk"
 
@@ -36,6 +36,8 @@ rule phrogs_mmseqs_download:
         db_path = DBPATH
     output:
         directory(os.path.join(DBPATH, config['phrogs_mmseqs_folder']))
+    conda:
+        os.path.join("envs", "curl.yaml")
     shell:
         """
             curl -Lo {params.file} {params.url}
@@ -48,6 +50,8 @@ rule smg_hmm_download:
         url=os.path.join(config['smg_hmm'])
     output:
         os.path.join(DBPATH, config['smg_hmm_file'])
+    conda:
+        os.path.join("envs", "curl.yaml")
     shell:
         """
             curl -Lo {output} {params.url}
@@ -58,6 +62,8 @@ rule phrog_annot_download:
         url=os.path.join(config['phrog_annot'])
     output:
         os.path.join(DBPATH, config['phrog_annot_file'])
+    conda:
+        os.path.join("envs", "curl.yaml")
     shell:
         """
             curl -Lo {output} {params.url}
