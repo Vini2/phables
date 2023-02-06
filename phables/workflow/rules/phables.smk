@@ -31,4 +31,4 @@ rule run_phables:
     conda:
         os.path.join("..", "envs", "phables.yaml")
     script:
-        os.path.join('scripts', 'phables.py')
+        os.path.join("..", "scripts", "phables.py")
