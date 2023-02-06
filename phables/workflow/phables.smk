@@ -60,19 +60,19 @@ rule print_stages:
 
 """RULES"""
 # Step 2: Obtain unitig sequences from assembly graph
-include: os.path.join("rules", "rules/gfa2fasta.smk")
+include: os.path.join("rules", "gfa2fasta.smk")
 
 
 # Step 3: Map reads to unitig sequences and get BAM files
-include: os.path.join("rules", "rules/mapping.smk")
+include: os.path.join("rules", "mapping.smk")
 
 
 # Step 4: Run CoverM to get coverage of unitig sequences
-include: os.path.join("rules", "rules/coverm.smk")
+include: os.path.join("rules", "coverm.smk")
 
 
 # Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
-include: os.path.join("rules", "rules/genes.smk")
+include: os.path.join("rules", "genes.smk")
 
 
 # Step 6: Run Phables
