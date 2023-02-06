@@ -7,8 +7,8 @@ This is an auxiliary Snakefile to test phables.
 """
 
 """CONFIGURATION"""
-configfile: os.path.join(workflow.basedir, 'config', 'config.yaml')
-configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
+configfile: os.path.join(workflow.basedir, "..", "config", "config.yaml")
+configfile: os.path.join(workflow.basedir, "..", "config", "databases.yaml")
 
 
 """PREFLIGHT CHECKS
@@ -67,8 +67,8 @@ rule test_phables:
         output = TESTDIR,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))
     log:
-        temp(os.path.join(TESTDIR, "phables_output.log"))
+        os.path.join(TESTDIR, "phables_output.log")
     conda: 
-        "./envs/phables.yaml"
+        os.path.join("envs", "phables.yaml")
     script:
         os.path.join('scripts', 'phables.py')

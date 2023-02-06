@@ -110,10 +110,12 @@ Specify threads:    phables run ... --threads [threads]
 Disable conda:      phables run ... --no-use-conda 
 Change defaults:    phables run ... --snake-default="-k --nolock"
 Add Snakemake args: phables run ... --dry-run --keep-going --touch
-Specify targets:    phables run ... all print_targets
+Specify targets:    phables run ... print_stages
 Available targets:
     all             Run everything (default)
-    print_targets   List available targets
+    preprocess      Run preprocessing only
+    phables         Run phables (and preprocessing if needed)
+    print_stages    List available stages
 """
 
 
@@ -129,6 +131,9 @@ Available targets:
     help="Path to assembly graph file in .GFA format",
     type=click.Path(),
     required=True,
+)
+@click.option(
+    "--reads", help="Path to directory containing paired-end reads", type=click.Path(exists=True), required=True
 )
 @click.option(
     "--minlength",
@@ -189,6 +194,7 @@ Available targets:
 @common_options
 def run(
     input,
+    reads,
     minlength,
     mincov,
     compcount,
@@ -205,6 +211,7 @@ def run(
     # Config to add or update in configfile
     merge_config = {
         "input": input,
+        "reads": reads,
         "minlength": minlength,
         "mincov": mincov,
         "compcount": compcount,
@@ -269,42 +276,42 @@ def test(output, **kwargs):
     )
 
 
-# Preprocess command
-@click.command(
-    epilog=help_msg_extra,
-    context_settings=dict(
-        help_option_names=["-h", "--help"], ignore_unknown_options=True
-    ),
-)
-@click.option(
-    "--input",
-    help="Path to assembly graph file in .GFA format",
-    type=click.Path(exists=True),
-    required=True,
-)
-@click.option(
-    "--reads", help="Path to directory containing paired-end reads", type=click.Path(exists=True), required=True
-)
-@common_options
-def preprocess(input, reads, output, log, threads, **kwargs):
-    """Preprocess data"""
-    # Config to add or update in configfile
-    merge_config = {
-        "input": input,
-        "reads": reads,
-        "output": output,
-        "log": log,
-        "threads": threads
-    }
-
-    # run!
-    run_snakemake(
-        # Full path to Snakefile
-        snakefile_path=snake_base(os.path.join("workflow", "preprocess.smk")),
-        merge_config=merge_config,
-        log=log,
-        **kwargs
-    )
+# # Preprocess command
+# @click.command(
+#     epilog=help_msg_extra,
+#     context_settings=dict(
+#         help_option_names=["-h", "--help"], ignore_unknown_options=True
+#     ),
+# )
+# @click.option(
+#     "--input",
+#     help="Path to assembly graph file in .GFA format",
+#     type=click.Path(exists=True),
+#     required=True,
+# )
+# @click.option(
+#     "--reads", help="Path to directory containing paired-end reads", type=click.Path(exists=True), required=True
+# )
+# @common_options
+# def preprocess(input, reads, output, log, threads, **kwargs):
+#     """Preprocess data"""
+#     # Config to add or update in configfile
+#     merge_config = {
+#         "input": input,
+#         "reads": reads,
+#         "output": output,
+#         "log": log,
+#         "threads": threads
+#     }
+#
+#     # run!
+#     run_snakemake(
+#         # Full path to Snakefile
+#         snakefile_path=snake_base(os.path.join("workflow", "preprocess.smk")),
+#         merge_config=merge_config,
+#         log=log,
+#         **kwargs
+#     )
 
 
 @click.command()
@@ -322,7 +329,7 @@ def citation(**kwargs):
 
 cli.add_command(run)
 cli.add_command(install)
-cli.add_command(preprocess)
+# cli.add_command(preprocess)
 cli.add_command(test)
 cli.add_command(config)
 cli.add_command(citation)
