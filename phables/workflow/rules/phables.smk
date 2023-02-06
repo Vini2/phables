@@ -29,6 +29,6 @@ rule run_phables:
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda:
-        os.path.join("envs", "phables.yaml")
+        os.path.join("..", "envs", "phables.yaml")
     script:
         os.path.join('scripts', 'phables.py')

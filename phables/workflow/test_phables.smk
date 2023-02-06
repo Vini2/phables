@@ -69,6 +69,6 @@ rule test_phables:
     log:
         os.path.join(TESTDIR, "phables_output.log")
     conda: 
-        "./envs/phables.yaml"
+        os.path.join("envs", "phables.yaml")
     script:
         os.path.join('scripts', 'phables.py')
