@@ -24,6 +24,7 @@ preprocessTargets.append(os.path.join(PHROGS_PATH, "phrogs_annotations.tsv"))
 COVERAGE_FILE = os.path.join(OUTDIR, 'coverage.tsv')
 PHROG_ANNOT = os.path.join(PHROGS_PATH, 'phrogs_annotations.tsv')
 SMG_FILE = os.path.join(OUTDIR, 'edges.fasta.hmmout')
+GRAPH_FILE = INPUT
 
 
 """PHABLES TARGETS"""
