@@ -13,7 +13,7 @@ rule run_coverm:
     threads:
         THREADS
     params:
-        tempdir = os.path.join(OUTDIR, "coverm_temp")
+        tempdir = os.path.join(OUTDIR, "{sample}.coverm_temp")
     log:
         os.path.join(LOGSDIR, "{sample}_coverm.log")
     conda: 
