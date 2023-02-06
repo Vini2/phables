@@ -20,6 +20,12 @@ PHROGS_PATH = os.path.join(OUTDIR, 'phrogs/')
 preprocessTargets.append(os.path.join(PHROGS_PATH, "phrogs_annotations.tsv"))
 
 
+"""MISC"""
+COVERAGE_FILE = os.path.join(OUTDIR, 'coverage.tsv')
+PHROG_ANNOT = os.path.join(PHROGS_PATH, 'phrogs_annotations.tsv')
+SMG_FILE = os.path.join(OUTDIR, 'edges.fasta.hmmout')
+
+
 """PHABLES TARGETS"""
 phablesTargets.append(os.path.join(OUTDIR, "resolved_paths.fasta"))
 phablesTargets.append(os.path.join(OUTDIR, "resolved_genome_info.txt"))

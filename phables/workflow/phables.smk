@@ -80,9 +80,9 @@ rule run_phables:
     input:
         GRAPH_FILE,
         COVERAGE_FILE,
-        BAM_PATH,
         PHROG_ANNOT,
-        SMG_FILE
+        SMG_FILE,
+        preprocessTargets
     output:
         genomes_fasta = os.path.join(OUTDIR, "resolved_paths.fasta"),
         genomes_folder = directory(os.path.join(OUTDIR, "resolved_phages")),
