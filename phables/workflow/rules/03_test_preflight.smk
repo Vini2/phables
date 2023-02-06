@@ -4,9 +4,6 @@ e.g. Configure the run, declare directories, validate the input files etc.
 This preflight check to confirm the database filepaths 
 """
 
-"""CONFIGURATION"""
-configfile: os.path.join(workflow.basedir, '../', 'config', 'config.yaml')
-configfile: os.path.join(workflow.basedir, '../', 'config', 'databases.yaml')
 
 """
 Setting the directory variables
