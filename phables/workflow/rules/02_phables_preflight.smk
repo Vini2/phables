@@ -37,6 +37,33 @@ PATTERN_R2 = '{sample}_R2' + FQEXTN
 
 
 ############################################################################
+# Variables for intermediate files
+############################################################################
+
+# Check for assembly_graph.gfa
+GRAPH_FILE = INPUT
+
+# Check for unitigs file
+EDGES_FILE = os.path.join(OUTDIR, 'edges.fasta')
+
+# Check for coverage file
+COVERAGE_FILE = os.path.join(OUTDIR, 'coverage.tsv')
+
+# Check for BAM folder
+BAM_PATH = os.path.join(OUTDIR, 'bam_files')
+
+# Check if there are BAM files in BAM folder
+SAMPLES = glob_wildcards(os.path.join(BAM_PATH, '{sample}.bam'))
+
+# Check for PHROG annotations
+PHROGS_PATH = os.path.join(OUTDIR, 'phrogs/')
+PHROG_ANNOT = os.path.join(PHROGS_PATH, 'phrogs_annotations.tsv')
+
+# Check for single-copy marker gene results file
+SMG_FILE = os.path.join(OUTDIR, 'edges.fasta.hmmout')
+
+
+############################################################################
 # Get Phables parameters
 ############################################################################
 ML = config['minlength']
