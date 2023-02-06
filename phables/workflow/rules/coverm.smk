@@ -20,7 +20,7 @@ rule run_coverm:
         os.path.join("..", "envs", "mapping.yaml")
     shell:
         """
-        mkdir {params.tempdir}
+        mkdir -p {params.tempdir}
         TMPDIR={params.tempdir}
         coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {threads} --output-file {output} 2>&1 | tee {log}
         rm -r {params.tempdir}

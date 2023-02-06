@@ -6,8 +6,8 @@ log: 'phables/phables.log'
 # Databases 
 databases:
 
-# Threads
-threads: 1
+# Threads per job (will be scaled down if more than --threads)
+threads: 8
 
 # Phable parameters
 minlength: 2000
