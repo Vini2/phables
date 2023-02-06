@@ -10,9 +10,10 @@ rule scan_smg:
     threads:
         THREADS
     output:
+        hmmout = os.path.join(OUTDIR, "edges.fasta.hmmout")
+    params:
         frag = EDGES_FILE + ".frag",
         frag_faa = EDGES_FILE + ".frag.faa",
-        hmmout = os.path.join(OUTDIR, "edges.fasta.hmmout")
     log:
         frag_out=os.path.join(LOGSDIR, "smg_scan_frag_out.log"),
         frag_err=os.path.join(LOGSDIR, "smg_scan_frag_err.log"),
@@ -22,8 +23,8 @@ rule scan_smg:
         os.path.join("..", "envs", "smg.yaml")
     shell:
         """
-            run_FragGeneScan.pl -genome={input.genome} -out={output.frag} -complete=0 -train=complete -thread={threads} 1>{log.frag_out} 2>{log.frag_err}
-            hmmsearch --domtblout {output.hmmout} --cut_tc --cpu {threads} {input.hmm} {output.frag_faa} 1>{log.hmm_out} 2> {log.hmm_err}
+            run_FragGeneScan.pl -genome={input.genome} -out={params.frag} -complete=0 -train=complete -thread={threads} 1>{log.frag_out} 2>{log.frag_err}
+            hmmsearch --domtblout {output.hmmout} --cut_tc --cpu {threads} {input.hmm} {params.frag_faa} 1>{log.hmm_out} 2> {log.hmm_err}
         """
 
 
@@ -45,7 +46,7 @@ rule scan_phrogs:
         os.path.join("..", "envs", "mmseqs.yaml")
     shell:
         """
-            mmseqs createdb {input} {params.target_seq} > {log}
-            mmseqs search {params.target_seq} {input.db} {params.results_mmseqs} {params.tmp} --threads {threads} -s 7 > {log}
-            mmseqs createtsv {params.target_seq} {input.db} {params.results_mmseqs} {output} --threads {threads} --full-header > {log}
+        mmseqs createdb {input} {params.target_seq} > {log}
+        mmseqs search {params.target_seq} {input.db} {params.results_mmseqs} {params.tmp} --threads {threads} -s 7 > {log}
+        mmseqs createtsv {params.target_seq} {input.db} {params.results_mmseqs} {output} --threads {threads} --full-header > {log}
         """
