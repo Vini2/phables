@@ -1,5 +1,5 @@
 {% set name = "phables" %}
-{% set version = "0.1.0b7" %}
+{% set version = "0.1.1" %}
 
 package:
   name: "{{ name|lower }}"
