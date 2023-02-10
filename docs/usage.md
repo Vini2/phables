@@ -1,16 +1,16 @@
 # Phables Usage
 
-## Run options
+Phables run options can be found using the `phables run -h` command.
 
-You can see the following command-line options of Phables using `phables run --help`.
-
-```bash
+```
 Usage: phables run [OPTIONS] [SNAKE_ARGS]...
 
   Run Phables
 
 Options:
   --input PATH                  Path to assembly graph file in .GFA format
+                                [required]
+  --reads PATH                  Path to directory containing paired-end reads
                                 [required]
   --minlength INTEGER           minimum length of circular unitigs to consider
                                 [default: 2000]
@@ -37,12 +37,12 @@ Options:
                                 --rerun-incomplete, --printshellcmds,
                                 --nolock, --show-failed-logs]
   -h, --help                    Show this message and exit.
-
 ```
 
 ## Run options explained
 
-* `--input` - to assembly graph file in .GFA format
+* `--input` - assembly graph file in .GFA format
+* `--reads` - folder containing paired-end read files
 * `--minlength` - minimum length of circular unitigs to consider [default: 2000]
 * `--mincov` - minimum coverage of paths to output [default: 10]
 * `--compcount` - maximum unitig count to consider a component [default: 200]
@@ -57,18 +57,37 @@ Options:
 * `--conda-prefix` - custom conda env directory
 * `--snake-default` - customise Snakemake runtime args  [default: `--rerun-incomplete, --printshellcmds, --nolock, --show-failed-logs`]
 
+
 ## Example usage
 
+Assuming your assembly graph file is `assembly_graph.gfa` and reads folder as `fastq`, you can run `phables` as follows.
+
 ```bash
-phables run --input assembly_graph.gfa
+# Preprocess data using 8 threads (default is 1 thread)
+phables run --input assembly_graph.gfa --reads fastq --threads 8
 ```
 
-Note that you should provide the path to the assembly graph file in .GFA format for `--input` parameter.
+Note that you should provide the path to the GFA file to the `--input` parameter and the folder containing your sequencing reads to the `--reads` parameter. 
 
-The output of all the Phables subcommands is set by default to `phables.out`. If you changed the `--output` path in the [preprocessing steps](https://phables.readthedocs.io/en/latest/preprocess/) to `my_output_folder` for example, make sure to change the `--output` parameter for `phables run` as follows.
+The output of Phables is set by default to `phables.out`. You can update the output path using the `--output` parameter for `phables run` as follows.
 
 ```bash
-phables run --input assembly_graph.gfa  --output my_output_folder
+# Preprocess data using 8 threads (default is 1 thread)
+phables run --input assembly_graph.gfa --reads fastq  --output my_output_folder --threads 8
+```
+
+The `phables run` command will run the following preprocessing steps with the corresponding files and folders, prior to genome resolution.
+
+* Obtain unitig sequences from assembly graph - `edges.fasta`
+* Map reads to unitig sequences and get BAM files - `bam_files`
+* Run CoverM to get coverage of unitig sequences - `coverage.tsv`
+* Scan unitig sequences for single-copy marker genes - `edges.fasta.hmmout`
+* Scan unitig sequences for Prokaryotic Virus Remote Homologous Groups (PHROGs) - `phrogs/phrogs_annotations.tsv`
+
+You can use the following command to run only the above preprocessing steps.
+
+```
+phables run preprocessing --input assembly_graph.gfa --reads fastq --threads 8
 ```
 
 ## Output
@@ -80,7 +99,3 @@ The output of Phables will contain the following main files and folders.
 * `resolved_genome_info.txt` containing the path name, coverage, length, GC content and unitig order of the resolved genomes
 * `resolved_edges.fasta` containing the unitigs that make up the resolved genomes
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
-
-## Reporting Issues
-
-Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).

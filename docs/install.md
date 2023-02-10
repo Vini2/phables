@@ -64,12 +64,11 @@ Options:
   -h, --help     Show this message and exit.
 
 Commands:
-  run         Run Phables
-  install     Install databases
-  preprocess  Preprocess data
-  test        Test Phables
-  config      Copy the system default config file
-  citation    Print the citation(s) for this tool
+  run       Run Phables
+  install   Install databases
+  test      Test Phables
+  config    Copy the system default config file
+  citation  Print the citation(s) for this tool
 ```
 
 ## Setup the databases

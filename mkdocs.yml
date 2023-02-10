@@ -16,7 +16,7 @@ nav:
         - Introduction: index.md
     - RUNNING: 
         - Install: install.md
-        - Preprocess: preprocess.md
+        - Assemble: assemble.md
         - Usage: usage.md
         - FAQ: faq.md
     - EVALUATION:
