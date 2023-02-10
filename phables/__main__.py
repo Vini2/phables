@@ -85,16 +85,6 @@ def cli():
 help_msg_extra = """
 \b
 \b
-DOWNLOAD AND SETUP DATABASES
-phables install
-\b
-\b
-PREPROCESSING DATA
-phables preprocess <options> 
-\b
-\b
-RUN PHABLES
-phables run <options> 
 For more information on Phables please visit:
 https://phables.readthedocs.io/
 \b
