@@ -99,6 +99,7 @@ phables test
 # Run Phables
 # locally: using 8 threads (default is 1 thread)
 phables run --input assembly_graph.gfa --reads fastq/ --threads 8
+```
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
 
