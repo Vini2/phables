@@ -96,13 +96,9 @@ phables test
 ### Run on your own data
 
 ```bash
-# Preprocess data
-# locally: using 8 threads (default is 1 thread)
-phables preprocess --input assembly_graph.gfa --reads reads_dir/ --threads 8
-
 # Run Phables
-phables run --input assembly_graph.gfa 
-```
+# locally: using 8 threads (default is 1 thread)
+phables run --input assembly_graph.gfa --reads fastq/ --threads 8
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
 
