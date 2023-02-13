@@ -552,6 +552,8 @@ def main():
                     for solution_path in solution_paths:
                         coverage_val = solution_paths[solution_path]["weight"]
 
+                        logger.debug(f"Path {coverage_val} coverage: {coverage_val}")
+
                         # Filter path by coverage
                         if coverage_val >= mincov:
 
@@ -628,9 +630,11 @@ def main():
                                     cycle_number += 1
 
                     logger.debug(f"Number of paths selected: {cycle_number-1}")
-                    resolved_components.add(my_count)
-                    resolved_cyclic.add(my_count)
-                    case3_resolved.add(my_count)
+
+                    if cycle_number > 1:
+                        resolved_components.add(my_count)
+                        resolved_cyclic.add(my_count)
+                        case3_resolved.add(my_count)
 
                 else:
                     logger.debug(f"No paths detected")
