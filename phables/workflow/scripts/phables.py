@@ -506,12 +506,7 @@ def main():
                             u_index,
                         ) not in visited_edges:
                             
-                            cov_upper_bound = 0
-
-                            if cov["weight"] > 0:
-                                cov_upper_bound = cov["weight"]
-                            else:
-                                cov_upper_bound = mincov
+                            cov_upper_bound = cov["weight"]
 
                             if juction_cov <= cov_upper_bound:
                                 network_edges.append(
