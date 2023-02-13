@@ -16,13 +16,12 @@ preprocessTargets.append(expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), 
 preprocessTargets.append(os.path.join(OUTDIR, "coverage.tsv"))
 preprocessTargets.append(os.path.join(OUTDIR, "edges.fasta.hmmout"))
 
-PHROGS_PATH = os.path.join(OUTDIR, 'phrogs/')
-preprocessTargets.append(os.path.join(PHROGS_PATH, "phrogs_annotations.tsv"))
+preprocessTargets.append(os.path.join(OUTDIR, "phrogs_annotations.tsv"))
 
 
 """MISC"""
 COVERAGE_FILE = os.path.join(OUTDIR, 'coverage.tsv')
-PHROG_ANNOT = os.path.join(PHROGS_PATH, 'phrogs_annotations.tsv')
+PHROG_ANNOT = os.path.join(OUTDIR, 'phrogs_annotations.tsv')
 SMG_FILE = os.path.join(OUTDIR, 'edges.fasta.hmmout')
 GRAPH_FILE = INPUT
 

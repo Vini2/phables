@@ -35,18 +35,21 @@ rule scan_phrogs:
     threads:
         THREADS
     output:
-        os.path.join(PHROGS_PATH, "phrogs_annotations.tsv")
+        os.path.join(OUTDIR, "phrogs_annotations.tsv")
     params:
-        target_seq = os.path.join(PHROGS_PATH, "target_seq"),
-        results_mmseqs = os.path.join(PHROGS_PATH, "results_mmseqs"),
-        tmp = os.path.join(PHROGS_PATH, "tmp"),
+        out_path = os.path.join(OUTDIR, "phrogs"),
+        target_seq = os.path.join(OUTDIR, "phrogs", "target_seq"),
+        results_mmseqs = os.path.join(OUTDIR, "phrogs", "results_mmseqs"),
+        tmp = os.path.join(OUTDIR, "phrogs", "tmp"),
     log:
         os.path.join(LOGSDIR, "phrogs_scan.log")
     conda: 
         os.path.join("..", "envs", "mmseqs.yaml")
     shell:
         """
+        mkdir {params.out_path}
         mmseqs createdb {input} {params.target_seq} > {log}
         mmseqs search {params.target_seq} {input.db} {params.results_mmseqs} {params.tmp} --threads {threads} -s 7 > {log}
         mmseqs createtsv {params.target_seq} {input.db} {params.results_mmseqs} {output} --threads {threads} --full-header > {log}
+        rm -rf {params.out_path}
         """
