@@ -39,13 +39,13 @@ def main():
     bampath = snakemake.params.bampath
     hmmout = snakemake.params.hmmout
     phrogs = snakemake.params.phrogs
-    minlength = snakemake.params.minlength
-    mincov = snakemake.params.mincov
-    compcount = snakemake.params.compcount
-    maxpaths = snakemake.params.maxpaths
-    mgfrac = snakemake.params.mgfrac
-    evalue = snakemake.params.evalue
-    seqidentity = snakemake.params.seqidentity
+    minlength = int(snakemake.params.minlength)
+    mincov = int(snakemake.params.mincov)
+    compcount = int(snakemake.params.compcount)
+    maxpaths = int(snakemake.params.maxpaths)
+    mgfrac = float(snakemake.params.mgfrac)
+    evalue = float(snakemake.params.evalue)
+    seqidentity = float(snakemake.params.seqidentity)
     output = snakemake.params.output
     log = snakemake.params.log
 
