@@ -20,7 +20,7 @@ MC = config['mincov']
 CC = config['compcount']
 MP = config['maxpaths']
 MGF = config['mgfrac']
-AS = config['alignscore']
+EV = config['evalue']
 SI = config['seqidentity']
 
 

@@ -62,7 +62,7 @@ rule test_phables:
         compcount = CC,
         maxpaths = MP,
         mgfrac = MGF,
-        alignscore = AS,
+        evalue = EV,
         seqidentity = SI,
         output = TESTDIR,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))

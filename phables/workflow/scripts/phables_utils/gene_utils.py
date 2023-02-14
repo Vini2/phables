@@ -50,7 +50,7 @@ def get_smg_unitigs(hmmout, mg_frac):
     return smg_unitigs
 
 
-def get_phrog_unitigs(phrogs, align_score, seq_identity):
+def get_phrog_unitigs(phrogs, e_value, seq_identity):
     """
     Get unitigs containing PHROGs
     """
@@ -80,10 +80,10 @@ def get_phrog_unitigs(phrogs, align_score, seq_identity):
             name = strings[0][1:-1]
             phrog_id = strings[1][1:-1].split()[0]
             phrog = phrog_dict[phrog_id]
-            alnScore = float(strings[2])
             seqIdentity = float(strings[3])
+            evalue = float(strings[4])
 
-            if alnScore > align_score and seqIdentity > seq_identity:
+            if evalue < e_value and seqIdentity > seq_identity:
 
                 if name not in unitig_phrogs:
                     unitig_phrogs[name] = set([phrog])

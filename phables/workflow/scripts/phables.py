@@ -44,7 +44,7 @@ def main():
     compcount = snakemake.params.compcount
     maxpaths = snakemake.params.maxpaths
     mgfrac = snakemake.params.mgfrac
-    alignscore = snakemake.params.alignscore
+    evalue = snakemake.params.evalue
     seqidentity = snakemake.params.seqidentity
     output = snakemake.params.output
     log = snakemake.params.log
@@ -85,7 +85,7 @@ def main():
     logger.info(f"Minimum unitig count to consider a component: {compcount}")
     logger.info(f"Maximum number of paths to resolve for a component: {maxpaths}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
-    logger.info(f"Minimum alignment score for phrog annotations: {alignscore}")
+    logger.info(f"Maximum e-value for phrog annotations: {evalue}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Output folder: {output}")
 
@@ -120,7 +120,7 @@ def main():
 
     # Get unitigs with PHROGs
     # ----------------------------------------------------------------------
-    unitig_phrogs = gene_utils.get_phrog_unitigs(phrogs, alignscore, seqidentity)
+    unitig_phrogs = gene_utils.get_phrog_unitigs(phrogs, evalue, seqidentity)
 
     # Get components with viral bubbles
     # ----------------------------------------------------------------------
@@ -552,7 +552,7 @@ def main():
                     for solution_path in solution_paths:
                         coverage_val = solution_paths[solution_path]["weight"]
 
-                        logger.debug(f"Path {coverage_val} coverage: {coverage_val}")
+                        logger.debug(f"Path {cycle_number} coverage: {coverage_val}")
 
                         # Filter path by coverage
                         if coverage_val >= mincov:

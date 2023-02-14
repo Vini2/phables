@@ -19,9 +19,10 @@ def get_components(
 
         if len(component) > 1:
 
-            terminase_present = False
-            capsid_present = False
-            portal_present = False
+            head_present = False
+            connector_present = False
+            tail_present = False
+            lysis_present = False
 
             for unitig in component:
 
@@ -30,14 +31,16 @@ def get_components(
                 elif unitig_names[unitig] in unitig_phrogs:
 
                     for protein in unitig_phrogs[unitig_names[unitig]]:
-                        if "terminase large subunit" in protein:
-                            terminase_present = True
-                        if "capsid" in protein:
-                            capsid_present = True
+                        if "head and packaging" in protein:
+                            head_present = True
+                        if "connector" in protein:
+                            connector_present = True
                         if "portal" in protein:
-                            portal_present = True
+                            tail_present = True
+                        if "lysis" in protein:
+                            lysis_present = True
 
-            if (terminase_present or capsid_present or portal_present):
+            if (head_present or connector_present or tail_present or lysis_present):
                 pruned_vs[i] = component
                 i += 1
 

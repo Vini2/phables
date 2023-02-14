@@ -135,7 +135,7 @@ Available targets:
 )
 @click.option(
     "--mincov",
-    default=10,
+    default=1,
     required=False,
     help="minimum coverage of paths to output",
     type=int,
@@ -166,10 +166,10 @@ Available targets:
     show_default=True,
 )
 @click.option(
-    "--alignscore",
-    default=90,
+    "--evalue",
+    default=1E-10,
     required=False,
-    help="minimum alignment score for phrog annotations",
+    help="maximum e-value for phrog annotations",
     type=float,
     show_default=True,
 )
@@ -190,7 +190,7 @@ def run(
     compcount,
     maxpaths,
     mgfrac,
-    alignscore,
+    evalue,
     seqidentity,
     output,
     log,
@@ -207,7 +207,7 @@ def run(
         "compcount": compcount,
         "maxpaths": maxpaths,
         "mgfrac": mgfrac,
-        "alignscore": alignscore,
+        "evalue": evalue,
         "seqidentity": seqidentity,
         "output": output,
         "log": log,

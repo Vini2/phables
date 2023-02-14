@@ -22,7 +22,7 @@ rule run_phables:
         compcount = CC,
         maxpaths = MP,
         mgfrac = MGF,
-        alignscore = AS,
+        evalue = EV,
         seqidentity = SI,
         output = OUTDIR,
         log = os.path.join(LOGSDIR, "phables_output.log")

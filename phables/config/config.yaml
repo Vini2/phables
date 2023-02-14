@@ -11,9 +11,9 @@ threads: 8
 
 # Phable parameters
 minlength: 2000
-mincov: 10
+mincov: 1
 compcount: 200
 maxpaths: 10
 mgfrac: 0.2
-alignscore: 90
+evalue: 1E-10
 seqidentity: 0.3
