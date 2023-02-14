@@ -11,9 +11,9 @@ from phables_utils import (component_utils, edge_graph_utils, flow_utils,
 from phables_utils.coverage_utils import (get_junction_pe_coverage,
                                           get_unitig_coverage)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.output_utils import (write_component_info, write_path,
+from phables_utils.output_utils import (write_component_info,
+                                        write_component_phrog_info, write_path,
                                         write_path_fasta,
-                                        write_component_phrog_info,
                                         write_res_genome_info, write_unitigs)
 from tqdm import tqdm
 
@@ -32,7 +32,6 @@ MAX_VAL = sys.maxsize
 
 
 def main():
-
     # Get arguments
     # ----------------------------------------------------------------------
     graph = snakemake.params.graph
@@ -121,7 +120,9 @@ def main():
 
     # Get unitigs with PHROGs
     # ----------------------------------------------------------------------
-    unitig_phrogs, phrog_dict = gene_utils.get_phrog_unitigs(phrogs, evalue, seqidentity)
+    unitig_phrogs, phrog_dict = gene_utils.get_phrog_unitigs(
+        phrogs, evalue, seqidentity
+    )
 
     # Get components with viral bubbles
     # ----------------------------------------------------------------------
@@ -167,7 +168,6 @@ def main():
     phage_like_edges = set()
 
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
-
         component_time_start = time.time()
 
         my_genomic_paths = []
@@ -193,7 +193,6 @@ def main():
 
         # Case 2 components
         if len(candidate_nodes) == 2:
-
             all_self_looped = True
 
             for node in candidate_nodes:
@@ -201,7 +200,6 @@ def main():
                     all_self_looped = False
 
             if all_self_looped:
-
                 case2_found.add(my_count)
 
                 cycle_components.add(my_count)
@@ -220,7 +218,6 @@ def main():
                         unitig2 = candidate_nodes[target_vertex_id]
 
                 if unitig1 != "" and unitig2 != "":
-
                     unitig1_name = unitig_names[unitig1]
                     unitig2_name = unitig_names[unitig2]
 
@@ -245,7 +242,6 @@ def main():
                         repeat_unitig_name = unitig1_name
 
                     if unitig_to_consider != -1:
-
                         cycle_number = 1
                         resolved_edges.add(unitig_to_consider)
                         resolved_edges.add(repeat_unitig)
@@ -279,7 +275,6 @@ def main():
 
         # Case 3 components
         elif len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
-
             # Create initial directed graph with coverage values
             # ----------------------------------------------------------------------
             G_edge = nx.DiGraph()
@@ -294,14 +289,12 @@ def main():
             clean_node_count = 0
 
             for vertex in pruned_graph.vs["id"]:
-
                 unitig_name = unitig_names[vertex]
 
                 if unitig_name not in self_looped_nodes:
                     clean_node_count += 1
 
                 for node in oriented_links[unitig_name]:
-
                     consider_edge = False
 
                     if not (
@@ -310,7 +303,6 @@ def main():
                         consider_edge = True
 
                     if consider_edge:
-
                         cov_1 = MAX_VAL
                         cov_2 = MAX_VAL
 
@@ -344,7 +336,6 @@ def main():
                 logger.debug(f"No cycles found in component {my_count}")
 
             if has_cycles:
-
                 logger.debug(
                     f"Potentially cycles can be detected in component {my_count}."
                 )
@@ -354,7 +345,6 @@ def main():
                 dead_ends_to_remove = edge_graph_utils.remove_dead_ends(G_edge)
 
                 if len(dead_ends_to_remove) > 0:
-
                     for node in dead_ends_to_remove:
                         node_id = unitig_names_rev[node[:-1]]
                         if node_id in candidate_nodes:
@@ -379,7 +369,6 @@ def main():
                 )
 
                 if len(source_sink_candidates) > 0:
-
                     # Identify the longest source/sink vertex
                     max_length = -1
                     max_length_vertex = -1
@@ -405,7 +394,6 @@ def main():
                 G = nx.DiGraph()
 
                 for u, v, cov in G_edge.edges(data=True):
-
                     if u not in node_indices:
                         node_indices[u] = my_counter
                         node_indices_rev[my_counter] = u
@@ -423,7 +411,6 @@ def main():
                 out_degree = []
 
                 for node in list(G.nodes):
-
                     if node_indices_rev[node][:-1] not in self_looped_nodes:
                         clean_indegree = len(
                             [
@@ -463,7 +450,6 @@ def main():
                 visited_edges = []
 
                 for u, v, cov in G_edge.edges(data=True):
-
                     u_name = unitig_names_rev[u[:-1]]
                     v_name = unitig_names_rev[v[:-1]]
 
@@ -507,7 +493,6 @@ def main():
                             v_index,
                             u_index,
                         ) not in visited_edges:
-                            
                             cov_upper_bound = cov["weight"]
 
                             if juction_cov <= cov_upper_bound:
@@ -544,7 +529,6 @@ def main():
                 # Iterate through solution paths
                 # ----------------------------------------------------------------------
                 if len(solution_paths) != 0:
-
                     phage_like_edges = phage_like_edges.union(
                         set(original_candidate_nodes)
                     )
@@ -558,7 +542,6 @@ def main():
 
                         # Filter path by coverage
                         if coverage_val >= mincov:
-
                             # Create graph for path
                             G_path = nx.DiGraph()
 
@@ -569,14 +552,12 @@ def main():
                             )
 
                             if 0 in list(G_path.nodes):
-
                                 # Get all simple paths from node 0 to last node
                                 candidate_paths = list(
                                     nx.all_simple_paths(G_path, 0, len(candidate_nodes))
                                 )
 
                                 if len(candidate_paths) > 0:
-
                                     logger.debug(
                                         f"candidate_paths: {candidate_paths[0]}"
                                     )
@@ -647,7 +628,6 @@ def main():
 
         # Case 1 components - circular unitigs
         elif len(candidate_nodes) == 1:
-
             case1_found.add(my_count)
 
             unitig_name = unitig_names[candidate_nodes[0]]
@@ -691,7 +671,6 @@ def main():
         n_paths = 0
 
         if len(my_genomic_paths) > 1:
-
             # Get the degree of the component
             graph_degree = assembly_graph.degree(original_candidate_nodes)
 
@@ -702,9 +681,7 @@ def main():
 
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
-
                 if genomic_path.length > largest_length * 0.95:
-
                     logger.debug(
                         f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}"
                     )
@@ -728,7 +705,6 @@ def main():
                 and len(in_degree) > 0
                 and len(out_degree) > 0
             ):
-
                 # Create GenomeComponent object with component details
                 genome_comp = GenomeComponent(
                     f"phage_comp_{my_count}",
@@ -817,7 +793,9 @@ def main():
     logger.info(f"Resolved component information can be found in {output}/{filename}")
 
     filename = write_component_phrog_info(resolved_components, comp_phrogs, output)
-    logger.info(f"PHROGs found in resolved components can be found in {output}/{filename}")
+    logger.info(
+        f"PHROGs found in resolved components can be found in {output}/{filename}"
+    )
 
     # Get elapsed time
     # ----------------------------------------------------------------------

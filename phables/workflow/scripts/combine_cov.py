@@ -20,7 +20,6 @@ __email__ = "viji.mallawaarachchi@gmail.com"
 
 
 def main():
-
     # Get arguments
     # -----------------------
 
@@ -84,7 +83,9 @@ def main():
 
     # Save dataframe to file
     final_df.to_csv(output_path + "coverage.tsv", sep="\t", index=False)
-    logger.info(f"The combined coverage values can be found at {output_path}coverage.tsv")
+    logger.info(
+        f"The combined coverage values can be found at {output_path}coverage.tsv"
+    )
 
     # Exit program
     # --------------

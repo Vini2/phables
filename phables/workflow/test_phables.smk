@@ -48,6 +48,7 @@ rule test_phables:
         phage_edges = temp(os.path.join(TESTDIR, "phage_like_edges.fasta")),
         unitigs = temp(os.path.join(TESTDIR, "resolved_edges.fasta")),
         component_info = temp(os.path.join(TESTDIR, "resolved_component_info.txt")),
+        phrog_comp_info = temp(os.path.join(TESTDIR, "component_phrogs.txt")),
         mfd = temp(os.path.join(TESTDIR, "results_MFD.txt")),
         mfd_details = temp(os.path.join(TESTDIR, "results_MFD_details.txt")),
         log = temp(os.path.join(TESTDIR, "phables_output.log"))

@@ -25,7 +25,6 @@ __email__ = "viji.mallawaarachchi@gmail.com"
 
 
 def main():
-
     # Get arguments
     # -----------------------
 
@@ -86,7 +85,6 @@ def main():
         line = file.readline()
 
         while line != "":
-
             if "S" in line:
                 strings = line.split("\t")
 

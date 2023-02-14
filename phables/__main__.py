@@ -61,7 +61,10 @@ def common_options(func):
             show_default=True,
         ),
         click.option(
-            "--log", default="phables.log", callback=default_to_output, hidden=True,
+            "--log",
+            default="phables.log",
+            callback=default_to_output,
+            hidden=True,
         ),
         click.argument("snake_args", nargs=-1),
     ]
@@ -76,8 +79,8 @@ def common_options(func):
 @click.version_option(get_version(), "-v", "--version", is_flag=True)
 def cli():
     """
-        Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
-        Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
+    Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
+    Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
     """
     pass
 
@@ -123,7 +126,10 @@ Available targets:
     required=True,
 )
 @click.option(
-    "--reads", help="Path to directory containing paired-end reads", type=click.Path(exists=True), required=True
+    "--reads",
+    help="Path to directory containing paired-end reads",
+    type=click.Path(exists=True),
+    required=True,
 )
 @click.option(
     "--minlength",
@@ -167,7 +173,7 @@ Available targets:
 )
 @click.option(
     "--evalue",
-    default=1E-10,
+    default=1e-10,
     required=False,
     help="maximum e-value for phrog annotations",
     type=float,
@@ -196,7 +202,6 @@ def run(
     log,
     **kwargs
 ):
-
     """Run Phables"""
     # Config to add or update in configfile
     merge_config = {

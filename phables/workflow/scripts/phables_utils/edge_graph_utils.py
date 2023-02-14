@@ -73,12 +73,9 @@ def get_links(assembly_graph_file):
 
     # Get links from .gfa file
     with open(assembly_graph_file) as file:
-
         for line in file.readlines():
-
             # Identify lines with link information
             if line.startswith("L"):
-
                 strings = line.split("\t")
 
                 link1 = strings[1]
@@ -107,7 +104,6 @@ def get_links(assembly_graph_file):
                         oriented_links[link2][link1].append(("-", "+"))
 
             elif line.startswith("S"):
-
                 strings = line.strip().split()
                 my_map[node_count] = strings[1]
                 graph_contigs[strings[1]] = Seq(strings[2])
@@ -226,7 +222,6 @@ def remove_dead_ends(G_edge):
     dead_ends_to_remove = []
 
     while has_dead_ends:
-
         to_remove = []
 
         for node in list(new_G.nodes):

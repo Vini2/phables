@@ -11,14 +11,12 @@ def get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes):
     source_sink_candidates = []
 
     for node in list(G_edge.nodes):
-
         unitig_name = node[:-1]
 
         if (
             unitig_name not in self_looped_nodes
             and len(graph_unitigs[unitig_name]) > minlength
         ):
-
             # Get BFS layers
             bfs_layers = dict(enumerate(nx.bfs_layers(G_edge, node)))
 
@@ -29,9 +27,7 @@ def get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes):
 
             # Check if successors of those in last_layer is same as the node
             for item in bfs_layers[last_layer]:
-
                 if item[:-1] not in self_looped_nodes:
-
                     item_successors = list(G_edge.successors(item))
 
                     if (

@@ -10,7 +10,8 @@ rule run_phables:
         genomes_folder = directory(os.path.join(OUTDIR, "resolved_phages")),
         genome_info = os.path.join(OUTDIR, "resolved_genome_info.txt"),
         unitigs = os.path.join(OUTDIR, "resolved_edges.fasta"),
-        component_info = os.path.join(OUTDIR, "resolved_component_info.txt")
+        component_info = os.path.join(OUTDIR, "resolved_component_info.txt"),
+        phrog_comp_info = os.path.join(OUTDIR, "component_phrogs.txt"),
     params:
         graph = GRAPH_FILE,
         hmmout = SMG_FILE,

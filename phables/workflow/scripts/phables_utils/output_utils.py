@@ -10,7 +10,6 @@ def write_unitigs(nodes, unitig_names, graph_unitigs, filename, output):
     """
 
     with open(f"{output}/{filename}.fasta", "w+") as myfile:
-
         for node in nodes:
             unitig_name = unitig_names[node]
             edge_seq = str(graph_unitigs[unitig_name])
@@ -54,7 +53,6 @@ def write_component_info(all_components, output):
         myfile.write(f"Coverage ratio (highest/lowest)\n")
 
         if len(all_components) > 0:
-
             for component in all_components:
                 myfile.write(f"{component.id}\t")
                 myfile.write(f"{component.n_nodes}\t")
@@ -104,9 +102,7 @@ def write_path(final_genomic_paths, output):
     """
 
     with open(f"{output}/resolved_paths.fasta", "a+") as myfile:
-
         for genomic_path in final_genomic_paths:
-
             myfile.write(f">{genomic_path.id}\n")
 
             chunks = [
@@ -127,9 +123,7 @@ def write_path_fasta(final_genomic_paths, output_genomes_path):
         subprocess.run("mkdir -p " + output_genomes_path, shell=True)
 
     for genomic_path in final_genomic_paths:
-
         with open(f"{output_genomes_path}/{genomic_path.id}.fasta", "w+") as myfile:
-
             myfile.write(f">{genomic_path.id}\n")
 
             chunks = [
@@ -140,15 +134,14 @@ def write_path_fasta(final_genomic_paths, output_genomes_path):
             for chunk in chunks:
                 myfile.write(f"{chunk}\n")
 
+
 def write_component_phrog_info(resolved_components, comp_phrogs, output):
     """
     Write PHROGs found in resolved components
     """
 
     with open(f"{output}/component_phrogs.txt", "w") as myfile:
-
         for comp in resolved_components:
-
             myfile.write(f"phage_{comp}\t{comp_phrogs[comp]}\n")
 
     return "component_phrogs.txt"

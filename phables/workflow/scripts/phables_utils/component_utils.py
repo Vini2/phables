@@ -6,7 +6,7 @@ def get_components(
     circular,
     edges_lengths,
     cicular_len,
-    phrog_dict
+    phrog_dict,
 ):
     """
     Get connected components with PHROGs and no SMGs.
@@ -20,20 +20,16 @@ def get_components(
     phrogs_found = set()
 
     for component in assembly_graph.components():
-
         head_present = False
         connector_present = False
         tail_present = False
         lysis_present = False
 
         if len(component) > 1:
-
             for unitig in component:
-
                 if unitig_names[unitig] in smg_unitigs:
                     break
                 elif unitig_names[unitig] in unitig_phrogs:
-
                     for phrog in unitig_phrogs[unitig_names[unitig]]:
                         if "head and packaging" in phrog_dict[phrog]:
                             head_present = True
@@ -43,16 +39,15 @@ def get_components(
                             tail_present = True
                         if "lysis" in phrog_dict[phrog]:
                             lysis_present = True
-                        
+
                         phrogs_found.add(phrog)
 
-            if (head_present or connector_present or tail_present or lysis_present):
+            if head_present or connector_present or tail_present or lysis_present:
                 pruned_vs[i] = component
                 comp_phrogs[i] = phrogs_found
                 i += 1
 
         if len(component) == 1:
-
             unitig = component[0]
             phrogs_present = False
 
@@ -65,10 +60,10 @@ def get_components(
                     tail_present = True
                 if "lysis" in phrog_dict[phrog]:
                     lysis_present = True
-                
+
                 phrogs_found.add(phrog)
 
-            if (head_present or connector_present or tail_present or lysis_present):
+            if head_present or connector_present or tail_present or lysis_present:
                 phrogs_present = True
 
             if (

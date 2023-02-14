@@ -15,7 +15,6 @@ def get_unitig_coverage(coverage):
 
     with open(coverage, "r") as myfile:
         for line in myfile.readlines():
-
             if not line.startswith("Contig"):
                 strings = line.strip().split()
 
@@ -66,11 +65,9 @@ def get_junction_pe_coverage(bam_path, output):
             link_counts = pickle.load(handle)
 
     else:
-
         bam_files = glob.glob(bam_path + "/*.bam")
 
         for bam_file in bam_files:
-
             bam = pysam.AlignmentFile(bam_file, "rb")
 
             read_pairs = read_pair_generator(bam)
@@ -97,15 +94,11 @@ def get_graph_spanning_reads(gaf_path, output):
             junction_reads = pickle.load(handle)
 
     else:
-
         gaf_files = glob.glob(gaf_path + "/*.gaf")
 
         for gaf_file in gaf_files:
-
             with open(gaf_file, "r") as myfile:
-
                 for line in myfile.readlines():
-
                     strings = line.strip().split("\t")
 
                     if strings[5].count(">") == 2:

@@ -10,7 +10,6 @@ logger = logging.getLogger("phables 0.1.1")
 
 
 def read_input(graphfile, number_subpath):
-
     trip_data = open(graphfile, "r").read().split("\n")
     i = 0
     listOfGraphs = {}
@@ -50,7 +49,6 @@ def read_input(graphfile, number_subpath):
 # FD-Subpath-Inexact-Gurobi
 # --------------------------------------------
 def flowMultipleDecomposition(data, K):
-
     # libraries
     import gurobipy as gp
     from gurobipy import GRB
@@ -108,7 +106,7 @@ def flowMultipleDecomposition(data, K):
         )
 
         # linearization
-        for (i, j) in E:
+        for i, j in E:
             for k in range(0, K):
                 model.addConstr(z[i, j, k] <= W * x[i, j, k])
                 model.addConstr(w[k] - (1 - x[i, j, k]) * W <= z[i, j, k])
@@ -146,11 +144,11 @@ def flowMultipleDecomposition(data, K):
                             w_sol[k] = v.x
 
                 if "x" in v.VarName:
-                    for (i, j, k) in T:
+                    for i, j, k in T:
                         if str(i) + "," + str(j) + "," + str(k) in v.VarName:
                             x_sol[i, j, k] = v.x
 
-            for (i, j, k) in T:
+            for i, j, k in T:
                 if x_sol[i, j, k] == 1:
                     paths[k].append((i, j))
 
@@ -170,7 +168,6 @@ def flowMultipleDecomposition(data, K):
 
 
 def FD_Algorithm(data, max_paths):
-
     listOfEdges = data["edges"]
     solutionMap = data["graph"]
     solutionSet = 0
@@ -196,12 +193,10 @@ def FD_Algorithm(data, max_paths):
 
 
 def SolveInstances(Graphs, max_paths, outfile, recfile):
-
     fp = open(outfile, "w+")
     fc = open(recfile, "w+")
 
     for s in range(0, 1):
-
         f_low = {}
         f_up = {}
         Edges = set()
@@ -228,7 +223,7 @@ def SolveInstances(Graphs, max_paths, outfile, recfile):
 
         for v in V:
             setAdj = set()
-            for (i, j) in list(G.out_edges(v)):
+            for i, j in list(G.out_edges(v)):
                 if i != v:
                     setAdj.add(i)
                 if j != v:
@@ -237,7 +232,7 @@ def SolveInstances(Graphs, max_paths, outfile, recfile):
             AD_out[v] = list(setAdj)
 
             setAdj = set()
-            for (i, j) in list(G.in_edges(v)):
+            for i, j in list(G.in_edges(v)):
                 if i != v:
                     setAdj.add(i)
                 if j != v:

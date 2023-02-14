@@ -16,7 +16,6 @@ def get_smg_unitigs(hmmout, mg_frac):
     unitig_smgs = {}
 
     with open(hmmout, "r") as myfile:
-
         for line in myfile.readlines():
             if not line.startswith("#") and line.startswith("edge_"):
                 strings = line.strip().split()
@@ -70,9 +69,7 @@ def get_phrog_unitigs(phrogs, e_value, seq_identity):
     unitig_phrogs = {}
 
     with open(phrogs, "r") as myfile:
-
         for line in myfile.readlines():
-
             # if "edge_" in line:
 
             strings = line.strip().split("\t")
@@ -83,7 +80,6 @@ def get_phrog_unitigs(phrogs, e_value, seq_identity):
             evalue = float(strings[4])
 
             if evalue < e_value and seqIdentity > seq_identity:
-
                 if name not in unitig_phrogs:
                     unitig_phrogs[name] = set([phrog_id])
                 else:
