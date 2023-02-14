@@ -6,6 +6,7 @@ def get_components(
     circular,
     edges_lengths,
     cicular_len,
+    phrog_dict
 ):
     """
     Get connected components with PHROGs and no SMGs.
@@ -15,14 +16,17 @@ def get_components(
 
     i = 0
 
+    comp_phrogs = {}
+    phrogs_found = set()
+
     for component in assembly_graph.components():
 
-        if len(component) > 1:
+        head_present = False
+        connector_present = False
+        tail_present = False
+        lysis_present = False
 
-            head_present = False
-            connector_present = False
-            tail_present = False
-            lysis_present = False
+        if len(component) > 1:
 
             for unitig in component:
 
@@ -30,28 +34,50 @@ def get_components(
                     break
                 elif unitig_names[unitig] in unitig_phrogs:
 
-                    for protein in unitig_phrogs[unitig_names[unitig]]:
-                        if "head and packaging" in protein:
+                    for phrog in unitig_phrogs[unitig_names[unitig]]:
+                        if "head and packaging" in phrog_dict[phrog]:
                             head_present = True
-                        if "connector" in protein:
+                        if "connector" in phrog_dict[phrog]:
                             connector_present = True
-                        if "portal" in protein:
+                        if "portal" in phrog_dict[phrog]:
                             tail_present = True
-                        if "lysis" in protein:
+                        if "lysis" in phrog_dict[phrog]:
                             lysis_present = True
+                        
+                        phrogs_found.add(phrog)
 
             if (head_present or connector_present or tail_present or lysis_present):
                 pruned_vs[i] = component
+                comp_phrogs[i] = phrogs_found
                 i += 1
 
         if len(component) == 1:
 
+            unitig = component[0]
+            phrogs_present = False
+
+            for phrog in unitig_phrogs[unitig_names[unitig]]:
+                if "head and packaging" in phrog_dict[phrog]:
+                    head_present = True
+                if "connector" in phrog_dict[phrog]:
+                    connector_present = True
+                if "portal" in phrog_dict[phrog]:
+                    tail_present = True
+                if "lysis" in phrog_dict[phrog]:
+                    lysis_present = True
+                
+                phrogs_found.add(phrog)
+
+            if (head_present or connector_present or tail_present or lysis_present):
+                phrogs_present = True
+
             if (
-                unitig_names[component[0]] in unitig_phrogs
-                and unitig_names[component[0]] in circular
-                and edges_lengths[unitig_names[component[0]]] > cicular_len
+                phrogs_present
+                and unitig_names[unitig] in circular
+                and edges_lengths[unitig_names[unitig]] > cicular_len
             ):
                 pruned_vs[i] = component
+                comp_phrogs[i] = phrogs_found
                 i += 1
 
-    return pruned_vs
+    return pruned_vs, comp_phrogs

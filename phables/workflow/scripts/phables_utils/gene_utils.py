@@ -79,15 +79,14 @@ def get_phrog_unitigs(phrogs, e_value, seq_identity):
 
             name = strings[0][1:-1]
             phrog_id = strings[1][1:-1].split()[0]
-            phrog = phrog_dict[phrog_id]
             seqIdentity = float(strings[3])
             evalue = float(strings[4])
 
             if evalue < e_value and seqIdentity > seq_identity:
 
                 if name not in unitig_phrogs:
-                    unitig_phrogs[name] = set([phrog])
+                    unitig_phrogs[name] = set([phrog_id])
                 else:
-                    unitig_phrogs[name].add(phrog)
+                    unitig_phrogs[name].add(phrog_id)
 
-    return unitig_phrogs
+    return unitig_phrogs, phrog_dict

@@ -139,3 +139,16 @@ def write_path_fasta(final_genomic_paths, output_genomes_path):
 
             for chunk in chunks:
                 myfile.write(f"{chunk}\n")
+
+def write_component_phrog_info(resolved_components, comp_phrogs, output):
+    """
+    Write PHROGs found in resolved components
+    """
+
+    with open(f"{output}/component_phrogs.txt", "w") as myfile:
+
+        for comp in resolved_components:
+
+            myfile.write(f"phage_{comp}\t{comp_phrogs[comp]}\n")
+
+    return "component_phrogs.txt"

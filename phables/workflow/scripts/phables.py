@@ -13,6 +13,7 @@ from phables_utils.coverage_utils import (get_junction_pe_coverage,
 from phables_utils.genome_utils import GenomeComponent, GenomePath
 from phables_utils.output_utils import (write_component_info, write_path,
                                         write_path_fasta,
+                                        write_component_phrog_info,
                                         write_res_genome_info, write_unitigs)
 from tqdm import tqdm
 
@@ -120,11 +121,11 @@ def main():
 
     # Get unitigs with PHROGs
     # ----------------------------------------------------------------------
-    unitig_phrogs = gene_utils.get_phrog_unitigs(phrogs, evalue, seqidentity)
+    unitig_phrogs, phrog_dict = gene_utils.get_phrog_unitigs(phrogs, evalue, seqidentity)
 
     # Get components with viral bubbles
     # ----------------------------------------------------------------------
-    pruned_vs = component_utils.get_components(
+    pruned_vs, comp_phrogs = component_utils.get_components(
         assembly_graph,
         unitig_names,
         smg_unitigs,
@@ -132,6 +133,7 @@ def main():
         circular,
         edges_lengths,
         minlength,
+        phrog_dict,
     )
     logger.info(f"Total number of components found: {len(pruned_vs)}")
 
@@ -813,6 +815,9 @@ def main():
 
     filename = write_component_info(all_components, output)
     logger.info(f"Resolved component information can be found in {output}/{filename}")
+
+    filename = write_component_phrog_info(resolved_components, comp_phrogs, output)
+    logger.info(f"PHROGs found in resolved components can be found in {output}/{filename}")
 
     # Get elapsed time
     # ----------------------------------------------------------------------
