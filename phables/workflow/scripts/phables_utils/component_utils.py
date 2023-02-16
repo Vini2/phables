@@ -51,17 +51,18 @@ def get_components(
             unitig = component[0]
             phrogs_present = False
 
-            for phrog in unitig_phrogs[unitig_names[unitig]]:
-                if "head and packaging" in phrog_dict[phrog]:
-                    head_present = True
-                if "connector" in phrog_dict[phrog]:
-                    connector_present = True
-                if "portal" in phrog_dict[phrog]:
-                    tail_present = True
-                if "lysis" in phrog_dict[phrog]:
-                    lysis_present = True
+            if unitig_names[unitig] in unitig_phrogs:
+                for phrog in unitig_phrogs[unitig_names[unitig]]:
+                    if "head and packaging" in phrog_dict[phrog]:
+                        head_present = True
+                    if "connector" in phrog_dict[phrog]:
+                        connector_present = True
+                    if "portal" in phrog_dict[phrog]:
+                        tail_present = True
+                    if "lysis" in phrog_dict[phrog]:
+                        lysis_present = True
 
-                phrogs_found.add(phrog)
+                    phrogs_found.add(phrog)
 
             if head_present or connector_present or tail_present or lysis_present:
                 phrogs_present = True
