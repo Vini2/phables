@@ -26,8 +26,8 @@ rule raw_coverage:
     shell:
         """
         minimap2 -t {threads} {params.minimap} {input.edges} \
-            <(zcat {input.r1} | tee >( wc -l > {output.r1})) \
-            <(zcat {input.r2} | tee >( wc -l > {output.r2})) \
+            <(zcat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
+            <(zcat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
         | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
         > {output.tsv}
         """
@@ -36,20 +36,20 @@ rule raw_coverage:
 rule rpkm_coverage:
     """convert raw coverages to RPKM values"""
     input:
-        tsv = temp(os.path.join(COVERM_PATH,"{sample}.counts.tsv")),
-        r1 = temp(os.path.join(COVERM_PATH,"{sample}.R1.counts")),
-        r2 = temp(os.path.join(COVERM_PATH,"{sample}.R2.counts"))
+        tsv = os.path.join(COVERM_PATH,"{sample}.counts.tsv"),
+        r1 = os.path.join(COVERM_PATH,"{sample}.R1.counts"),
+        r2 = os.path.join(COVERM_PATH,"{sample}.R2.counts")
     output:
         os.path.join(COVERM_PATH,"{sample}_rpkm.tsv")
     run:
         with open(input.r1, 'r') as f:
-            lib = int(f.readline().strip) / 1000000
+            lib = int(f.readline().strip()) / 1000000
         with open(output[0], 'w') as o:
             o.write(f"Contig\t{wildcards.sample}\n")
             with open(input.tsv, 'r') as t:
                 for line in t:
                     l = line.strip().split()
-                    rpkm = l[1] / ( l[2] / lib )
+                    rpkm = int(l[1]) / ( int(l[2]) / lib )
                     o.write(f"{l[0]}\t{rpkm}\n")
 
 
