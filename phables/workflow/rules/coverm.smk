@@ -3,28 +3,54 @@ Use CoverM to map to calculate coverage of unitigs.
 Use combine_cov to combine the coverage values of multiple samples into one file.
 """
 
-rule run_coverm:
+rule raw_coverage:
+    """Map and collect the raw read counts for each sample"""
     input:
         edges = EDGES_FILE,
-        r1 = os.path.join(READ_DIR, PATTERN_R1),
-        r2 = os.path.join(READ_DIR, PATTERN_R2)
+        r1 = os.path.join(READ_DIR,PATTERN_R1),
+        r2 = os.path.join(READ_DIR,PATTERN_R2)
     output:
-        os.path.join(COVERM_PATH, "{sample}_rpkm.tsv")
+        tsv = temp(os.path.join(COVERM_PATH, "{sample}.counts.tsv")),
+        r1 = temp(os.path.join(COVERM_PATH, "{sample}.R1.counts")),
+        r2 = temp(os.path.join(COVERM_PATH, "{sample}.R2.counts")),
     threads:
-        THREADS
+        config["resources"]["jobCPU"]
+    resources:
+        mem_mb = config["resources"]["jobMem"]
     params:
-        tempdir = os.path.join(OUTDIR, "{sample}.coverm_temp")
-    log:
-        os.path.join(LOGSDIR, "{sample}_coverm.log")
-    conda: 
+        minimap = "-x sr --secondary=no"
+    conda:
         os.path.join("..", "envs", "mapping.yaml")
+    log:
+        os.path.join(LOGSDIR, "{sample}.minimap.log")
     shell:
         """
-        mkdir -p {params.tempdir}
-        TMPDIR={params.tempdir}
-        coverm contig -m rpkm -1 {input.r1} -2 {input.r2} -r {input.edges} -t {threads} --output-file {output} 2>&1 | tee {log}
-        rm -rf {params.tempdir}
+        minimap2 -t {threads} {params.minimap} {input.edges} \
+            <(zcat {input.r1} | tee >( wc -l > {output.r1})) \
+            <(zcat {input.r2} | tee >( wc -l > {output.r2})) \
+        | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
+        > {output.tsv}
         """
+
+
+rule rpkm_coverage:
+    """convert raw coverages to RPKM values"""
+    input:
+        tsv = temp(os.path.join(COVERM_PATH,"{sample}.counts.tsv")),
+        r1 = temp(os.path.join(COVERM_PATH,"{sample}.R1.counts")),
+        r2 = temp(os.path.join(COVERM_PATH,"{sample}.R2.counts"))
+    output:
+        os.path.join(COVERM_PATH,"{sample}_rpkm.tsv")
+    run:
+        with open(input.r1, 'r') as f:
+            lib = int(f.readline().strip) / 1000000
+        with open(output[0], 'w') as o:
+            o.write(f"Contig\t{wildcards.sample}\n")
+            with open(input.tsv, 'r') as t:
+                for line in t:
+                    l = line.strip().split()
+                    rpkm = l[1] / ( l[2] / lib )
+                    o.write(f"{l[0]}\t{rpkm}\n")
 
 
 rule run_combine_cov:

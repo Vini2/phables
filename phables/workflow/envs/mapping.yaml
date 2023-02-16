@@ -3,5 +3,5 @@ channels:
   - bioconda
 dependencies:
   - minimap2
-  - samtools==1.15
-  - coverm
+  - samtools
+#  - coverm
