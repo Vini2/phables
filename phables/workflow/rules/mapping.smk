@@ -12,7 +12,9 @@ rule map_reads_to_unitigs:
         bam = os.path.join(BAM_PATH, "{sample}.bam"),
         index = os.path.join(BAM_PATH, "{sample}.bam.bai")
     threads:
-         THREADS
+        config["resources"]["jobCPU"]
+    resources:
+        mem_mb = config["resources"]["jobMem"]
     log:
         os.path.join(LOGSDIR, "{sample}_mapping.log")
     conda: 

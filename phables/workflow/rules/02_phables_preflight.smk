@@ -9,7 +9,7 @@ This preflight check to confirm the database filepaths
 Setting the directory variables
 """
 
-THREADS = config['threads']
+# THREADS = config['threads']
 INPUT = config['input']
 OUTDIR = config['output']
 print(f"Output files will be saved to directory, {OUTDIR}\n")
