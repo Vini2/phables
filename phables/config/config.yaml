@@ -6,9 +6,10 @@ log: 'phables/phables.log'
 # Databases 
 databases:
 
-# Threads per job (will be scaled down if more than --threads)
+# Job resources for use with Snakemake profiles
+  # jobCPU will be scaled down if running locally with less than 8 threads
+  # jobMem is ignored when running locally
 resources:
-  local_threads: 8
   jobCPU: 8
   jobMem: 16000       # in Mb
 
