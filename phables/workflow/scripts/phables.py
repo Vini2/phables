@@ -18,7 +18,7 @@ from phables_utils.output_utils import (write_component_info,
 from tqdm import tqdm
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2022, Phables Project"
+__copyright__ = "Copyright 2023, Phables Project"
 __license__ = "MIT"
 __version__ = "0.2.0"
 __maintainer__ = "Vijini Mallawaarachchi"
