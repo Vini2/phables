@@ -250,10 +250,9 @@ def main():
                         path_string = (
                             str(graph_unitigs[repeat_unitig_name])
                             + str(graph_unitigs[unitig_name])
-                            + str(
-                                graph_unitigs[repeat_unitig_name].reverse_complement()
-                            )
+                            + str(graph_unitigs[repeat_unitig_name])
                         )
+                        logger.debug(f"Direct terminal repeat detected is {repeat_unitig_name}")
 
                         genome_path = GenomePath(
                             f"phage_comp_{my_count}_cycle_{cycle_number}",
