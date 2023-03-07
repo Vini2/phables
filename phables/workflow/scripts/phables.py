@@ -18,7 +18,7 @@ from phables_utils.output_utils import (write_component_info,
 from tqdm import tqdm
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2023, Phables Project"
+__copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
 __version__ = "0.2.0"
 __maintainer__ = "Vijini Mallawaarachchi"
@@ -26,6 +26,7 @@ __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Development"
 
 MAX_VAL = sys.maxsize
+LEN_THRESHOLD = 0.95
 
 # Phables main code
 # ----------------------------------------------------------------------
@@ -242,6 +243,7 @@ def main():
                         repeat_unitig_name = unitig1_name
 
                     if unitig_to_consider != -1:
+                        logger.debug(f"Case 2 bubble: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long.")
                         cycle_number = 1
                         resolved_edges.add(unitig_to_consider)
                         resolved_edges.add(repeat_unitig)
@@ -255,6 +257,7 @@ def main():
 
                         genome_path = GenomePath(
                             f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            "case2",
                             [
                                 f"{repeat_unitig_name}+",
                                 f"{unitig_name}+",
@@ -595,6 +598,7 @@ def main():
                                     # Create GenomePath object with path details
                                     genome_path = GenomePath(
                                         f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                        "case3",
                                         [x for x in path_order],
                                         [unitig_names_rev[x[:-1]] for x in path_order],
                                         path_string,
@@ -641,6 +645,7 @@ def main():
             # Create GenomePath object with path details
             genome_path = GenomePath(
                 f"phage_comp_{my_count}_cycle_{cycle_number}",
+                "case1",
                 [unitig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
@@ -681,7 +686,12 @@ def main():
 
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
-                if genomic_path.length > largest_length * 0.95:
+
+                passed = False
+                if genomic_path.length > largest_length * LEN_THRESHOLD:
+                    passed = True
+
+                if passed:
                     logger.debug(
                         f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}"
                     )
