@@ -6,15 +6,17 @@ import time
 
 import networkx as nx
 from igraph import *
-from phables_utils import (component_utils, edge_graph_utils, flow_utils,
-                           gene_utils)
-from phables_utils.coverage_utils import (get_junction_pe_coverage,
-                                          get_unitig_coverage)
+from phables_utils import component_utils, edge_graph_utils, flow_utils, gene_utils
+from phables_utils.coverage_utils import get_junction_pe_coverage, get_unitig_coverage
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.output_utils import (write_component_info,
-                                        write_component_phrog_info, write_path,
-                                        write_path_fasta,
-                                        write_res_genome_info, write_unitigs)
+from phables_utils.output_utils import (
+    write_component_info,
+    write_component_phrog_info,
+    write_path,
+    write_path_fasta,
+    write_res_genome_info,
+    write_unitigs,
+)
 from tqdm import tqdm
 
 __author__ = "Vijini Mallawaarachchi"
@@ -243,7 +245,9 @@ def main():
                         repeat_unitig_name = unitig1_name
 
                     if unitig_to_consider != -1:
-                        logger.debug(f"Case 2 bubble: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long.")
+                        logger.debug(
+                            f"Case 2 bubble: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long."
+                        )
                         cycle_number = 1
                         resolved_edges.add(unitig_to_consider)
                         resolved_edges.add(repeat_unitig)
@@ -252,7 +256,9 @@ def main():
                             + str(graph_unitigs[unitig_name])
                             + str(graph_unitigs[repeat_unitig_name])
                         )
-                        logger.debug(f"Direct terminal repeat detected is {repeat_unitig_name}")
+                        logger.debug(
+                            f"Direct terminal repeat detected is {repeat_unitig_name}"
+                        )
 
                         genome_path = GenomePath(
                             f"phage_comp_{my_count}_cycle_{cycle_number}",
@@ -685,7 +691,6 @@ def main():
 
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
-
                 passed = False
                 if genomic_path.length > largest_length * LEN_THRESHOLD:
                     passed = True
