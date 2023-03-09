@@ -18,18 +18,28 @@ rule raw_coverage:
     resources:
         mem_mb = config["resources"]["jobMem"]
     params:
-        minimap = "-x sr --secondary=no"
+        minimap = "-x sr --secondary=no",
+        reads_dir = READ_DIR
     conda:
         os.path.join("..", "envs", "mapping.yaml")
     log:
         os.path.join(LOGSDIR, "{sample}.minimap.log")
     shell:
         """
-        minimap2 -t {threads} {params.minimap} {input.edges} \
-            <(zcat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
-            <(zcat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
-        | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
-        > {output.tsv}
+        if ls {params.reads_dir}/*.gz  &>/dev/null
+        then
+            minimap2 -t {threads} {params.minimap} {input.edges} \
+                <(zcat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
+                <(zcat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
+            | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
+            > {output.tsv}
+        else
+            minimap2 -t {threads} {params.minimap} {input.edges} \
+                <(cat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
+                <(cat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
+            | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
+            > {output.tsv}
+        fi
         """
 
 
