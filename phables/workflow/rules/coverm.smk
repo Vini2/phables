@@ -26,20 +26,11 @@ rule raw_coverage:
         os.path.join(LOGSDIR, "{sample}.minimap.log")
     shell:
         """
-        if ls {params.reads_dir}/*.gz  &>/dev/null
-        then
-            minimap2 -t {threads} {params.minimap} {input.edges} \
-                <(zcat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
-                <(zcat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
-            | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
-            > {output.tsv}
-        else
-            minimap2 -t {threads} {params.minimap} {input.edges} \
-                <(cat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
-                <(cat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
-            | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
-            > {output.tsv}
-        fi
+        minimap2 -t {threads} {params.minimap} {input.edges} \
+            <(zcat -f {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
+            <(zcat -f {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
+        | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
+        > {output.tsv}
         """
 
 
