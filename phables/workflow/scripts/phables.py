@@ -183,7 +183,7 @@ def main():
 
         has_cycles = False
 
-        # if 5627 not in candidate_nodes:
+        # if 423 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
@@ -332,6 +332,7 @@ def main():
                 G_edge.add_edge(cedge[0], cedge[1], weight=cycle_edges[cedge])
 
             two_comp = sorted(nx.weakly_connected_components(G_edge), key=len)
+            logger.debug(f"No. of weakly connected components: {len(two_comp)}")
 
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
@@ -379,15 +380,15 @@ def main():
                 if len(source_sink_candidates) > 0:
                     # Identify the longest source/sink vertex
                     max_length = -1
-                    max_length_vertex = -1
+                    max_length_st_vertex = -1
 
                     for vertex in source_sink_candidates:
                         if len(graph_unitigs[vertex[:-1]]) > max_length:
                             max_length = len(graph_unitigs[vertex[:-1]])
-                            max_length_vertex = vertex
+                            max_length_st_vertex = vertex
 
-                    source_sink = unitig_names_rev[max_length_vertex[:-1]]
-                    logger.debug(f"Identified source_sink from BFS: {source_sink}")
+                    source_sink = unitig_names_rev[max_length_st_vertex[:-1]]
+                    logger.debug(f"Identified source_sink from BFS: {source_sink}, {max_length_st_vertex}")
 
                     candidate_nodes.remove(source_sink)
                     candidate_nodes.insert(0, source_sink)
@@ -410,6 +411,8 @@ def main():
                         node_indices[v] = my_counter
                         node_indices_rev[my_counter] = v
                         my_counter += 1
+
+                    logger.debug(f"Edge: {u}, {v}, {cov['weight']}")
 
                     G.add_edge(node_indices[u], node_indices[v], weight=cov["weight"])
 
@@ -457,9 +460,16 @@ def main():
 
                 visited_edges = []
 
+                logger.debug(f"G_edge.nodes: {list(G_edge.nodes)}")
+                logger.debug(f"G_edge.edges: {G_edge.edges(data=True)}")
+
                 for u, v, cov in G_edge.edges(data=True):
+
                     u_name = unitig_names_rev[u[:-1]]
                     v_name = unitig_names_rev[v[:-1]]
+
+                    original_edge = (u[:-1], v[:-1])
+                    rev_original_edge = (v[:-1], u[:-1])
 
                     u_index = candidate_nodes.index(u_name)
                     v_index = candidate_nodes.index(v_name)
