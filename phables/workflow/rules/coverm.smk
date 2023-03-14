@@ -25,11 +25,26 @@ rule raw_coverage:
         os.path.join(LOGSDIR, "{sample}.minimap.log")
     shell:
         """
-        minimap2 -t {threads} {params.minimap} {input.edges} \
+        minimap2 -t {threads} {params.minimap} {input.edges} 2> {log} \
             <(zcat {input.r1} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r1})) \
             <(zcat {input.r2} | tee >( wc -l | awk '{{print $1 / 4}}' > {output.r2})) \
         | awk -F '\t' '{{ edges[$6]+=1; len[$6]=$7 }} END {{ for (edge in edges) {{ print edge, len[edge], edges[edge] }} }}' \
         > {output.tsv}
+        """
+
+
+rule faidx:
+    input:
+        EDGES_FILE,
+    output:
+        EDGES_FILE + ".fai"
+    conda:
+        os.path.join("..","envs","samtools.yaml")
+    log:
+        os.path.join(LOGSDIR, "samtools.faidx.log")
+    shell:
+        """
+        samtools faidx {input} 2> {log}
         """
 
 
@@ -49,13 +64,15 @@ rule rpkm_coverage:
             with open(input.tsv, 'r') as t:
                 for line in t:
                     l = line.strip().split()
-                    rpkm = int(l[1]) / ( int(l[2]) / lib )
+                    rpm = int(l[2]) / lib
+                    rpkm = rpm / ( int(l[1]) / 1000 )
                     o.write(f"{l[0]}\t{rpkm}\n")
 
 
 rule run_combine_cov:
     input:
-        files=expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES)
+        files=expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES),
+        fai = EDGES_FILE + ".fai"
     output:
         os.path.join(OUTDIR, "coverage.tsv")
     params:
@@ -64,7 +81,17 @@ rule run_combine_cov:
         log = os.path.join(LOGSDIR, "combine_cov.log")
     log:
         os.path.join(LOGSDIR, "combine_cov.log")
-    conda: 
-        os.path.join("..", "envs", "phables.yaml")
-    script:
-        os.path.join('..', 'scripts', 'combine_cov.py')
+    run:
+        counts = {}
+        with open(input.fai, "r") as f:
+            for line in f:
+                l = line.strip().split()
+                counts[l[0]] = 0
+        for file in input.files:
+            with open(file, "r") as f:
+                for line in f:
+                    l = line.strip().split()
+                    counts[l[0]] += l[1]
+        with open(output[0], "w") as out:
+            for contig in list(counts.keys()):
+                out.write(f"{contig}\t{counts[contig]}\n")
