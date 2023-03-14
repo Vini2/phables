@@ -12,7 +12,7 @@ import subprocess
 import pandas as pd
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2022, Phables Project"
+__copyright__ = "Copyright 2023, Phables Project"
 __license__ = "MIT"
 __type__ = "Support Script"
 __maintainer__ = "Vijini Mallawaarachchi"

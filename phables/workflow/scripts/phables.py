@@ -6,26 +6,29 @@ import time
 
 import networkx as nx
 from igraph import *
-from phables_utils import (component_utils, edge_graph_utils, flow_utils,
-                           gene_utils)
-from phables_utils.coverage_utils import (get_junction_pe_coverage,
-                                          get_unitig_coverage)
+from phables_utils import component_utils, edge_graph_utils, flow_utils, gene_utils
+from phables_utils.coverage_utils import get_junction_pe_coverage, get_unitig_coverage
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.output_utils import (write_component_info,
-                                        write_component_phrog_info, write_path,
-                                        write_path_fasta,
-                                        write_res_genome_info, write_unitigs)
+from phables_utils.output_utils import (
+    write_component_info,
+    write_component_phrog_info,
+    write_path,
+    write_path_fasta,
+    write_res_genome_info,
+    write_unitigs,
+)
 from tqdm import tqdm
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Development"
 
 MAX_VAL = sys.maxsize
+LEN_THRESHOLD = 0.95
 
 # Phables main code
 # ----------------------------------------------------------------------
@@ -180,7 +183,7 @@ def main():
 
         has_cycles = False
 
-        # if 5627 not in candidate_nodes:
+        # if 423 not in candidate_nodes:
         #     continue
 
         logger.debug(f"my_count: {my_count}")
@@ -242,19 +245,24 @@ def main():
                         repeat_unitig_name = unitig1_name
 
                     if unitig_to_consider != -1:
+                        logger.debug(
+                            f"Case 2 bubble: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long."
+                        )
                         cycle_number = 1
                         resolved_edges.add(unitig_to_consider)
                         resolved_edges.add(repeat_unitig)
                         path_string = (
                             str(graph_unitigs[repeat_unitig_name])
                             + str(graph_unitigs[unitig_name])
-                            + str(
-                                graph_unitigs[repeat_unitig_name].reverse_complement()
-                            )
+                            + str(graph_unitigs[repeat_unitig_name])
+                        )
+                        logger.debug(
+                            f"Direct terminal repeat detected is {repeat_unitig_name}"
                         )
 
                         genome_path = GenomePath(
                             f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            "case2",
                             [
                                 f"{repeat_unitig_name}+",
                                 f"{unitig_name}+",
@@ -324,6 +332,7 @@ def main():
                 G_edge.add_edge(cedge[0], cedge[1], weight=cycle_edges[cedge])
 
             two_comp = sorted(nx.weakly_connected_components(G_edge), key=len)
+            logger.debug(f"No. of weakly connected components: {len(two_comp)}")
 
             if len(two_comp) >= 2:
                 G_edge.remove_nodes_from(list(two_comp[0]))
@@ -371,15 +380,15 @@ def main():
                 if len(source_sink_candidates) > 0:
                     # Identify the longest source/sink vertex
                     max_length = -1
-                    max_length_vertex = -1
+                    max_length_st_vertex = -1
 
                     for vertex in source_sink_candidates:
                         if len(graph_unitigs[vertex[:-1]]) > max_length:
                             max_length = len(graph_unitigs[vertex[:-1]])
-                            max_length_vertex = vertex
+                            max_length_st_vertex = vertex
 
-                    source_sink = unitig_names_rev[max_length_vertex[:-1]]
-                    logger.debug(f"Identified source_sink from BFS: {source_sink}")
+                    source_sink = unitig_names_rev[max_length_st_vertex[:-1]]
+                    logger.debug(f"Identified source_sink from BFS: {source_sink}, {max_length_st_vertex}")
 
                     candidate_nodes.remove(source_sink)
                     candidate_nodes.insert(0, source_sink)
@@ -402,6 +411,8 @@ def main():
                         node_indices[v] = my_counter
                         node_indices_rev[my_counter] = v
                         my_counter += 1
+
+                    logger.debug(f"Edge: {u}, {v}, {cov['weight']}")
 
                     G.add_edge(node_indices[u], node_indices[v], weight=cov["weight"])
 
@@ -449,9 +460,16 @@ def main():
 
                 visited_edges = []
 
+                logger.debug(f"G_edge.nodes: {list(G_edge.nodes)}")
+                logger.debug(f"G_edge.edges: {G_edge.edges(data=True)}")
+
                 for u, v, cov in G_edge.edges(data=True):
+
                     u_name = unitig_names_rev[u[:-1]]
                     v_name = unitig_names_rev[v[:-1]]
+
+                    original_edge = (u[:-1], v[:-1])
+                    rev_original_edge = (v[:-1], u[:-1])
 
                     u_index = candidate_nodes.index(u_name)
                     v_index = candidate_nodes.index(v_name)
@@ -595,6 +613,7 @@ def main():
                                     # Create GenomePath object with path details
                                     genome_path = GenomePath(
                                         f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                        "case3",
                                         [x for x in path_order],
                                         [unitig_names_rev[x[:-1]] for x in path_order],
                                         path_string,
@@ -641,6 +660,7 @@ def main():
             # Create GenomePath object with path details
             genome_path = GenomePath(
                 f"phage_comp_{my_count}_cycle_{cycle_number}",
+                "case1",
                 [unitig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
@@ -681,7 +701,11 @@ def main():
 
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
-                if genomic_path.length > largest_length * 0.95:
+                passed = False
+                if genomic_path.length > largest_length * LEN_THRESHOLD:
+                    passed = True
+
+                if passed:
                     logger.debug(
                         f"{genomic_path.id}\t{genomic_path.length}\t{genomic_path.coverage}"
                     )

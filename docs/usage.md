@@ -22,8 +22,8 @@ Options:
                                 component  [default: 10]
   --mgfrac FLOAT                length threshold to consider single copy
                                 marker genes  [default: 0.2]
-  --alignscore FLOAT            minimum alignment score for phrog annotations
-                                [default: 90]
+  --evalue FLOAT                maximum e-value for phrog annotations
+                                [default: 1e-10]
   --seqidentity FLOAT           minimum sequence identity for phrog
                                 annotations  [default: 0.3]
   --output PATH                 Output directory  [default: phables.out]
@@ -48,7 +48,7 @@ Options:
 * `--compcount` - maximum unitig count to consider a component [default: 200]
 * `--maxpaths` - maximum number of paths to resolve for a component [default: 10]
 * `--mgfrac` - length threshold to consider single copy marker genes [default: 0.2]
-* `--alignscore` - minimum alignment score for phrog annotations [default: 90]
+* `--evalue` - maximum e-value for phrog annotations [default: 1e-10]
 * `--seqidentity` - minimum sequence identity for phrog annotations [default: 0.3]
 * `--output` - path to the output directory [default: `phables.out`]
 * `--configfile` - custom config file [default: `(outputDir)/config.yaml`]

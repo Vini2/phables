@@ -22,5 +22,5 @@ rule map_reads_to_unitigs:
     shell:
         """
             minimap2 -t {threads} -N 5 -ax sr {input.edges} {input.r1} {input.r2} | samtools sort -@ {threads} > {output.bam}
-            samtools index {output.bam} {output.index}
+            samtools index -@ {threads} {output.bam} {output.index}
         """
