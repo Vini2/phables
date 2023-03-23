@@ -169,6 +169,7 @@ def main():
     case3_resolved = set()
 
     phage_like_edges = set()
+    all_phage_like_edges = set()
 
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
         component_time_start = time.time()
@@ -190,6 +191,8 @@ def main():
 
         logger.debug(f"number of unitigs: {len(candidate_nodes)}")
         logger.debug(f"{candidate_nodes}")
+
+        all_phage_like_edges = all_phage_like_edges.union(set(candidate_nodes))
 
         in_degree = []
         out_degree = []
@@ -801,6 +804,9 @@ def main():
 
     write_unitigs(
         phage_like_edges, unitig_names, graph_unitigs, "phage_like_edges", output
+    )
+    write_unitigs(
+        all_phage_like_edges, unitig_names, graph_unitigs, "all_phage_like_edges", output
     )
     write_unitigs(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
 
