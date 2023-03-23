@@ -34,6 +34,21 @@ rule raw_coverage:
         """
 
 
+rule faidx:
+    input:
+        EDGES_FILE,
+    output:
+        EDGES_FILE + ".fai"
+    conda:
+        os.path.join("..","envs","samtools.yaml")
+    log:
+        os.path.join(LOGSDIR, "samtools.faidx.log")
+    shell:
+        """
+        samtools faidx {input} 2> {log}
+        """
+
+
 rule rpkm_coverage:
     """convert raw coverages to RPKM values"""
     input:
@@ -50,13 +65,15 @@ rule rpkm_coverage:
             with open(input.tsv, 'r') as t:
                 for line in t:
                     l = line.strip().split()
-                    rpkm = int(l[1]) / ( int(l[2]) / lib )
+                    rpm = int(l[2]) / lib
+                    rpkm = rpm / ( int(l[1]) / 1000 )
                     o.write(f"{l[0]}\t{rpkm}\n")
 
 
 rule run_combine_cov:
     input:
-        files=expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES)
+        files=expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES),
+        fai = EDGES_FILE + ".fai"
     output:
         os.path.join(OUTDIR, "coverage.tsv")
     params:
@@ -65,7 +82,17 @@ rule run_combine_cov:
         log = os.path.join(LOGSDIR, "combine_cov.log")
     log:
         os.path.join(LOGSDIR, "combine_cov.log")
-    conda: 
-        os.path.join("..", "envs", "phables.yaml")
-    script:
-        os.path.join('..', 'scripts', 'combine_cov.py')
+    run:
+        counts = {}
+        with open(input.fai, "r") as f:
+            for line in f:
+                l = line.strip().split()
+                counts[l[0]] = 0
+        for file in input.files:
+            with open(file, "r") as f:
+                for line in f:
+                    l = line.strip().split()
+                    counts[l[0]] += l[1]
+        with open(output[0], "w") as out:
+            for contig in list(counts.keys()):
+                out.write(f"{contig}\t{counts[contig]}\n")
