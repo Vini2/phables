@@ -257,10 +257,10 @@ def main():
                         path_string = (
                             str(graph_unitigs[repeat_unitig_name])
                             + str(graph_unitigs[unitig_name])
-                            + str(graph_unitigs[repeat_unitig_name])
+                            + str(graph_unitigs[repeat_unitig_name].reverse_complement())
                         )
                         logger.debug(
-                            f"Direct terminal repeat detected is {repeat_unitig_name}"
+                            f"Terminal repeat detected is {repeat_unitig_name}"
                         )
 
                         genome_path = GenomePath(
