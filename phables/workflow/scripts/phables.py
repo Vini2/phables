@@ -689,6 +689,7 @@ def main():
         final_genomic_paths = []
         comp_resolved_edges = set()
         visited_nodes = set()
+        comp_resolved_paths = set()
 
         frac_unitigs = 1
         n_paths = 0
@@ -704,9 +705,16 @@ def main():
 
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
+
                 passed = False
+
                 if genomic_path.length > largest_length * LEN_THRESHOLD:
                     passed = True
+
+                path_node_order_string = ",".join(genomic_path.node_order)
+
+                if path_node_order_string in comp_resolved_paths:
+                    passed = False
 
                 if passed:
                     logger.debug(
@@ -717,6 +725,7 @@ def main():
                     path_coverages.append(genomic_path.coverage)
                     final_genomic_paths.append(genomic_path)
                     visited_nodes = visited_nodes.union(set(genomic_path.node_order))
+                    comp_resolved_paths.add(path_node_order_string)
                     n_paths += 1
 
                     for path_node in genomic_path.node_id_order:
