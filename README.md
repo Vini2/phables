@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/Vini2/phables/master/phables_logo.png" width="600" title="phables logo" alt="phables logo">
 </p>
 
-Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
+Phables: from fragmented assemblies to high-quality bacteriophage genomes
 ===============
 
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
