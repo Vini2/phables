@@ -122,4 +122,22 @@ Are you interested in contributing to the Phables project? If so, you can check 
 Phables uses the Gurobi implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/).
 
 ## Citation
-The Phables manuscript is under review at the OUP Bioinformatics journal. If you use Phables in your work, please contact Rob Edwards at [raedwards@gmail.com](mailto:raedwards@gmail.com) for an appropriate citation.
+The Phables manuscript is under review at the OUP Bioinformatics journal and the preprint is available on biorxiv at DOI: [10.1101/2023.04.04.535632](https://www.biorxiv.org/content/10.1101/2023.04.04.535632v1). If you use Phables in your work, please cite Phables as,
+
+Vijini Mallawaarachchi, Michael J. Roach, Bhavya Papudeshi, Sarah K Giles, Susanna R Grigson, Przemyslaw Decewicz, George Bouras, Ryan D Hesse, Laura K Inglis, Abbey LK Hutton, Elizabeth A Dinsdale, Robert A Edwards. Phables: from fragmented assemblies to high-quality bacteriophage genomes. bioRxiv 2023.04.04.535632; doi: https://doi.org/10.1101/2023.04.04.535632
+
+```bibtex
+@article{Mallawaarachchi2023.04.04.535632,
+	author = {Vijini Mallawaarachchi and Michael J Roach and Bhavya Papudeshi and Sarah K Giles and Susanna R Grigson and Przemyslaw Decewicz and George Bouras and Ryan D Hesse and Laura K Inglis and Abbey LK Hutton and Elizabeth A Dinsdale and Robert A Edwards},
+	title = {Phables: from fragmented assemblies to high-quality bacteriophage genomes},
+	elocation-id = {2023.04.04.535632},
+	year = {2023},
+	doi = {10.1101/2023.04.04.535632},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Microbial communities found within the human gut have a strong influence on human health. Intestinal bacteria and viruses influence gastrointestinal diseases such as inflammatory bowel disease. Viruses infecting bacteria, known as bacteriophages, play a key role in modulating bacterial communities within the human gut. However, the identification and characterisation of novel bacteriophages remain a challenge. Available tools use similarities between sequences, nucleotide composition, and the presence of viral genes/proteins. Most available tools consider individual contigs to determine whether they are of viral origin. As a result of the challenges in viral assembly, fragmentation of viral genomes can occur, leading to the need for new approaches in viral identification. We introduce Phables, a new computational method to resolve bacteriophage genomes from fragmented viral metagenomic assemblies. Phables identifies bacteriophage-like components in the assembly graph, models each component as a flow network, and uses graph algorithms and flow decomposition techniques to identify genomic paths. Experimental results of viral metagenomic samples obtained from different environments show that over 80\% of the bacteriophage genomes resolved by Phables have high quality and are longer than the individual contigs identified by existing viral identification tools.},
+	URL = {https://www.biorxiv.org/content/early/2023/04/04/2023.04.04.535632},
+	eprint = {https://www.biorxiv.org/content/early/2023/04/04/2023.04.04.535632.full.pdf},
+	journal = {bioRxiv}
+}
+
+```
