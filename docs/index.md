@@ -1,6 +1,6 @@
 ![](images/phables_logo.png)
 
-# Phage bubbles resolve bacteriophage genomes in viral metagenomic samples
+# Phables: from fragmented assemblies to high-quality bacteriophage genomes
 
 Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. 
 It models cyclic phage-like components in a viral metagenomic assembly graph as flow networks, models as a 

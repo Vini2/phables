@@ -19,7 +19,7 @@ Once you have run Phables, check out the [EVALUATION](https://phables.readthedoc
 
 ### Q1: Gurobi installation conflicts and `grbgetkey` fails to run
 
-If you come across conflicts when installing Gurobi in the phables environment and could not run the `grbgetkey` command properly, please follow the steps given below.
+If you come across conflicts when installing Gurobi in the `phables` environment and could not run the `grbgetkey` command properly, please follow the steps given below.
 
 ```bash
 # Deactivate the phables environment
