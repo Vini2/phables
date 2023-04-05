@@ -122,4 +122,4 @@ Are you interested in contributing to the Phables project? If so, you can check 
 Phables uses the Gurobi implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/).
 
 ## Citation
-The Phables manuscript is still under preparation. If you use Phables in your work, please contact Rob Edwards at [raedwards@gmail.com](mailto:raedwards@gmail.com) for an appropriate citation.
+The Phables manuscript is under review at the OUP Bioinformatics journal. If you use Phables in your work, please contact Rob Edwards at [raedwards@gmail.com](mailto:raedwards@gmail.com) for an appropriate citation.
