@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 __author__ = "Vijini Mallawaarachchi"
-__copyright__ = "Copyright 2022, Phables Project"
+__copyright__ = "Copyright 2023, Phables Project"
 __license__ = "MIT"
 __type__ = "Test Script"
 __maintainer__ = "Vijini Mallawaarachchi"
@@ -45,27 +45,5 @@ def exec_command(cmnd, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
 
 def test_phables(tmp_dir):
     """test phables"""
-    dir_name = TEST_ROOTDIR / "data"
-    graph = dir_name / "assembly_graph.gfa"
-    paths = dir_name / "assembly_info.txt"
-    coverage = dir_name / "edge_coverages.tsv"
-    smg = dir_name / "edges.fasta.hmmout"
-    phrogs = dir_name / "phrogs_annotations.tsv"
-
-    cmd = f"{EXEC_ROOTDIR}/phables -g {graph} -p {paths} -b {dir_name} -hm {smg} -ph {phrogs} -c {coverage} -o {tmp_dir}"
-    exec_command(cmd)
-
-
-def test_combine_cov(tmp_dir):
-    """test phables"""
-    dir_name = TEST_ROOTDIR / "script_data"
-    cmd = f"python {EXEC_ROOTDIR}/phables_utils/support/combine_cov.py --covpath {dir_name} --output {tmp_dir}"
-    exec_command(cmd)
-
-
-def test_gfa2fasta(tmp_dir):
-    """test phables"""
-    dir_name = TEST_ROOTDIR / "data"
-    graph = dir_name / "assembly_graph.gfa"
-    cmd = f"python {EXEC_ROOTDIR}/phables_utils/support/gfa2fasta.py --graph {graph} --assembler flye --output {tmp_dir}"
+    cmd = f"phables test"
     exec_command(cmd)

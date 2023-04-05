@@ -16,8 +16,10 @@ nav:
         - Introduction: index.md
     - RUNNING: 
         - Install: install.md
-        - Preprocess: preprocess.md
+        - Assemble: assemble.md
         - Usage: usage.md
-    - EVAUATION:
+        - FAQ: faq.md
+    - EVALUATION:
         - Running CheckV: quality.md
         - Quality comparison: comparison.md
+        - Graph statistics: graph_stats.md

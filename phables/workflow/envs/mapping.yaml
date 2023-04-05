@@ -1,0 +1,7 @@
+name: mapping
+channels:
+  - bioconda
+dependencies:
+  - minimap2
+  - samtools
+#  - coverm

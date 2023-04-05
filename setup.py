@@ -1,63 +1,51 @@
-#!/usr/bin/env python3
+import os
 
-import setuptools
+from setuptools import find_packages, setup
+
+
+def get_version():
+    with open(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "phables",
+            "phables.VERSION",
+        )
+    ) as f:
+        return f.readline().strip()
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-packages = setuptools.find_packages()
-package_data = {
-    "phables_utils": [
-        "phables_utils/*",
-        "phables_utils/support/*",
-        "phables_utils/phrogs/*",
-    ]
-}
 
 data_files = [(".", ["LICENSE", "README.md"])]
 
-setuptools.setup(
+setup(
     name="phables",
-    version="0.1.0a3",
-    zip_safe=True,
-    author="Vijini Mallawaarachchi",
-    author_email="viji.mallawaarachchi@gmail.com",
+    packages=find_packages(),
+    url="https://github.com/Vini2/phables",
+    python_requires=">=3.8,<3.11",
     description="Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Vini2/phables",
-    license="MIT",
-    packages=packages,
-    package_data=package_data,
+    version=get_version(),
+    author="Vijini Mallawaarachchi",
+    author_email="viji.mallawaarachchi@gmail.com",
     data_files=data_files,
+    py_modules=["phables"],
+    install_requires=[
+        "snakemake>=7.14.0",
+        "pyyaml>=6.0",
+        "click>=8.1.3",
+    ],
+    entry_points={"console_scripts": ["phables=phables.__main__:main"]},
     include_package_data=True,
-    scripts=["phables"],
-    entry_points={
-        "console_scripts": [
-            "combine_cov=phables_utils.support.combine_cov:main",
-            "gfa2fasta=phables_utils.support.gfa2fasta:main",
-        ],
-    },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        "biopython",
-        "python-igraph",
-        "networkx>=2.8.6",
-        "scipy",
-        "numpy",
-        "pandas",
-        "tqdm",
-        "click",
-        "pysam",
-        "more-itertools",
-        "gurobipy",
-    ],
-    python_requires=">=3.8",
 )

@@ -1,0 +1,19 @@
+name: phables
+channels:
+  - conda-forge
+  - anaconda
+  - bioconda
+  - gurobi
+dependencies:
+  - python>=3.8
+  - biopython
+  - python-igraph
+  - pysam
+  - networkx>=2.8.6
+  - scipy
+  - numpy
+  - pandas
+  - gurobi>=10.0.0
+  - more-itertools
+  - tqdm
+  - click

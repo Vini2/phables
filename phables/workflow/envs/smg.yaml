@@ -1,0 +1,6 @@
+name: smg
+channels:
+  - bioconda
+dependencies:
+  - fraggenescan
+  - hmmer

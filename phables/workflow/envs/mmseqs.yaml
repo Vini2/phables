@@ -1,0 +1,5 @@
+name: mmseqs
+channels:
+  - bioconda
+dependencies:
+  - mmseqs2=13.45111
