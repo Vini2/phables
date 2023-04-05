@@ -58,3 +58,9 @@ You will have to contact your system admin and setup a floating network license.
 If you want to run Phables on a cluster, your cluster should have a [floating network license](https://en.wikipedia.org/wiki/Floating_licensing) for Gurobi for the `run` subcommand to execute properly.
 
 **Gurobi license for a cluster:** You will have to contact your system admin and setup a floating network license for the cluster. You can find more details at [https://support.gurobi.com/hc/en-us/articles/360013195412-How-do-I-obtain-a-free-academic-license-for-a-cluster-or-a-shared-computer-lab-](https://support.gurobi.com/hc/en-us/articles/360013195412-How-do-I-obtain-a-free-academic-license-for-a-cluster-or-a-shared-computer-lab-).
+
+If your cluster has Gurobi already installed with the license setup, you can load the module as follows, prior to running Phables.
+
+```bash
+module load gurobi
+```
