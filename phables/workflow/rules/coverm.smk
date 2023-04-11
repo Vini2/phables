@@ -90,9 +90,10 @@ rule run_combine_cov:
                 counts[l[0]] = 0
         for file in input.files:
             with open(file, "r") as f:
+                f.readline()
                 for line in f:
                     l = line.strip().split()
-                    counts[l[0]] += l[1]
+                    counts[l[0]] += float(l[1])
         with open(output[0], "w") as out:
             for contig in list(counts.keys()):
                 out.write(f"{contig}\t{counts[contig]}\n")
