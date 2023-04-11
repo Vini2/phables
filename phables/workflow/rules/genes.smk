@@ -51,7 +51,7 @@ rule scan_phrogs:
         os.path.join("..", "envs", "mmseqs.yaml")
     shell:
         """
-        mkdir {params.out_path}
+        mkdir -p {params.out_path}
         mmseqs createdb {input} {params.target_seq} > {log}
         mmseqs search {params.target_seq} {input.db} {params.results_mmseqs} {params.tmp} --threads {threads} -s 7 > {log}
         mmseqs createtsv {params.target_seq} {input.db} {params.results_mmseqs} {output} --threads {threads} --full-header > {log}
