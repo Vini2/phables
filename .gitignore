@@ -129,6 +129,7 @@ dmypy.json
 
 # Mac OS
 *.DS_Store
+./**/.DS_Store
 
 # Snakemake
 .snakemake/
