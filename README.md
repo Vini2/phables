@@ -120,7 +120,7 @@ Are you interested in contributing to the Phables project? If so, you can check 
 
 ## Acknowledgement
 
-Phables uses the Gurobi implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/).
+Phables uses the [Gurobi](https://www.gurobi.com/) implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/).
 
 ## Citation
 The Phables manuscript is currently under review and the preprint is available on biorxiv at DOI: [10.1101/2023.04.04.535632](https://www.biorxiv.org/content/10.1101/2023.04.04.535632v1). 
@@ -148,7 +148,7 @@ If you use Phables in your work, please cite Phables as,
 Also, please cite the following tools/databases used by Phables.
 
 * Roach MJ, Pierce-Ward NT, Suchecki R, Mallawaarachchi V, Papudeshi B, et al. Ten simple rules and a template for creating workflows-as-applications. PLOS Computational Biology 18(12) (2022): e1010705. [https://doi.org/10.1371/journal.pcbi.1010705](https://doi.org/10.1371/journal.pcbi.1010705)
-* Terzian P, Olo Ndela E, Galiez C, Lossouarn J, Pérez Bucio RE, Mom R, Toussaint A, Petit MA, Enault F. PHROG : families of prokaryotic virus proteins clustered using remote homology. NAR Genomics and Bioinformatics, Volume 3, Issue 3, lqab067 (2021). [https://doi.org/10.1093/nargab/lqab067](https://doi.org/10.1093/nargab/lqab067)
+* Terzian P, Olo Ndela E, Galiez C, Lossouarn J, Pérez Bucio RE, Mom R, Toussaint A, Petit MA, Enault F. PHROG: families of prokaryotic virus proteins clustered using remote homology. NAR Genomics and Bioinformatics, Volume 3, Issue 3, lqab067 (2021). [https://doi.org/10.1093/nargab/lqab067](https://doi.org/10.1093/nargab/lqab067)
 * Steinegger M, Söding J. MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets. Nat Biotechnol 35, 1026–1028 (2017). [https://doi.org/10.1038/nbt.3988](https://doi.org/10.1038/nbt.3988)
 * Li H. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics, 34:3094-3100 (2018). [https://doi.org/10.1093/bioinformatics/bty191](https://doi.org/10.1093/bioinformatics/bty191)
 * Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R, 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools, Bioinformatics, Volume 25, Issue 16, Pages 2078–2079 (2009). [https://doi.org/10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp352)
