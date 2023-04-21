@@ -14,6 +14,7 @@ theme:
 nav:
     - HOME:
         - Introduction: index.md
+        - Citation: citation.md
     - RUNNING: 
         - Install: install.md
         - Assemble: assemble.md
