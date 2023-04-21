@@ -141,6 +141,7 @@ def write_component_phrog_info(resolved_components, comp_phrogs, output):
     """
 
     with open(f"{output}/component_phrogs.txt", "w") as myfile:
+        myfile.write(f"Phage component\tPHROG\n")
         for comp in resolved_components:
             myfile.write(f"phage_{comp}\t{comp_phrogs[comp]}\n")
 

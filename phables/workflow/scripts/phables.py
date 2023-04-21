@@ -806,7 +806,11 @@ def main():
     logger.info(f"Case 2 (resolved/found): {len(case2_resolved)}/{len(case2_found)}")
     logger.info(f"Case 3 (resolved/found): {len(case3_resolved)}/{len(case3_found)}")
     logger.info(f"Total number of genomes resolved: {len(all_resolved_paths)}")
-    logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
+
+    if len(all_resolved_paths) == 0:
+        logger.info(f"No genomes were resolved.")
+    else:
+        logger.info(f"Resolved genomes can be found in {output}/resolved_paths.fasta")
 
     # Write edges to file
     # ----------------------------------------------------------------------
@@ -823,18 +827,19 @@ def main():
     # ----------------------------------------------------------------------
 
     filename = write_res_genome_info(all_resolved_paths, output)
-    logger.info(f"Resolved genome information can be found in {output}/{filename}")
+    if len(all_resolved_paths) > 0:
+        logger.info(f"Resolved genome information can be found in {output}/{filename}")
 
     # Record component information
     # ----------------------------------------------------------------------
 
     filename = write_component_info(all_components, output)
-    logger.info(f"Resolved component information can be found in {output}/{filename}")
+    if len(all_components) > 0:
+        logger.info(f"Resolved component information can be found in {output}/{filename}")
 
     filename = write_component_phrog_info(resolved_components, comp_phrogs, output)
-    logger.info(
-        f"PHROGs found in resolved components can be found in {output}/{filename}"
-    )
+    if len(resolved_components) > 0:
+        logger.info(f"PHROGs found in resolved components can be found in {output}/{filename}")
 
     # Get elapsed time
     # ----------------------------------------------------------------------

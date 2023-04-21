@@ -27,8 +27,6 @@ GRAPH_FILE = INPUT
 
 
 """PHABLES TARGETS"""
-phablesTargets.append(os.path.join(OUTDIR, "resolved_paths.fasta"))
 phablesTargets.append(os.path.join(OUTDIR, "resolved_genome_info.txt"))
-phablesTargets.append(os.path.join(OUTDIR, "resolved_edges.fasta"))
 phablesTargets.append(os.path.join(OUTDIR, "resolved_component_info.txt"))
 phablesTargets.append(os.path.join(OUTDIR, "component_phrogs.txt"))
