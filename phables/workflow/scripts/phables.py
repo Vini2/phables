@@ -74,7 +74,7 @@ def main():
     logger.addHandler(fileHandler)
 
     logger.info(
-        "Welcome to Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples."
+        "Welcome to Phables: from fragmented assemblies to high-quality bacteriophage genomes."
     )
 
     logger.info(f"Input arguments: ")
@@ -257,7 +257,9 @@ def main():
                         path_string = (
                             str(graph_unitigs[repeat_unitig_name])
                             + str(graph_unitigs[unitig_name])
-                            + str(graph_unitigs[repeat_unitig_name].reverse_complement())
+                            + str(
+                                graph_unitigs[repeat_unitig_name].reverse_complement()
+                            )
                         )
                         logger.debug(
                             f"Terminal repeat detected is {repeat_unitig_name}"
@@ -391,7 +393,9 @@ def main():
                             max_length_st_vertex = vertex
 
                     source_sink = unitig_names_rev[max_length_st_vertex[:-1]]
-                    logger.debug(f"Identified source_sink from BFS: {source_sink}, {max_length_st_vertex}")
+                    logger.debug(
+                        f"Identified source_sink from BFS: {source_sink}, {max_length_st_vertex}"
+                    )
 
                     candidate_nodes.remove(source_sink)
                     candidate_nodes.insert(0, source_sink)
@@ -467,7 +471,6 @@ def main():
                 logger.debug(f"G_edge.edges: {G_edge.edges(data=True)}")
 
                 for u, v, cov in G_edge.edges(data=True):
-
                     u_name = unitig_names_rev[u[:-1]]
                     v_name = unitig_names_rev[v[:-1]]
 
@@ -705,7 +708,6 @@ def main():
 
             # Filter genomic paths
             for genomic_path in my_genomic_paths:
-
                 passed = False
 
                 if genomic_path.length > largest_length * LEN_THRESHOLD:
@@ -819,7 +821,11 @@ def main():
         phage_like_edges, unitig_names, graph_unitigs, "phage_like_edges", output
     )
     write_unitigs(
-        all_phage_like_edges, unitig_names, graph_unitigs, "all_phage_like_edges", output
+        all_phage_like_edges,
+        unitig_names,
+        graph_unitigs,
+        "all_phage_like_edges",
+        output,
     )
     write_unitigs(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
 
@@ -835,11 +841,15 @@ def main():
 
     filename = write_component_info(all_components, output)
     if len(all_components) > 0:
-        logger.info(f"Resolved component information can be found in {output}/{filename}")
+        logger.info(
+            f"Resolved component information can be found in {output}/{filename}"
+        )
 
     filename = write_component_phrog_info(resolved_components, comp_phrogs, output)
     if len(resolved_components) > 0:
-        logger.info(f"PHROGs found in resolved components can be found in {output}/{filename}")
+        logger.info(
+            f"PHROGs found in resolved components can be found in {output}/{filename}"
+        )
 
     # Get elapsed time
     # ----------------------------------------------------------------------

@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     url="https://github.com/Vini2/phables",
     python_requires=">=3.8,<3.11",
-    description="Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples",
+    description="Phables: from fragmented assemblies to high-quality bacteriophage genomes",
     long_description=long_description,
     long_description_content_type="text/markdown",
     version=get_version(),

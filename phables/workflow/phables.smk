@@ -1,5 +1,5 @@
 """
-Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
+Phables: from fragmented assemblies to high-quality bacteriophage genomes.
 
 2023, Vijini Mallawaarachchi
 

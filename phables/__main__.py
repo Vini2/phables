@@ -79,7 +79,7 @@ def common_options(func):
 @click.version_option(get_version(), "-v", "--version", is_flag=True)
 def cli():
     """
-    Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic samples.
+    Phables: from fragmented assemblies to high-quality bacteriophage genomes.
     Please refer the full documentation available on Read the Docs at https://phables.readthedocs.io/
     """
     pass

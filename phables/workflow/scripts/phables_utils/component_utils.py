@@ -19,9 +19,8 @@ def get_components(
     comp_phrogs = {}
 
     for component in assembly_graph.components():
-
         phrogs_found = set()
-        
+
         head_present = False
         connector_present = False
         tail_present = False
