@@ -41,7 +41,7 @@ setup(
     entry_points={"console_scripts": ["phables=phables.__main__:main"]},
     include_package_data=True,
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
