@@ -1,5 +1,5 @@
 """
-Use CoverM to map to calculate coverage of unitigs.
+Use raw_coverage to map to calculate coverage of unitigs.
 Use combine_cov to combine the coverage values of multiple samples into one file.
 """
 
@@ -10,15 +10,15 @@ rule raw_coverage:
         r1 = os.path.join(READ_DIR,PATTERN_R1),
         r2 = os.path.join(READ_DIR,PATTERN_R2)
     output:
-        tsv = temp(os.path.join(COVERM_PATH, "{sample}.counts.tsv")),
-        r1 = temp(os.path.join(COVERM_PATH, "{sample}.R1.counts")),
-        r2 = temp(os.path.join(COVERM_PATH, "{sample}.R2.counts")),
+        tsv = temp(os.path.join(COVERAGE_PATH, "{sample}.counts.tsv")),
+        r1 = temp(os.path.join(COVERAGE_PATH, "{sample}.R1.counts")),
+        r2 = temp(os.path.join(COVERAGE_PATH, "{sample}.R2.counts")),
     threads:
         config["resources"]["jobCPU"]
     resources:
         mem_mb = config["resources"]["jobMem"]
     params:
-        minimap = "-x sr --secondary=no",
+        minimap = "-x sr",
         reads_dir = READ_DIR
     conda:
         os.path.join("..", "envs", "mapping.yaml")
@@ -52,11 +52,11 @@ rule faidx:
 rule rpkm_coverage:
     """convert raw coverages to RPKM values"""
     input:
-        tsv = os.path.join(COVERM_PATH,"{sample}.counts.tsv"),
-        r1 = os.path.join(COVERM_PATH,"{sample}.R1.counts"),
-        r2 = os.path.join(COVERM_PATH,"{sample}.R2.counts")
+        tsv = os.path.join(COVERAGE_PATH,"{sample}.counts.tsv"),
+        r1 = os.path.join(COVERAGE_PATH,"{sample}.R1.counts"),
+        r2 = os.path.join(COVERAGE_PATH,"{sample}.R2.counts")
     output:
-        os.path.join(COVERM_PATH,"{sample}_rpkm.tsv")
+        os.path.join(COVERAGE_PATH,"{sample}_rpkm.tsv")
     run:
         with open(input.r1, 'r') as f:
             lib = int(f.readline().strip()) / 1000000
@@ -72,12 +72,12 @@ rule rpkm_coverage:
 
 rule run_combine_cov:
     input:
-        files=expand(os.path.join(COVERM_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES),
+        files=expand(os.path.join(COVERAGE_PATH, "{sample}_rpkm.tsv"), sample=SAMPLES),
         fai = EDGES_FILE + ".fai"
     output:
         os.path.join(OUTDIR, "coverage.tsv")
     params:
-        covpath = COVERM_PATH,
+        covpath = COVERAGE_PATH,
         output = OUTDIR,
         log = os.path.join(LOGSDIR, "combine_cov.log")
     log:

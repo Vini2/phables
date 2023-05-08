@@ -67,8 +67,8 @@ include: os.path.join("rules", "gfa2fasta.smk")
 include: os.path.join("rules", "mapping.smk")
 
 
-# Step 4: Run CoverM to get coverage of unitig sequences
-include: os.path.join("rules", "coverm.smk")
+# Step 4: Calculate coverage of unitig sequences
+include: os.path.join("rules", "coverage.smk")
 
 
 # Step 5: Scan unitig sequences for single-copy marker genes and PHROGs

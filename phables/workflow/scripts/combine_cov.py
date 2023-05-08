@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-"""combine_cov.py: Combine multiple coverage files of samples from CoverM.
+"""combine_cov.py: Combine multiple coverage files of samples.
 
 """
 

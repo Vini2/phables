@@ -4,4 +4,3 @@ channels:
 dependencies:
   - minimap2
   - samtools
-#  - coverm
