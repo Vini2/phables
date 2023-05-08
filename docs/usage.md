@@ -15,7 +15,7 @@ Options:
   --minlength INTEGER           minimum length of circular unitigs to consider
                                 [default: 2000]
   --mincov INTEGER              minimum coverage of paths to output  [default:
-                                10]
+                                1]
   --compcount INTEGER           maximum unitig count to consider a component
                                 [default: 200]
   --maxpaths INTEGER            maximum number of paths to resolve for a
@@ -37,6 +37,29 @@ Options:
                                 --rerun-incomplete, --printshellcmds,
                                 --nolock, --show-failed-logs]
   -h, --help                    Show this message and exit.
+
+  
+  For more information on Phables please visit:
+  https://phables.readthedocs.io/
+  
+  
+  CLUSTER EXECUTION:
+  phables run ... --profile [profile]
+  For information on Snakemake profiles see:
+  https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
+  
+  RUN EXAMPLES:
+  Required:           phables run --input [assembly graph file]
+  Specify threads:    phables run ... --threads [threads]
+  Disable conda:      phables run ... --no-use-conda 
+  Change defaults:    phables run ... --snake-default="-k --nolock"
+  Add Snakemake args: phables run ... --dry-run --keep-going --touch
+  Specify targets:    phables run ... print_stages
+  Available targets:
+      all             Run everything (default)
+      preprocess      Run preprocessing only
+      phables         Run phables (and preprocessing if needed)
+      print_stages    List available stages
 ```
 
 ## Run options explained

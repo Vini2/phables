@@ -55,8 +55,8 @@ After setting up, run `phables --help` to print out the Phables help message.
 ```bash
 Usage: phables [OPTIONS] COMMAND [ARGS]...
 
-  Phables: Phage bubbles resolve bacteriophage genomes in viral metagenomic
-  samples. Please refer the full documentation available on Read the Docs at
+  Phables: from fragmented assemblies to high-quality bacteriophage genomes.
+  Please refer the full documentation available on Read the Docs at
   https://phables.readthedocs.io/
 
 Options:
