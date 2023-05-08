@@ -40,7 +40,7 @@ rule faidx:
     output:
         EDGES_FILE + ".fai"
     conda:
-        os.path.join("..","envs","samtools.yaml")
+        os.path.join("..","envs","mapping.yaml")
     log:
         os.path.join(LOGSDIR, "samtools.faidx.log")
     shell:
