@@ -76,19 +76,28 @@ The output of Phables is set by default to `phables.out`. You can update the out
 phables run --input assembly_graph.gfa --reads fastq  --output my_output_folder --threads 8
 ```
 
-The `phables run` command will run the following preprocessing steps with the corresponding files and folders, prior to genome resolution.
+The `phables run` command will run the following preprocessing steps with the corresponding files and folders, and then perform genome resolution.
 
 * Obtain unitig sequences from assembly graph - `edges.fasta`
 * Map reads to unitig sequences and get BAM files - `bam_files`
-* Run CoverM to get coverage of unitig sequences - `coverage.tsv`
+* Calculate coverage of unitig sequences - `coverage.tsv`
 * Scan unitig sequences for single-copy marker genes - `edges.fasta.hmmout`
 * Scan unitig sequences for Prokaryotic Virus Remote Homologous Groups (PHROGs) - `phrogs/phrogs_annotations.tsv`
 
-You can use the following command to run only the above preprocessing steps.
+You can use the following command to **only run the preprocessing steps**.
 
+```bash
+# Only preprocess data
+phables run --input assembly_graph.gfa --reads fastq --threads 8 preprocess
 ```
-phables run preprocessing --input assembly_graph.gfa --reads fastq --threads 8
+
+You can use the following command to **only run the genome resolution steps**. Please make sure to have the preprocessing results in the output folder.
+
+```bash
+# Only run phables core
+phables run --input assembly_graph.gfa --reads fastq --threads 8 phables
 ```
+
 
 ## Output
 
