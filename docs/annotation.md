@@ -10,7 +10,7 @@ The recommended way to install pharokka is using [`conda`](https://docs.conda.io
 # Create a new conda environment and install pharokka
 conda create -n pharokka -c bioconda pharokka
 
-# Activate checkv conda environment
+# Activate pharokka conda environment
 conda activate pharokka
 ```
 
@@ -20,9 +20,9 @@ conda activate pharokka
 install_databases.py -o <path/to/databse_dir>
 ```
 
-## Running CheckV pharokka
+## Running pharokka
 
-Here is an example command to run CheckV on the complete and high-quality resolved genomes.
+Here is an example command to run pharokka on the complete and high-quality resolved genomes.
 
 ```bash
 pharokka.py -i complete_hq_genomes.fasta -o pharokka_output  -t 16 -d <path/to/database_dir>
