@@ -23,4 +23,5 @@ nav:
     - EVALUATION:
         - Running CheckV: quality.md
         - Quality comparison: comparison.md
+        - Annotation with pharokka: annotation.md
         - Graph statistics: graph_stats.md
