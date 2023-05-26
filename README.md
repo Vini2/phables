@@ -11,8 +11,9 @@ Phables: from fragmented assemblies to high-quality bacteriophage genomes
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/phables/badges/version.svg)](https://anaconda.org/bioconda/phables)
-[![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 ![Conda](https://img.shields.io/conda/dn/bioconda/phables)
+[![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
+[![Downloads](https://static.pepy.tech/badge/phables)](https://pepy.tech/project/phables)
 [![CodeQL](https://github.com/Vini2/phables/actions/workflows/codeql.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/codeql.yml)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
 
