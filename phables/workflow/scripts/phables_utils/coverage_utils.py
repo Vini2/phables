@@ -35,7 +35,7 @@ def read_pair_generator(bam, region_string=None):
     read_dict = defaultdict(lambda: [None, None])
 
     for read in bam.fetch(region=region_string):
-        if read.is_secondary or read.is_supplementary:
+        if read.is_secondary or read.is_supplementary or not read.is_paired:
             continue
         qname = read.query_name
         if qname not in read_dict:
