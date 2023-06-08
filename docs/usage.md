@@ -131,3 +131,4 @@ The output of Phables will contain the following main files and folders.
 * `resolved_genome_info.txt` containing the path name, coverage, length, GC content and unitig order of the resolved genomes
 * `resolved_edges.fasta` containing the unitigs that make up the resolved genomes
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
+* `all_phage_like_edges.fasta` containing sequences from all the phage-like components (both resolved and unresolved)
