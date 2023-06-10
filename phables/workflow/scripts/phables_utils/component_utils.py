@@ -36,7 +36,7 @@ def get_components(
                             head_present = True
                         if "connector" in phrog_dict[phrog]:
                             connector_present = True
-                        if "portal" in phrog_dict[phrog]:
+                        if "tail" in phrog_dict[phrog]:
                             tail_present = True
                         if "lysis" in phrog_dict[phrog]:
                             lysis_present = True
@@ -58,7 +58,7 @@ def get_components(
                         head_present = True
                     if "connector" in phrog_dict[phrog]:
                         connector_present = True
-                    if "portal" in phrog_dict[phrog]:
+                    if "tail" in phrog_dict[phrog]:
                         tail_present = True
                     if "lysis" in phrog_dict[phrog]:
                         lysis_present = True
