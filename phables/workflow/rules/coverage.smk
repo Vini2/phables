@@ -34,7 +34,7 @@ rule koverage:
         os.path.join("..", "envs", "koverage.yaml")
     shell:
         """
-        koverage bench \
+        koverage run bench \
             --reads {input.tsv} \
             --ref {input.edges} \
             --threads {threads} \

@@ -28,7 +28,7 @@ def targetRule(fn):
     target_rules.append(fn.__name__[2:])
     return fn
 
-localrules: all, preprocess, phables, print_stages, rpkm_coverage
+localrules: all, preprocess, phables, print_stages, koverage_tsv
 
 
 """Run stages"""
