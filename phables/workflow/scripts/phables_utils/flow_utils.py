@@ -3,9 +3,9 @@ import networkx as nx
 from .FD_Inexact import SolveInstances
 
 
-def get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes):
+def get_source_sink_circular(G_edge, graph_unitigs, minlength, self_looped_nodes):
     """
-    Identify source/sink vertex
+    Identify source/sink vertex for circular components
     """
 
     source_sink_candidates = []
@@ -46,6 +46,29 @@ def get_source_sink(G_edge, graph_unitigs, minlength, self_looped_nodes):
                 source_sink_candidates.append(node)
 
     return source_sink_candidates
+
+
+def get_source_sink_linear(G_edge, graph_unitigs, minlength, self_looped_nodes):
+    """
+    Identify source/sink vertex for linear components
+    """
+
+    source_candidates = []
+    sink_candidates = []
+
+    for node in list(G_edge.nodes):
+
+        unitig_name = node[:-1]
+
+        if unitig_name not in self_looped_nodes:
+            indegree = len([x for x in G_edge.predecessors(node)])
+            outdegree = len([x for x in G_edge.successors(node)])
+            if indegree > 0 and outdegree == 0:
+                sink_candidates.append(node)
+            elif indegree == 0 and outdegree > 0:
+                source_candidates.append(node)
+
+    return source_candidates, sink_candidates
 
 
 def solve_mfd(G, max_paths, output):

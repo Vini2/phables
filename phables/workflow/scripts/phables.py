@@ -113,7 +113,7 @@ def main():
         f"Total number of links in the assembly graph: {len(assembly_graph.es)}"
     )
 
-    # Get circular unitigs
+    # Get single unitigs
     # ----------------------------------------------------------------------
     circular = edge_graph_utils.get_circular(self_looped_nodes, graph_unitigs)
 
@@ -157,8 +157,10 @@ def main():
     all_components = []
 
     cycle_components = set()
+    linear_components = set()
     resolved_components = set()
-    circular_unitigs = set()
+    resolved_linear = set()
+    single_unitigs = set()
     resolved_cyclic = set()
 
     case1_found = set()
@@ -324,7 +326,12 @@ def main():
                         if node in unitig_coverages:
                             cov_2 = unitig_coverages[node]
 
-                        min_cov = min([cov_1, cov_2])
+                        # min_cov = min([cov_1, cov_2])
+
+                        if min([cov_1, cov_2]) != 0:
+                            min_cov = min([cov_1, cov_2])
+                        else:
+                            min_cov = max([cov_1, cov_2])
 
                         for edge in oriented_links[unitig_name][node]:
                             cycle_edges[(unitig_name + edge[0], node + edge[1])] = int(
@@ -371,7 +378,7 @@ def main():
                 # Identify source/sink vertex
                 # ----------------------------------------------------------------------
 
-                source_sink_candidates = flow_utils.get_source_sink(
+                source_sink_candidates = flow_utils.get_source_sink_circular(
                     G_edge, graph_unitigs, minlength, self_looped_nodes
                 )
 
@@ -474,9 +481,6 @@ def main():
                     u_name = unitig_names_rev[u[:-1]]
                     v_name = unitig_names_rev[v[:-1]]
 
-                    original_edge = (u[:-1], v[:-1])
-                    rev_original_edge = (v[:-1], u[:-1])
-
                     u_index = candidate_nodes.index(u_name)
                     v_index = candidate_nodes.index(v_name)
 
@@ -485,54 +489,37 @@ def main():
 
                     juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
 
+                    logger.debug(f"{v_name}, {u_index}, {juction_cov}")
+
                     if v_index == 0:
-                        if (u_index, len(candidate_nodes)) not in visited_edges and (
-                            len(candidate_nodes),
-                            u_index,
-                        ) not in visited_edges:
-                            if juction_cov < cov["weight"]:
-                                network_edges.append(
-                                    (
-                                        u_index,
-                                        len(candidate_nodes),
-                                        juction_cov,
-                                        cov["weight"],
-                                    )
-                                )
-                            else:
-                                network_edges.append(
-                                    (u_index, len(candidate_nodes), 0, cov["weight"])
-                                )
-
-                            visited_edges.append((u_index, len(candidate_nodes)))
-
-                            if juction_cov != 0:
-                                subpaths[subpath_count] = [
-                                    u_index,
-                                    len(candidate_nodes),
-                                ]
-                                subpath_count += 1
+                        final_vertex = len(candidate_nodes)
                     else:
-                        if (u_index, v_index) not in visited_edges and (
-                            v_index,
-                            u_index,
-                        ) not in visited_edges:
-                            cov_upper_bound = cov["weight"]
+                        final_vertex = v_index
 
-                            if juction_cov <= cov_upper_bound:
-                                network_edges.append(
-                                    (u_index, v_index, juction_cov, cov_upper_bound)
-                                )
-                            else:
-                                network_edges.append(
-                                    (u_index, v_index, 0, cov_upper_bound)
-                                )
+                    if (u_index, final_vertex) not in visited_edges and (
+                        final_vertex,
+                        u_index,
+                    ) not in visited_edges:
+                        cov_upper_bound = cov["weight"]
 
-                            visited_edges.append((u_index, v_index))
+                        if juction_cov == 0:
+                            network_edges.append(
+                                (u_index, final_vertex, 0, cov_upper_bound)
+                            )
+                        elif juction_cov <= cov_upper_bound:
+                            network_edges.append(
+                                (u_index, final_vertex, juction_cov, cov_upper_bound)
+                            )
+                        else:
+                            network_edges.append(
+                                (u_index, final_vertex, 0, cov_upper_bound)
+                            )
 
-                            if juction_cov != 0:
-                                subpaths[subpath_count] = [u_index, v_index]
-                                subpath_count += 1
+                        visited_edges.append((u_index, final_vertex))
+
+                        if juction_cov > 0:
+                            subpaths[subpath_count] = [u_index, final_vertex]
+                            subpath_count += 1
 
                 logger.debug(f"edge_list_indices: {edge_list_indices}")
 
@@ -649,13 +636,21 @@ def main():
                     continue
 
             else:
-                logger.debug(f"No cycles detected. Maybe a linear component?")
+                logger.debug(f"No cycles detected. Found a linear component.")
 
-        # Case 1 components - circular unitigs
+
+        # Case 1 components - single unitigs
         elif len(candidate_nodes) == 1:
             case1_found.add(my_count)
 
             unitig_name = unitig_names[candidate_nodes[0]]
+
+            case_name = ""
+
+            if unitig_name in self_looped_nodes:
+                case_name = "case1_circular"
+            else:
+                case_name = "case1_linear"
 
             resolved_edges.add(candidate_nodes[0])
 
@@ -666,7 +661,7 @@ def main():
             # Create GenomePath object with path details
             genome_path = GenomePath(
                 f"phage_comp_{my_count}_cycle_{cycle_number}",
-                "case1",
+                case_name,
                 [unitig_names[candidate_nodes[0]]],
                 [candidate_nodes[0]],
                 path_string,
@@ -678,7 +673,7 @@ def main():
             )
             my_genomic_paths.append(genome_path)
             resolved_components.add(my_count)
-            circular_unitigs.add(my_count)
+            single_unitigs.add(my_count)
             case1_resolved.add(my_count)
 
             phage_like_edges = phage_like_edges.union(set(candidate_nodes))
@@ -781,7 +776,7 @@ def main():
                 )
 
         else:
-            # Circular unitigs
+            # single unitigs
             for genomic_path in my_genomic_paths:
                 final_genomic_paths.append(genomic_path)
                 all_resolved_paths.append(genomic_path)
@@ -797,12 +792,14 @@ def main():
     # ----------------------------------------------------------------------
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
     logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
-    logger.info(f"Circular unitigs identified: {len(circular_unitigs)}")
+    logger.info(f"single unitigs identified: {len(single_unitigs)}")
+    logger.info(f"Total number of linear components found: {len(linear_components)}")
+    logger.info(f"Total number of linear components resolved: {len(resolved_linear)}")
     logger.info(
-        f"Total number of cyclic components found including circular unitigs: {len(cycle_components) + len(circular_unitigs)}"
+        f"Total number of cyclic components found including single unitigs: {len(cycle_components) + len(single_unitigs)}"
     )
     logger.info(
-        f"Total number of components resolved: {len(circular_unitigs)+len(resolved_cyclic)}"
+        f"Total number of components resolved: {len(single_unitigs)+len(resolved_cyclic)+len(resolved_linear)}"
     )
     logger.info(f"Case 1 (resolved/found): {len(case1_resolved)}/{len(case1_found)}")
     logger.info(f"Case 2 (resolved/found): {len(case2_resolved)}/{len(case2_found)}")
