@@ -16,7 +16,7 @@ Once you have run Phables, check out the [EVALUATION](https://phables.readthedoc
 
 ### Q5: Can I run Phables on mixed-microbial communities?
 
-Phables was originally designed to run on viromic data, but it can also be used to study mixed-microbial communities. However, the current implementation of Phables filters any component with at least a single unitig encoding any bacterial single-copy marker gene and hence, prophages might be omitted in the final result. Also, [phage-plasmids](https://doi.org/10.1128/mbio.01851-22), elements that are both phages and plasmids, can be identified by Phables as phages. Hence, users should perform further downstream analysis to ensure that the predicted genomes are indeed phages.
+Phables was originally designed to run on viromic data, but it can also be used to study mixed-microbial communities. However, the current implementation of Phables filters any component with at least a single unitig encoding any bacterial single-copy marker gene and hence, prophages might be omitted in the final result. Also, some plasmids or [phage-plasmids](https://doi.org/10.1128/mbio.01851-22), can be identified by Phables as phages. Hence, users should perform further downstream analysis to ensure that the predicted genomes are actual phages. One option is to use a tool such as [PPR-Meta](https://github.com/zhenchengfang/PPR-Meta) to classify the genomes resolved from Phables into phages and plasmids.
 
 
 ## Gurobi FAQs
