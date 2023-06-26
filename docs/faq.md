@@ -14,7 +14,24 @@ Phables supports any assembly graph in GFA (`.gfa`) format. You can use any asse
 
 Once you have run Phables, check out the [EVALUATION](https://phables.readthedocs.io/en/latest/quality/) section where you can read on how to check and compare the quality of the resolved genomes, interpret graph statistics and visualise the results.
 
-### Q5: Can I run Phables on mixed-microbial communities?
+### Q5: How can I find out which contigs were included in the resolved phages?
+
+The `resolved_genome_info.txt` file contains the order of sequences in the assembly graph that were used to construct the genomes (refer to the example below). 
+
+| Path                 | Case  | Coverage | Length | GC content        | Node order                                                                   |
+|----------------------|-------|----------|--------|-------------------|------------------------------------------------------------------------------|
+| phage_comp_0_cycle_1 | case3 | 644      | 45659  | 34.86059703453864 | ['49-', '5524+', '24979-', '5556+', '55+', '5540-', '67+', '4490+', '5554-'] |
+| phage_comp_0_cycle_2 | case3 | 625      | 43427  | 35.03810993160937 | ['49-', '5522+', '24979-', '5558+', '55+', '65+', '67+', '4490+', '5498-']   |
+| ...                  |       |          |        |                   |                                                                              |
+
+The `Node order` column denotes the segment IDs from the assembly graph.
+
+The mapping between the contigs and assembly graph segments depends on the assembler you use. 
+
+* If you use MEGAHIT, the segments in the assembly graph are the contigs themselves. You can directly relate the `Node order` information as the contigs that make the paths.
+* If you use an assembler such as SPAdes or Flye, the sequences represented in the assembly graph are **unitigs**, which make up contigs. The information on which unitigs make up the contigs can be found in, for example, `contigs.paths` file in SPAdes and `assembly_info.txt` file in Flye.
+
+### Q6: Can I run Phables on mixed-microbial communities?
 
 Phables was originally designed to run on viromic data, but it can also be used to study mixed-microbial communities. However, the current implementation of Phables filters any component with at least a single unitig encoding any bacterial single-copy marker gene and hence, prophages might be omitted in the final result. Also, some plasmids or [phage-plasmids](https://doi.org/10.1128/mbio.01851-22), can be identified by Phables as phages. Hence, users should perform further downstream analysis to ensure that the predicted genomes are actual phages. One option is to use a tool such as [PPR-Meta](https://github.com/zhenchengfang/PPR-Meta) to classify the genomes resolved from Phables into phages and plasmids.
 
