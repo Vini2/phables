@@ -34,6 +34,8 @@ MP = config['maxpaths']
 MGF = config['mgfrac']
 EV = config['evalue']
 SI = config['seqidentity']
+CT = config['covtol']
+AL = config['alpha]
 
 
 """DIRECTORIES/FILES etc.
