@@ -15,9 +15,11 @@ resources:
 
 # Phable parameters
 minlength: 2000
-mincov: 1
+mincov: 10
 compcount: 200
 maxpaths: 10
 mgfrac: 0.2
 evalue: 1E-10
 seqidentity: 0.3
+covtol: 100
+alpha: 1.2

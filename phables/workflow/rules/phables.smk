@@ -25,6 +25,8 @@ rule run_phables:
         mgfrac = MGF,
         evalue = EV,
         seqidentity = SI,
+        covtol = CT,
+        alpha = AL,
         output = OUTDIR,
         log = os.path.join(LOGSDIR, "phables_output.log")
     log:

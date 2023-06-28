@@ -11,7 +11,7 @@ BAM_PATH = os.path.join(OUTDIR, 'temp')
 preprocessTargets.append(expand(os.path.join(BAM_PATH, "{sample}.bam"), sample=SAMPLE_NAMES))
 preprocessTargets.append(expand(os.path.join(BAM_PATH, "{sample}.bam.bai"), sample=SAMPLE_NAMES))
 
-COVERAGE_PATH = os.path.join(OUTDIR, 'coverage_results/')
+COVERAGE_PATH = os.path.join(OUTDIR, 'coverage_rpkm/')
 # preprocessTargets.append(expand(os.path.join(COVERAGE_PATH, "{sample}_rpkm.tsv"), sample=SAMPLE_NAMES))
 preprocessTargets.append(os.path.join(OUTDIR, "coverage.tsv"))
 preprocessTargets.append(os.path.join(OUTDIR, "edges.fasta.hmmout"))

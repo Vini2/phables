@@ -141,7 +141,7 @@ Available targets:
 )
 @click.option(
     "--mincov",
-    default=1,
+    default=10,
     required=False,
     help="minimum coverage of paths to output",
     type=int,
@@ -187,6 +187,22 @@ Available targets:
     type=float,
     show_default=True,
 )
+@click.option(
+    "--covtol",
+    default=100,
+    required=False,
+    help="coverage tolerance for extending subpaths",
+    type=int,
+    show_default=True,
+)
+@click.option(
+    "--alpha",
+    default=1.2,
+    required=False,
+    help="coverage multipler for flow interval modelling",
+    type=float,
+    show_default=True,
+)
 @common_options
 def run(
     input,
@@ -198,6 +214,8 @@ def run(
     mgfrac,
     evalue,
     seqidentity,
+    covtol,
+    alpha,
     output,
     log,
     **kwargs
@@ -214,6 +232,8 @@ def run(
         "mgfrac": mgfrac,
         "evalue": evalue,
         "seqidentity": seqidentity,
+        "covtol": covtol,
+        "alpha": alpha,
         "output": output,
         "log": log,
     }
