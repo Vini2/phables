@@ -17,3 +17,6 @@ dependencies:
   - more-itertools
   - tqdm
   - click
+  - pip
+  - pip:
+      - metasnek>=0.0.3
