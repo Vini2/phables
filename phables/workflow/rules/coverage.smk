@@ -43,7 +43,7 @@ rule koverage:
 
 
 rule run_combine_cov:
-    """Sample\tContig\tCount\tRPKM\tTPM\tCovered_bases\tVariance\n"""
+    """Sample\tContig\tCount\tRPM\tRPKM\tRPK\tTPM\tMean\tMedian\tHitrate\tVariance\n"""
     input:
         os.path.join(OUTDIR, "results", "sample_bench_coverage.tsv")
     output:
