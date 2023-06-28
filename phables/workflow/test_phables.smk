@@ -66,6 +66,8 @@ rule test_phables:
         mgfrac = MGF,
         evalue = EV,
         seqidentity = SI,
+        covtol = CT,
+        alpha = AL,
         output = TESTDIR,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))
     log:
