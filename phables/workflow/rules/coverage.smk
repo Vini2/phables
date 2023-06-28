@@ -34,7 +34,7 @@ rule koverage:
         os.path.join("..", "envs", "koverage.yaml")
     shell:
         """
-        koverage run bench \
+        koverage run coverm \
             --reads {input.tsv} \
             --ref {input.edges} \
             --threads {threads} \
@@ -43,10 +43,10 @@ rule koverage:
 
 
 rule run_combine_cov:
-    """Sample\tContig\tCount\tRPKM\tTPM\tCovered_bases\tVariance\n"""
+    """Sample\tContig\tCount\tRPKM\tTPM\tMean\tCovered_bases\tVariance\n"""
     input:
         os.path.join(OUTDIR, "results", "sample_bench_coverage.tsv")
     output:
         os.path.join(OUTDIR, "coverage.tsv")
     shell:
-        """awk -F '\t' '{{ sum[$2] += $4 }} END {{ for (key in sum) print key, sum[key] }}' {input} > {output}"""
+        """awk -F '\t' '{{ sum[$2] += $6 }} END {{ for (key in sum) print key, sum[key] }}' {input} > {output}"""
