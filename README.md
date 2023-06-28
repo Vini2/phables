@@ -5,17 +5,18 @@
 Phables: from fragmented assemblies to high-quality bacteriophage genomes
 ===============
 
-[![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
+[![](https://img.shields.io/static/v1?label=CLI&message=Snaketool&color=blueviolet)](https://github.com/beardymcjohnface/Snaketool)
 ![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![DOI](https://zenodo.org/badge/516191931.svg)](https://zenodo.org/badge/latestdoi/516191931)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/phables/badges/version.svg)](https://anaconda.org/bioconda/phables)
 ![Conda](https://img.shields.io/conda/dn/bioconda/phables)
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 [![Downloads](https://static.pepy.tech/badge/phables)](https://pepy.tech/project/phables)
+
+[![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 [![CodeQL](https://github.com/Vini2/phables/actions/workflows/codeql.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/codeql.yml)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models cyclic phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
