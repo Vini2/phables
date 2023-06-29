@@ -22,7 +22,7 @@ from tqdm import tqdm
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Development"
@@ -49,6 +49,8 @@ def main():
     mgfrac = float(snakemake.params.mgfrac)
     evalue = float(snakemake.params.evalue)
     seqidentity = float(snakemake.params.seqidentity)
+    covtol = float(snakemake.params.covtol)
+    alpha = float(snakemake.params.alpha)
     output = snakemake.params.output
     log = snakemake.params.log
 
@@ -90,6 +92,8 @@ def main():
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Maximum e-value for phrog annotations: {evalue}")
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
+    logger.info(f"Coverage tolerance for extending subpaths: {covtol}")
+    logger.info(f"Coverage multipler for flow interval modelling: {alpha}")
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
@@ -303,8 +307,14 @@ def main():
 
             clean_node_count = 0
 
+            max_comp_cov = -1
+
             for vertex in pruned_graph.vs["id"]:
                 unitig_name = unitig_names[vertex]
+
+                # Find the maximum coverage within the component
+                if unitig_name in unitig_coverages and unitig_coverages[unitig_name] > max_comp_cov:
+                    max_comp_cov = unitig_coverages[unitig_name]
 
                 if unitig_name not in self_looped_nodes:
                     clean_node_count += 1
@@ -325,8 +335,6 @@ def main():
                             cov_1 = unitig_coverages[unitig_name]
                         if node in unitig_coverages:
                             cov_2 = unitig_coverages[node]
-
-                        # min_cov = min([cov_1, cov_2])
 
                         if min([cov_1, cov_2]) != 0:
                             min_cov = min([cov_1, cov_2])
@@ -489,8 +497,6 @@ def main():
 
                     juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
 
-                    logger.debug(f"{v_name}, {u_index}, {juction_cov}")
-
                     if v_index == 0:
                         final_vertex = len(candidate_nodes)
                     else:
@@ -500,26 +506,84 @@ def main():
                         final_vertex,
                         u_index,
                     ) not in visited_edges:
-                        cov_upper_bound = cov["weight"]
+                        
+                        # Get coverage interval
+                        cov_lower_bound = cov["weight"]
+                        cov_upper_bound = int(max_comp_cov*alpha)
+
+                        logger.debug(f"({v}, {u}), {juction_cov}, {cov_lower_bound}, {cov_upper_bound}")
 
                         if juction_cov == 0:
                             network_edges.append(
                                 (u_index, final_vertex, 0, cov_upper_bound)
                             )
-                        elif juction_cov <= cov_upper_bound:
-                            network_edges.append(
-                                (u_index, final_vertex, juction_cov, cov_upper_bound)
-                            )
                         else:
                             network_edges.append(
-                                (u_index, final_vertex, 0, cov_upper_bound)
+                                (u_index, final_vertex, cov_lower_bound, cov_upper_bound)
                             )
 
                         visited_edges.append((u_index, final_vertex))
 
-                        if juction_cov > 0:
+                        # Add subpaths
+                        if juction_cov >= mincov:
+                            logger.debug(f"Adding subpath {[u_index, final_vertex]}")
                             subpaths[subpath_count] = [u_index, final_vertex]
                             subpath_count += 1
+
+                            # Extend subpaths using coverages of successors and predecessors
+                            if final_vertex != 0 and u_index != 0 and final_vertex != len(candidate_nodes):
+
+                                u_pred = [x for x in G_edge.predecessors(u)]
+                                v_succ = [x for x in G_edge.successors(v)]
+
+                                # Extend subpath using coverages of predecessors
+                                for u_pred in G_edge.predecessors(u):
+                                    u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                    u_pred_index = candidate_nodes.index(u_pred_name)
+                                    u_pred_cov = unitig_coverages[u_pred[:-1]]
+                                    u_cov = unitig_coverages[u[:-1]]
+
+                                    if abs(min(u_pred_cov, u_cov) - cov["weight"]) < covtol:
+                                        subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
+                                        logger.debug(f"Extending subpath based on predecessor coverage {[u_pred_index, u_index, final_vertex]}")
+                                        subpath_count += 1
+
+                                # Extend subpath using coverages of successors
+                                for v_succ in G_edge.successors(v):
+                                    v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                    v_succ_index = candidate_nodes.index(v_succ_name)
+                                    v_succ_cov = unitig_coverages[v_succ[:-1]]
+                                    v_cov = unitig_coverages[v[:-1]]
+
+                                    if v_succ_index != 0:
+                                        if abs(min(v_succ_cov, v_cov) - cov["weight"]) < 100:
+                                            subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
+                                            logger.debug(f"Extending subpath based on successor coverage {[u_index, final_vertex, v_succ_index]}")
+                                            subpath_count += 1
+
+
+                        else:
+                            # Extend subpaths of l=3 based on paired-end reads
+                            # aligned to successors and predecessors
+                            u_pred = [x for x in G_edge.predecessors(u)]
+                            v_succ = [x for x in G_edge.successors(v)]
+
+                            for u_pred in G_edge.predecessors(u):
+                                if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
+                                    u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                    u_pred_index = candidate_nodes.index(u_pred_name)
+                                    subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
+                                    logger.debug(f"Extending subpath {[u_pred_index, u_index, final_vertex]}")
+                                    subpath_count += 1
+
+                            for v_succ in G_edge.successors(v):
+                                if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
+                                    v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                    v_succ_index = candidate_nodes.index(v_succ_name)
+                                    if v_succ_index != 0:
+                                        subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
+                                        logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
+                                        subpath_count += 1
 
                 logger.debug(f"edge_list_indices: {edge_list_indices}")
 
@@ -636,7 +700,7 @@ def main():
                     continue
 
             else:
-                logger.debug(f"No cycles detected. Found a linear component.")
+                logger.debug(f"No cycles detected. Found a complex linear component.")
 
 
         # Case 1 components - single unitigs

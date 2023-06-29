@@ -25,7 +25,7 @@ rule koverage:
         expand(os.path.join(OUTDIR, "temp", "{sample}.{ext}"),
                sample=SAMPLE_NAMES,
                ext=["bam","bam.bai"]),
-        os.path.join(OUTDIR, "results", "sample_bench_coverage.tsv")
+        os.path.join(OUTDIR, "results", "sample_coverm_coverage.tsv")
     threads:
         config["resources"]["jobCPU"]
     resources:
@@ -45,8 +45,11 @@ rule koverage:
 rule run_combine_cov:
     """Sample\tContig\tCount\tRPKM\tTPM\tMean\tCovered_bases\tVariance\n"""
     input:
-        os.path.join(OUTDIR, "results", "sample_bench_coverage.tsv")
+        os.path.join(OUTDIR, "results", "sample_coverm_coverage.tsv")
     output:
         os.path.join(OUTDIR, "coverage.tsv")
     shell:
-        """awk -F '\t' '{{ sum[$2] += $6 }} END {{ for (key in sum) print key, sum[key] }}' {input} > {output}"""
+        """
+        sed -i '1d' {input}
+        awk -F '\t' '{{ sum[$2] += $6 }} END {{ for (key in sum) print key, sum[key] }}' {input} > {output}
+        """
