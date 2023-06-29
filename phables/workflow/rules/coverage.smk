@@ -6,7 +6,7 @@ Use combine_cov to combine the coverage values of multiple samples into one file
 rule koverage_tsv:
     """Generate TSV of samples and reads for Koverage"""
     output:
-        os.path.join(OUTDIR,"samples.tsv")
+        os.path.join(OUTDIR,"phables.samples.tsv")
     params:
         SAMPLE_READS
     run:
@@ -17,7 +17,7 @@ rule koverage_tsv:
 rule koverage:
     """Get coverage statistics with Koverage + CoverM"""
     input:
-        tsv = os.path.join(OUTDIR,"samples.tsv"),
+        tsv = os.path.join(OUTDIR,"phables.samples.tsv"),
         edges = EDGES_FILE
     params:
         out_dir = OUTDIR
