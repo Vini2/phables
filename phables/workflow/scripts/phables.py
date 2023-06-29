@@ -531,63 +531,61 @@ def main():
                             subpath_count += 1
 
                             # Extend subpaths using coverages of successors and predecessors
-                            if final_vertex != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes):
+                            u_pred = [x for x in G_edge.predecessors(u)]
+                            v_succ = [x for x in G_edge.successors(v)]
 
-                                u_pred = [x for x in G_edge.predecessors(u)]
-                                v_succ = [x for x in G_edge.successors(v)]
+                            # Extend subpath using coverages of predecessors
+                            for u_pred in G_edge.predecessors(u):
+                                u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                u_pred_index = candidate_nodes.index(u_pred_name)
+                                u_pred_cov = unitig_coverages[u_pred[:-1]]
+                                u_cov = unitig_coverages[u[:-1]]
 
-                                # Extend subpath using coverages of predecessors
-                                for u_pred in G_edge.predecessors(u):
-                                    u_pred_name = unitig_names_rev[u_pred[:-1]]
-                                    u_pred_index = candidate_nodes.index(u_pred_name)
-                                    u_pred_cov = unitig_coverages[u_pred[:-1]]
-                                    u_cov = unitig_coverages[u[:-1]]
-
+                                if final_vertex != 0 and u_index != 0 and u_pred_index != final_vertex and u_pred_index != 0 and final_vertex != len(candidate_nodes):
                                     if abs(min(u_pred_cov, u_cov) - cov["weight"]) < covtol:
                                         subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
                                         logger.debug(f"Extending subpath based on predecessor coverage {[u_pred_index, u_index, final_vertex]}")
                                         subpath_count += 1
 
-                                # Extend subpath using coverages of successors
-                                for v_succ in G_edge.successors(v):
-                                    v_succ_name = unitig_names_rev[v_succ[:-1]]
-                                    v_succ_index = candidate_nodes.index(v_succ_name)
-                                    v_succ_cov = unitig_coverages[v_succ[:-1]]
-                                    v_cov = unitig_coverages[v[:-1]]
+                            # Extend subpath using coverages of successors
+                            for v_succ in G_edge.successors(v):
+                                v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                v_succ_index = candidate_nodes.index(v_succ_name)
+                                v_succ_cov = unitig_coverages[v_succ[:-1]]
+                                v_cov = unitig_coverages[v[:-1]]
 
-                                    if v_succ_index != 0:
-                                        if abs(min(v_succ_cov, v_cov) - cov["weight"]) < 100:
-                                            subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
-                                            logger.debug(f"Extending subpath based on successor coverage {[u_index, final_vertex, v_succ_index]}")
-                                            subpath_count += 1
-
+                                if v_succ_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
+                                    if abs(min(v_succ_cov, v_cov) - cov["weight"]) < covtol:
+                                        subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
+                                        logger.debug(f"Extending subpath based on successor coverage {[u_index, final_vertex, v_succ_index]}")
+                                        subpath_count += 1
 
                         else:
                             # Extend subpaths of l=3 based on paired-end reads
                             # aligned to successors and predecessors
-                            if final_vertex != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes):
-                                
-                                u_pred = [x for x in G_edge.predecessors(u)]
-                                v_succ = [x for x in G_edge.successors(v)]
+                            u_pred = [x for x in G_edge.predecessors(u)]
+                            v_succ = [x for x in G_edge.successors(v)]
 
-                                for u_pred in G_edge.predecessors(u):
-                                    if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
-                                        u_pred_name = unitig_names_rev[u_pred[:-1]]
-                                        u_pred_index = candidate_nodes.index(u_pred_name)
+                            for u_pred in G_edge.predecessors(u):
+                                if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
+                                    u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                    u_pred_index = candidate_nodes.index(u_pred_name)
+                                    if final_vertex != 0 and u_index != 0 and u_pred_index != final_vertex and final_vertex != len(candidate_nodes) and u_pred_index != 0:
                                         subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
                                         logger.debug(f"Extending subpath {[u_pred_index, u_index, final_vertex]}")
                                         subpath_count += 1
 
-                                for v_succ in G_edge.successors(v):
-                                    if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
-                                        v_succ_name = unitig_names_rev[v_succ[:-1]]
-                                        v_succ_index = candidate_nodes.index(v_succ_name)
-                                        if v_succ_index != 0:
-                                            subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
-                                            logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
-                                            subpath_count += 1
+                            for v_succ in G_edge.successors(v):
+                                if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
+                                    v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                    v_succ_index = candidate_nodes.index(v_succ_name)
+                                    if v_succ_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
+                                        subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
+                                        logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
+                                        subpath_count += 1
 
                 logger.debug(f"edge_list_indices: {edge_list_indices}")
+                logger.debug(f"subpaths: {subpaths}")
 
                 # Create flow network and run MFD-ILP
                 # ----------------------------------------------------------------------
