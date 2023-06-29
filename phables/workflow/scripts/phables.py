@@ -554,7 +554,7 @@ def main():
                                 v_succ_cov = unitig_coverages[v_succ[:-1]]
                                 v_cov = unitig_coverages[v[:-1]]
 
-                                if v_succ_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
+                                if v_succ_index != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
                                     if abs(min(v_succ_cov, v_cov) - cov["weight"]) < covtol:
                                         subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
                                         logger.debug(f"Extending subpath based on successor coverage {[u_index, final_vertex, v_succ_index]}")
@@ -579,7 +579,7 @@ def main():
                                 if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
                                     v_succ_name = unitig_names_rev[v_succ[:-1]]
                                     v_succ_index = candidate_nodes.index(v_succ_name)
-                                    if v_succ_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
+                                    if v_succ_index != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
                                         subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
                                         logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
                                         subpath_count += 1
