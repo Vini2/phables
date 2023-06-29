@@ -531,7 +531,7 @@ def main():
                             subpath_count += 1
 
                             # Extend subpaths using coverages of successors and predecessors
-                            if final_vertex != 0 and u_index != 0 and final_vertex != len(candidate_nodes):
+                            if final_vertex != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes):
 
                                 u_pred = [x for x in G_edge.predecessors(u)]
                                 v_succ = [x for x in G_edge.successors(v)]
@@ -565,25 +565,27 @@ def main():
                         else:
                             # Extend subpaths of l=3 based on paired-end reads
                             # aligned to successors and predecessors
-                            u_pred = [x for x in G_edge.predecessors(u)]
-                            v_succ = [x for x in G_edge.successors(v)]
+                            if final_vertex != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes):
+                                
+                                u_pred = [x for x in G_edge.predecessors(u)]
+                                v_succ = [x for x in G_edge.successors(v)]
 
-                            for u_pred in G_edge.predecessors(u):
-                                if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
-                                    u_pred_name = unitig_names_rev[u_pred[:-1]]
-                                    u_pred_index = candidate_nodes.index(u_pred_name)
-                                    subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
-                                    logger.debug(f"Extending subpath {[u_pred_index, u_index, final_vertex]}")
-                                    subpath_count += 1
-
-                            for v_succ in G_edge.successors(v):
-                                if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
-                                    v_succ_name = unitig_names_rev[v_succ[:-1]]
-                                    v_succ_index = candidate_nodes.index(v_succ_name)
-                                    if v_succ_index != 0:
-                                        subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
-                                        logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
+                                for u_pred in G_edge.predecessors(u):
+                                    if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
+                                        u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                        u_pred_index = candidate_nodes.index(u_pred_name)
+                                        subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
+                                        logger.debug(f"Extending subpath {[u_pred_index, u_index, final_vertex]}")
                                         subpath_count += 1
+
+                                for v_succ in G_edge.successors(v):
+                                    if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
+                                        v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                        v_succ_index = candidate_nodes.index(v_succ_name)
+                                        if v_succ_index != 0:
+                                            subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
+                                            logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
+                                            subpath_count += 1
 
                 logger.debug(f"edge_list_indices: {edge_list_indices}")
 
@@ -613,10 +615,11 @@ def main():
                     for solution_path in solution_paths:
                         coverage_val = solution_paths[solution_path]["weight"]
 
-                        logger.debug(f"Path {cycle_number} coverage: {coverage_val}")
-
                         # Filter path by coverage
                         if coverage_val >= mincov:
+                            
+                            logger.debug(f"Path {cycle_number} coverage: {coverage_val}")
+
                             # Create graph for path
                             G_path = nx.DiGraph()
 
