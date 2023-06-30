@@ -116,10 +116,13 @@ def flowMultipleDecomposition(data, K):
         for k in range(0, K):
             for sp_len in range(0, len(subpaths)):
                 subpath_edges = list(more_itertools.pairwise(subpaths[sp_len]))
-                model.addConstr(
-                    gp.quicksum(x[i, j, k] for (i, j) in subpath_edges)
-                    >= len(subpath_edges) * r[k, sp_len]
-                )
+                try:
+                    model.addConstr(
+                        gp.quicksum(x[i, j, k] for (i, j) in subpath_edges)
+                        >= len(subpath_edges) * r[k, sp_len]
+                    )
+                except:
+                    continue
 
         model.addConstrs(
             gp.quicksum(r[k, sp_len] for k in range(0, K)) >= 1
