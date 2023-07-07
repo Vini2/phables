@@ -35,6 +35,12 @@ The mapping between the contigs and assembly graph segments depends on the assem
 
 Phables was originally designed to run on viromic data, but it can also be used to study mixed-microbial communities. However, the current implementation of Phables filters any component with at least a single unitig encoding any bacterial single-copy marker gene and hence, prophages might be omitted in the final result. Also, some plasmids or [phage-plasmids](https://doi.org/10.1128/mbio.01851-22), can be identified by Phables as phages. Hence, users should perform further downstream analysis to ensure that the predicted genomes are actual phages. One option is to use a tool such as [PPR-Meta](https://github.com/zhenchengfang/PPR-Meta) to classify the genomes resolved from Phables into phages and plasmids.
 
+### Q7: Can Phables identify prophages?
+
+If a prophage is active, excises from the genome, and is replicating, Phables would identify it. However, if it is a cryptic prophage, Phables would not identify it as it will be integrated into the host genome and can be part of a larger bacterial component in the assembly graph. As Phables discards components having bacterial single-copy marker genes, such prophages will not be identified. 
+
+Users can use specific tools to either identify prophages in bacterial genomes such as [Phispy](https://academic.oup.com/nar/article/40/16/e126/1027055) or [hafeZ](https://www.biorxiv.org/content/10.1101/2021.07.21.453177v1) or validate recovered prophage sequences from host-genomes in metagenomic sequences such as [CheckV](https://www.nature.com/articles/s41587-020-00774-7).
+
 
 ## Gurobi FAQs
 
