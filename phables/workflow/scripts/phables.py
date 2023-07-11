@@ -131,7 +131,7 @@ def main():
         phrogs, evalue, seqidentity
     )
 
-    # Get components with viral bubbles
+    # Get components with viral components
     # ----------------------------------------------------------------------
     pruned_vs, comp_phrogs = component_utils.get_components(
         assembly_graph,
@@ -255,7 +255,7 @@ def main():
 
                     if unitig_to_consider != -1:
                         logger.debug(
-                            f"Case 2 bubble: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long."
+                            f"Case 2 component: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long."
                         )
                         cycle_number = 1
                         resolved_edges.add(unitig_to_consider)
@@ -629,65 +629,69 @@ def main():
 
                             if 0 in list(G_path.nodes):
                                 # Get all simple paths from node 0 to last node
-                                candidate_paths = list(
-                                    nx.all_simple_paths(G_path, 0, len(candidate_nodes))
-                                )
-
-                                if len(candidate_paths) > 0:
-                                    logger.debug(
-                                        f"candidate_paths: {candidate_paths[0]}"
+                                try:
+                                    candidate_paths = list(
+                                        nx.all_simple_paths(G_path, 0, len(candidate_nodes))
                                     )
 
-                                    # Get mapped unitigs in order from the flow network
-                                    path_order = []
-                                    for path_edge in candidate_paths[0]:
-                                        if path_edge != len(candidate_nodes):
-                                            path_order.append(
-                                                edge_list_indices[path_edge]
-                                            )
-
-                                    logger.debug(f"path_order: {path_order}")
-
-                                    # Get the order of unitigs in path
-                                    path_string = ""
-                                    total_length = 0
-
-                                    for node in path_order:
-                                        unitig_name = node[:-1]
-                                        if node.endswith("+"):
-                                            path_string += str(
-                                                graph_unitigs[unitig_name]
-                                            )
-                                        else:
-                                            path_string += str(
-                                                graph_unitigs[
-                                                    unitig_name
-                                                ].reverse_complement()
-                                            )
-                                        total_length += len(
-                                            str(graph_unitigs[unitig_name])
+                                    if len(candidate_paths) > 0:
+                                        logger.debug(
+                                            f"candidate_paths: {candidate_paths[0]}"
                                         )
 
-                                    # Create GenomePath object with path details
-                                    genome_path = GenomePath(
-                                        f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                        "case3",
-                                        [x for x in path_order],
-                                        [unitig_names_rev[x[:-1]] for x in path_order],
-                                        path_string,
-                                        int(coverage_val),
-                                        total_length,
-                                        (
-                                            path_string.count("G")
-                                            + path_string.count("C")
-                                        )
-                                        / len(path_string)
-                                        * 100,
-                                    )
-                                    my_genomic_paths.append(genome_path)
-                                    logger.debug(f"total_length: {total_length}")
+                                        # Get mapped unitigs in order from the flow network
+                                        path_order = []
+                                        for path_edge in candidate_paths[0]:
+                                            if path_edge != len(candidate_nodes):
+                                                path_order.append(
+                                                    edge_list_indices[path_edge]
+                                                )
 
-                                    cycle_number += 1
+                                        logger.debug(f"path_order: {path_order}")
+
+                                        # Get the order of unitigs in path
+                                        path_string = ""
+                                        total_length = 0
+
+                                        for node in path_order:
+                                            unitig_name = node[:-1]
+                                            if node.endswith("+"):
+                                                path_string += str(
+                                                    graph_unitigs[unitig_name]
+                                                )
+                                            else:
+                                                path_string += str(
+                                                    graph_unitigs[
+                                                        unitig_name
+                                                    ].reverse_complement()
+                                                )
+                                            total_length += len(
+                                                str(graph_unitigs[unitig_name])
+                                            )
+
+                                        # Create GenomePath object with path details
+                                        genome_path = GenomePath(
+                                            f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                            "case3",
+                                            [x for x in path_order],
+                                            [unitig_names_rev[x[:-1]] for x in path_order],
+                                            path_string,
+                                            int(coverage_val),
+                                            total_length,
+                                            (
+                                                path_string.count("G")
+                                                + path_string.count("C")
+                                            )
+                                            / len(path_string)
+                                            * 100,
+                                        )
+                                        my_genomic_paths.append(genome_path)
+                                        logger.debug(f"total_length: {total_length}")
+
+                                        cycle_number += 1
+
+                                except nx.exception.NodeNotFound:
+                                    logger.debug(f"Could not resolve a continuous path.")
 
                     logger.debug(f"Number of paths selected: {cycle_number-1}")
 
@@ -757,7 +761,7 @@ def main():
         frac_unitigs = 1
         n_paths = 0
 
-        if len(my_genomic_paths) > 1:
+        if len(my_genomic_paths) > 0:
             # Get the degree of the component
             graph_degree = assembly_graph.degree(original_candidate_nodes)
 
@@ -795,6 +799,8 @@ def main():
 
             frac_unitigs = len(visited_nodes) / len(original_candidate_nodes)
 
+            resolved_edges = resolved_edges.union(comp_resolved_edges)
+
             logger.debug(f"frac_unitigs: {frac_unitigs}")
 
             # Filter components
@@ -829,7 +835,6 @@ def main():
                     frac_unitigs,
                 )
                 all_components.append(genome_comp)
-                resolved_edges = resolved_edges.union(comp_resolved_edges)
 
             if len(final_genomic_paths) > 0:
                 resolved_cyclic.add(my_count)
