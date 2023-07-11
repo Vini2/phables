@@ -313,7 +313,10 @@ def main():
                 unitig_name = unitig_names[vertex]
 
                 # Find the maximum coverage within the component
-                if unitig_name in unitig_coverages and unitig_coverages[unitig_name] > max_comp_cov:
+                if (
+                    unitig_name in unitig_coverages
+                    and unitig_coverages[unitig_name] > max_comp_cov
+                ):
                     max_comp_cov = unitig_coverages[unitig_name]
 
                 if unitig_name not in self_looped_nodes:
@@ -506,12 +509,13 @@ def main():
                         final_vertex,
                         u_index,
                     ) not in visited_edges:
-                        
                         # Get coverage interval
                         cov_lower_bound = cov["weight"]
-                        cov_upper_bound = int(max_comp_cov*alpha)
+                        cov_upper_bound = int(max_comp_cov * alpha)
 
-                        logger.debug(f"({v}, {u}), {juction_cov}, {cov_lower_bound}, {cov_upper_bound}")
+                        logger.debug(
+                            f"({v}, {u}), {juction_cov}, {cov_lower_bound}, {cov_upper_bound}"
+                        )
 
                         if juction_cov == 0:
                             network_edges.append(
@@ -519,7 +523,12 @@ def main():
                             )
                         else:
                             network_edges.append(
-                                (u_index, final_vertex, cov_lower_bound, cov_upper_bound)
+                                (
+                                    u_index,
+                                    final_vertex,
+                                    cov_lower_bound,
+                                    cov_upper_bound,
+                                )
                             )
 
                         visited_edges.append((u_index, final_vertex))
@@ -541,10 +550,23 @@ def main():
                                 u_pred_cov = unitig_coverages[u_pred[:-1]]
                                 u_cov = unitig_coverages[u[:-1]]
 
-                                if final_vertex != 0 and u_index != 0 and u_pred_index != final_vertex:
-                                    if abs(min(u_pred_cov, u_cov) - cov["weight"]) < covtol:
-                                        subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
-                                        logger.debug(f"Extending subpath based on predecessor coverage {[u_pred_index, u_index, final_vertex]}")
+                                if (
+                                    final_vertex != 0
+                                    and u_index != 0
+                                    and u_pred_index != final_vertex
+                                ):
+                                    if (
+                                        abs(min(u_pred_cov, u_cov) - cov["weight"])
+                                        < covtol
+                                    ):
+                                        subpaths[subpath_count] = [
+                                            u_pred_index,
+                                            u_index,
+                                            final_vertex,
+                                        ]
+                                        logger.debug(
+                                            f"Extending subpath based on predecessor coverage {[u_pred_index, u_index, final_vertex]}"
+                                        )
                                         subpath_count += 1
 
                             # Extend subpath using coverages of successors
@@ -554,10 +576,25 @@ def main():
                                 v_succ_cov = unitig_coverages[v_succ[:-1]]
                                 v_cov = unitig_coverages[v[:-1]]
 
-                                if v_succ_index != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
-                                    if abs(min(v_succ_cov, v_cov) - cov["weight"]) < covtol:
-                                        subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
-                                        logger.debug(f"Extending subpath based on successor coverage {[u_index, final_vertex, v_succ_index]}")
+                                if (
+                                    v_succ_index != 0
+                                    and u_index != 0
+                                    and final_vertex != 0
+                                    and final_vertex != len(candidate_nodes)
+                                    and v_succ_index != u_index
+                                ):
+                                    if (
+                                        abs(min(v_succ_cov, v_cov) - cov["weight"])
+                                        < covtol
+                                    ):
+                                        subpaths[subpath_count] = [
+                                            u_index,
+                                            final_vertex,
+                                            v_succ_index,
+                                        ]
+                                        logger.debug(
+                                            f"Extending subpath based on successor coverage {[u_index, final_vertex, v_succ_index]}"
+                                        )
                                         subpath_count += 1
 
                         else:
@@ -570,18 +607,40 @@ def main():
                                 if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
                                     u_pred_name = unitig_names_rev[u_pred[:-1]]
                                     u_pred_index = candidate_nodes.index(u_pred_name)
-                                    if final_vertex != 0 and u_index != 0 and u_pred_index != final_vertex:
-                                        subpaths[subpath_count] = [u_pred_index, u_index, final_vertex]
-                                        logger.debug(f"Extending subpath {[u_pred_index, u_index, final_vertex]}")
+                                    if (
+                                        final_vertex != 0
+                                        and u_index != 0
+                                        and u_pred_index != final_vertex
+                                    ):
+                                        subpaths[subpath_count] = [
+                                            u_pred_index,
+                                            u_index,
+                                            final_vertex,
+                                        ]
+                                        logger.debug(
+                                            f"Extending subpath {[u_pred_index, u_index, final_vertex]}"
+                                        )
                                         subpath_count += 1
 
                             for v_succ in G_edge.successors(v):
                                 if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
                                     v_succ_name = unitig_names_rev[v_succ[:-1]]
                                     v_succ_index = candidate_nodes.index(v_succ_name)
-                                    if v_succ_index != 0 and u_index != 0 and final_vertex != 0 and final_vertex != len(candidate_nodes) and v_succ_index != u_index:
-                                        subpaths[subpath_count] = [u_index, final_vertex, v_succ_index]
-                                        logger.debug(f"Extending subpath {[u_index, final_vertex, v_succ_index]}")
+                                    if (
+                                        v_succ_index != 0
+                                        and u_index != 0
+                                        and final_vertex != 0
+                                        and final_vertex != len(candidate_nodes)
+                                        and v_succ_index != u_index
+                                    ):
+                                        subpaths[subpath_count] = [
+                                            u_index,
+                                            final_vertex,
+                                            v_succ_index,
+                                        ]
+                                        logger.debug(
+                                            f"Extending subpath {[u_index, final_vertex, v_succ_index]}"
+                                        )
                                         subpath_count += 1
 
                 logger.debug(f"edge_list_indices: {edge_list_indices}")
@@ -615,8 +674,9 @@ def main():
 
                         # Filter path by coverage
                         if coverage_val >= mincov:
-                            
-                            logger.debug(f"Path {cycle_number} coverage: {coverage_val}")
+                            logger.debug(
+                                f"Path {cycle_number} coverage: {coverage_val}"
+                            )
 
                             # Create graph for path
                             G_path = nx.DiGraph()
@@ -631,7 +691,9 @@ def main():
                                 # Get all simple paths from node 0 to last node
                                 try:
                                     candidate_paths = list(
-                                        nx.all_simple_paths(G_path, 0, len(candidate_nodes))
+                                        nx.all_simple_paths(
+                                            G_path, 0, len(candidate_nodes)
+                                        )
                                     )
 
                                     if len(candidate_paths) > 0:
@@ -674,7 +736,10 @@ def main():
                                             f"phage_comp_{my_count}_cycle_{cycle_number}",
                                             "case3",
                                             [x for x in path_order],
-                                            [unitig_names_rev[x[:-1]] for x in path_order],
+                                            [
+                                                unitig_names_rev[x[:-1]]
+                                                for x in path_order
+                                            ],
                                             path_string,
                                             int(coverage_val),
                                             total_length,
@@ -691,7 +756,9 @@ def main():
                                         cycle_number += 1
 
                                 except nx.exception.NodeNotFound:
-                                    logger.debug(f"Could not resolve a continuous path.")
+                                    logger.debug(
+                                        f"Could not resolve a continuous path."
+                                    )
 
                     logger.debug(f"Number of paths selected: {cycle_number-1}")
 
@@ -706,7 +773,6 @@ def main():
 
             else:
                 logger.debug(f"No cycles detected. Found a complex linear component.")
-
 
         # Case 1 components - single unitigs
         elif len(candidate_nodes) == 1:

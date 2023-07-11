@@ -57,7 +57,6 @@ def get_source_sink_linear(G_edge, graph_unitigs, minlength, self_looped_nodes):
     sink_candidates = []
 
     for node in list(G_edge.nodes):
-
         unitig_name = node[:-1]
 
         if unitig_name not in self_looped_nodes:
