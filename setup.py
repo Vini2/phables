@@ -36,8 +36,7 @@ setup(
     install_requires=[
         "snakemake>=7.14.0",
         "pyyaml>=6.0",
-        "click>=8.1.3",
-        "metasnek>=0.0.3"
+        "click>=8.1.3"
     ],
     entry_points={"console_scripts": ["phables=phables.__main__:main"]},
     include_package_data=True,
