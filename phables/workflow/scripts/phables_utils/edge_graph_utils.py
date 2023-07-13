@@ -67,6 +67,7 @@ def get_links(assembly_graph_file):
     graph_contigs = {}
     edges_lengths = {}
     oriented_links = defaultdict(lambda: defaultdict(list))
+    link_overlap = defaultdict(int)
     links = []
 
     my_map = BidirectionalMap()
@@ -83,6 +84,7 @@ def get_links(assembly_graph_file):
 
                 link1_orientation = strings[2]
                 link2_orientation = strings[4]
+                overlap = int(strings[5].strip()[:-1])
 
                 link = []
                 link.append(link1)
@@ -92,16 +94,24 @@ def get_links(assembly_graph_file):
                 if link1 != link2:
                     if link1_orientation == "+" and link2_orientation == "+":
                         oriented_links[link1][link2].append(("+", "+"))
+                        link_overlap[(f"{link1}+", f"{link2}+")] = overlap
                         oriented_links[link2][link1].append(("-", "-"))
+                        link_overlap[(f"{link2}-", f"{link1}-")] = overlap
                     elif link1_orientation == "-" and link2_orientation == "-":
                         oriented_links[link1][link2].append(("-", "-"))
+                        link_overlap[(f"{link1}-", f"{link2}-")] = overlap
                         oriented_links[link2][link1].append(("+", "+"))
+                        link_overlap[(f"{link2}+", f"{link1}+")] = overlap
                     elif link1_orientation == "+" and link2_orientation == "-":
                         oriented_links[link1][link2].append(("+", "-"))
+                        link_overlap[(f"{link1}+", f"{link2}-")] = overlap
                         oriented_links[link2][link1].append(("+", "-"))
+                        link_overlap[(f"{link2}+", f"{link1}-")] = overlap
                     elif link1_orientation == "-" and link2_orientation == "+":
                         oriented_links[link1][link2].append(("-", "+"))
+                        link_overlap[(f"{link1}-", f"{link2}+")] = overlap
                         oriented_links[link2][link1].append(("-", "+"))
+                        link_overlap[(f"{link2}-", f"{link1}+")] = overlap
 
             elif line.startswith("S"):
                 strings = line.strip().split()
@@ -112,7 +122,7 @@ def get_links(assembly_graph_file):
 
             line = file.readline()
 
-    return node_count, graph_contigs, links, oriented_links, my_map, edges_lengths
+    return node_count, graph_contigs, links, oriented_links, link_overlap, my_map, edges_lengths
 
 
 def get_graph_edges(links, contig_names_rev):
@@ -146,6 +156,7 @@ def build_assembly_graph(assembly_graph_file):
         graph_contigs,
         links,
         oriented_links,
+        link_overlap,
         contig_names,
         edges_lengths,
     ) = get_links(assembly_graph_file)
@@ -178,6 +189,7 @@ def build_assembly_graph(assembly_graph_file):
     return (
         assembly_graph,
         oriented_links,
+        link_overlap,
         contig_names,
         contig_names_rev,
         graph_contigs,

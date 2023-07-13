@@ -103,6 +103,7 @@ def main():
     (
         assembly_graph,
         oriented_links,
+        link_overlap,
         unitig_names,
         unitig_names_rev,
         graph_unitigs,
@@ -262,9 +263,9 @@ def main():
                         resolved_edges.add(repeat_unitig)
                         path_string = (
                             str(graph_unitigs[repeat_unitig_name])
-                            + str(graph_unitigs[unitig_name])
+                            + str(graph_unitigs[unitig_name][link_overlap[(repeat_unitig, unitig_to_consider)]:])
                             + str(
-                                graph_unitigs[repeat_unitig_name].reverse_complement()
+                                graph_unitigs[repeat_unitig_name].reverse_complement()[link_overlap[(unitig_to_consider, repeat_unitig)]:]
                             )
                         )
                         logger.debug(
@@ -715,21 +716,28 @@ def main():
                                         path_string = ""
                                         total_length = 0
 
-                                        for node in path_order:
+                                        previous_edge = 0
+
+                                        for nodeid in range(len(path_order)):
+                                            node = path_order[nodeid]
                                             unitig_name = node[:-1]
+
                                             if node.endswith("+"):
-                                                path_string += str(
-                                                    graph_unitigs[unitig_name]
-                                                )
+                                                unitig_seq = str(graph_unitigs[unitig_name])
                                             else:
-                                                path_string += str(
-                                                    graph_unitigs[
-                                                        unitig_name
-                                                    ].reverse_complement()
-                                                )
-                                            total_length += len(
-                                                str(graph_unitigs[unitig_name])
-                                            )
+                                                unitig_seq = str(graph_unitigs[unitig_name].reverse_complement())
+
+                                            # If first node in path
+                                            if previous_edge == 0:
+                                                path_string += unitig_seq
+                                                total_length += len(unitig_seq)
+                                            
+                                            else:
+                                                trimmed_seq = unitig_seq[link_overlap[(previous_edge, node)]:]
+                                                path_string += trimmed_seq
+                                                total_length += len(trimmed_seq)
+
+                                            previous_edge = node
 
                                         # Create GenomePath object with path details
                                         genome_path = GenomePath(
