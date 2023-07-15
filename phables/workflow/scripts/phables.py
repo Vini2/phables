@@ -191,9 +191,6 @@ def main():
 
         has_cycles = False
 
-        # if 423 not in candidate_nodes:
-        #     continue
-
         logger.debug(f"my_count: {my_count}")
 
         logger.debug(f"number of unitigs: {len(candidate_nodes)}")
@@ -263,9 +260,15 @@ def main():
                         resolved_edges.add(repeat_unitig)
                         path_string = (
                             str(graph_unitigs[repeat_unitig_name])
-                            + str(graph_unitigs[unitig_name][link_overlap[(repeat_unitig, unitig_to_consider)]:])
                             + str(
-                                graph_unitigs[repeat_unitig_name].reverse_complement()[link_overlap[(unitig_to_consider, repeat_unitig)]:]
+                                graph_unitigs[unitig_name][
+                                    link_overlap[(repeat_unitig, unitig_to_consider)] :
+                                ]
+                            )
+                            + str(
+                                graph_unitigs[repeat_unitig_name].reverse_complement()[
+                                    link_overlap[(unitig_to_consider, repeat_unitig)] :
+                                ]
                             )
                         )
                         logger.debug(
@@ -723,17 +726,27 @@ def main():
                                             unitig_name = node[:-1]
 
                                             if node.endswith("+"):
-                                                unitig_seq = str(graph_unitigs[unitig_name])
+                                                unitig_seq = str(
+                                                    graph_unitigs[unitig_name]
+                                                )
                                             else:
-                                                unitig_seq = str(graph_unitigs[unitig_name].reverse_complement())
+                                                unitig_seq = str(
+                                                    graph_unitigs[
+                                                        unitig_name
+                                                    ].reverse_complement()
+                                                )
 
                                             # If first node in path
                                             if previous_edge == 0:
                                                 path_string += unitig_seq
                                                 total_length += len(unitig_seq)
-                                            
+
                                             else:
-                                                trimmed_seq = unitig_seq[link_overlap[(previous_edge, node)]:]
+                                                trimmed_seq = unitig_seq[
+                                                    link_overlap[
+                                                        (previous_edge, node)
+                                                    ] :
+                                                ]
                                                 path_string += trimmed_seq
                                                 total_length += len(trimmed_seq)
 

@@ -122,7 +122,15 @@ def get_links(assembly_graph_file):
 
             line = file.readline()
 
-    return node_count, graph_contigs, links, oriented_links, link_overlap, my_map, edges_lengths
+    return (
+        node_count,
+        graph_contigs,
+        links,
+        oriented_links,
+        link_overlap,
+        my_map,
+        edges_lengths,
+    )
 
 
 def get_graph_edges(links, contig_names_rev):
