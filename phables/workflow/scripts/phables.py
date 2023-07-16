@@ -16,6 +16,7 @@ from phables_utils.output_utils import (
     write_path_fasta,
     write_res_genome_info,
     write_unitigs,
+    init_files,
 )
 from tqdm import tqdm
 
@@ -57,7 +58,7 @@ def main():
     # Setup logger
     # ----------------------------------------------------------------------
 
-    logger = logging.getLogger(__version__)
+    logger = logging.getLogger(f"phables {__version__}")
     logger.setLevel(logging.DEBUG)
     logging.captureWarnings(True)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
@@ -97,6 +98,10 @@ def main():
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
+
+    # Init files
+    # ----------------------------------------------------------------------
+    init_files(output)
 
     # Get assembly graph
     # ----------------------------------------------------------------------

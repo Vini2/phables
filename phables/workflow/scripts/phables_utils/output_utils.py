@@ -1,7 +1,11 @@
+import logging
 import os
 import subprocess
 
 FASTA_LINE_LEN = 60
+
+# Create logger
+logger = logging.getLogger("phables 1.1.0")
 
 
 def write_unitigs(nodes, unitig_names, graph_unitigs, filename, output):
@@ -146,3 +150,18 @@ def write_component_phrog_info(resolved_components, comp_phrogs, output):
             myfile.write(f"phage_{comp}\t{comp_phrogs[comp]}\n")
 
     return "component_phrogs.txt"
+
+
+def init_files(output):
+    """
+    Initialise files and folders
+    """
+
+    open(f"{output}/resolved_edges.fasta", "a").close()
+    open(f"{output}/resolved_paths.fasta", "a").close()
+    open(f"{output}/resolved_genome_info.txt", "a").close()
+    open(f"{output}/resolved_component_info.txt", "a").close()
+    open(f"{output}/component_phrogs.txt", "a").close()
+
+    if not os.path.isdir(f"{output}/resolved_phages"):
+        subprocess.run(f"mkdir -p {output}/resolved_phages", shell=True)
