@@ -268,6 +268,7 @@ def run(
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "phables.smk")),
+        system_config=snake_base(os.path.join("config", "config.yaml")),
         merge_config=merge_config,
         log=log,
         **kwargs
@@ -301,7 +302,7 @@ def install(output, **kwargs):
     ),
 )
 @common_options
-def test(output, **kwargs):
+def test(**kwargs):
     """Test Phables"""
     test_dir = snake_base("test_data")
 
@@ -312,6 +313,7 @@ def test(output, **kwargs):
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "test_phables.smk")),
+        system_config=snake_base(os.path.join("config", "config.yaml")),
         merge_config=merge_config,
         **kwargs
     )
