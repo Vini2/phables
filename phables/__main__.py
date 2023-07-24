@@ -6,11 +6,25 @@ https://github.com/beardymcjohnface/Snaketool/wiki/Customising-your-Snaketool
 """
 
 import os
-
 import click
 
-from .util import (OrderedCommands, copy_config, default_to_output,
-                   get_version, print_citation, run_snakemake, snake_base)
+from snaketool_utils.cli_utils import OrderedCommands, run_snakemake, copy_config, echo_click
+
+
+def snake_base(rel_path):
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path)
+
+
+def get_version():
+    with open(snake_base("phables.VERSION"), "r") as f:
+        version = f.readline()
+    return version
+
+
+def print_citation():
+    with open(snake_base("phables.CITATION"), "r") as f:
+        for line in f:
+            echo_click(line)
 
 
 def common_options(func):
