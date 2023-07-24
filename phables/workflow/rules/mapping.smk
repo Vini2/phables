@@ -14,7 +14,8 @@ file from step 2 and Samtools to index the BAM files.
 #     threads:
 #         config["resources"]["jobCPU"]
 #     resources:
-#         mem_mb = config["resources"]["jobMem"]
+#         mem_mb = config["resources"]["jobMem"],
+#         mem = str(config["resources"]["jobMem"]) + "MB"
 #     log:
 #         os.path.join(LOGSDIR, "{sample}_mapping.log")
 #     conda:

@@ -49,6 +49,9 @@ def common_options(func):
             show_default=False,
         ),
         click.option(
+            "--profile", help="Snakemake profile", default=None, show_default=False
+        ),
+        click.option(
             "--snake-default",
             multiple=True,
             default=[
@@ -207,6 +210,7 @@ Available targets:
 def run(
     input,
     reads,
+    profile,
     minlength,
     mincov,
     compcount,
@@ -225,6 +229,7 @@ def run(
     merge_config = {
         "input": input,
         "reads": reads,
+        "profile": profile,
         "minlength": minlength,
         "mincov": mincov,
         "compcount": compcount,
