@@ -6,11 +6,32 @@ https://github.com/beardymcjohnface/Snaketool/wiki/Customising-your-Snaketool
 """
 
 import os
-
 import click
 
-from .util import (OrderedCommands, copy_config, default_to_output,
-                   get_version, print_citation, run_snakemake, snake_base)
+from snaketool_utils.cli_utils import OrderedCommands, run_snakemake, copy_config, echo_click
+
+
+def snake_base(rel_path):
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path)
+
+
+def get_version():
+    with open(snake_base("phables.VERSION"), "r") as f:
+        version = f.readline()
+    return version
+
+
+def print_citation():
+    with open(snake_base("phables.CITATION"), "r") as f:
+        for line in f:
+            echo_click(line)
+
+
+def default_to_output(ctx, param, value):
+    """Callback for click options; places value in output directory unless specified"""
+    if param.default == value:
+        return os.path.join(ctx.params["output"], value)
+    return value
 
 
 def common_options(func):
@@ -47,6 +68,9 @@ def common_options(func):
             help="Custom conda env directory",
             type=click.Path(),
             show_default=False,
+        ),
+        click.option(
+            "--profile", help="Snakemake profile", default=None, show_default=False
         ),
         click.option(
             "--snake-default",
@@ -207,6 +231,7 @@ Available targets:
 def run(
     input,
     reads,
+    profile,
     minlength,
     mincov,
     compcount,
@@ -225,6 +250,7 @@ def run(
     merge_config = {
         "input": input,
         "reads": reads,
+        "profile": profile,
         "minlength": minlength,
         "mincov": mincov,
         "compcount": compcount,
@@ -242,6 +268,7 @@ def run(
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "phables.smk")),
+        system_config=snake_base(os.path.join("config", "config.yaml")),
         merge_config=merge_config,
         log=log,
         **kwargs
@@ -275,7 +302,7 @@ def install(output, **kwargs):
     ),
 )
 @common_options
-def test(output, **kwargs):
+def test(**kwargs):
     """Test Phables"""
     test_dir = snake_base("test_data")
 
@@ -286,6 +313,7 @@ def test(output, **kwargs):
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "test_phables.smk")),
+        system_config=snake_base(os.path.join("config", "config.yaml")),
         merge_config=merge_config,
         **kwargs
     )

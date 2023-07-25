@@ -20,7 +20,8 @@ rule koverage:
         tsv = os.path.join(OUTDIR,"phables.samples.tsv"),
         edges = EDGES_FILE
     params:
-        out_dir = OUTDIR
+        out_dir = OUTDIR,
+        profile = lambda wildcards: "--profile " + config.profile if config.profile else "",
     output:
         expand(os.path.join(OUTDIR, "temp", "{sample}.{ext}"),
                sample=SAMPLE_NAMES,
@@ -29,7 +30,8 @@ rule koverage:
     threads:
         config["resources"]["jobCPU"]
     resources:
-        mem_mb = config["resources"]["jobMem"]
+        mem_mb = config["resources"]["jobMem"],
+        mem = str(config["resources"]["jobMem"]) + "MB"
     conda:
         os.path.join("..", "envs", "koverage.yaml")
     shell:
@@ -38,7 +40,8 @@ rule koverage:
             --reads {input.tsv} \
             --ref {input.edges} \
             --threads {threads} \
-            --output {params.out_dir}
+            --output {params.out_dir} \
+            {params.profile}
         """
 
 
