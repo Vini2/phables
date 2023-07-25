@@ -24,7 +24,7 @@ setup(
     name="phables",
     packages=find_packages(),
     url="https://github.com/Vini2/phables",
-    python_requires=">=3.8,<3.11",
+    python_requires=">=3.9",
     description="Phables: from fragmented assemblies to high-quality bacteriophage genomes",
     long_description=long_description,
     long_description_content_type="text/markdown",
