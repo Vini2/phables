@@ -223,7 +223,7 @@ Available targets:
     "--alpha",
     default=1.2,
     required=False,
-    help="coverage multipler for flow interval modelling",
+    help="coverage multiplier for flow interval modelling",
     type=float,
     show_default=True,
 )
