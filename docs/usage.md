@@ -15,7 +15,7 @@ Options:
   --minlength INTEGER           minimum length of circular unitigs to consider
                                 [default: 2000]
   --mincov INTEGER              minimum coverage of paths to output  [default:
-                                1]
+                                10]
   --compcount INTEGER           maximum unitig count to consider a component
                                 [default: 200]
   --maxpaths INTEGER            maximum number of paths to resolve for a
@@ -26,6 +26,10 @@ Options:
                                 [default: 1e-10]
   --seqidentity FLOAT           minimum sequence identity for phrog
                                 annotations  [default: 0.3]
+  --covtol INTEGER              coverage tolerance for extending subpaths
+                                [default: 100]
+  --alpha FLOAT                 coverage multiplier for flow interval modelling
+                                [default: 1.2]
   --output PATH                 Output directory  [default: phables.out]
   --configfile TEXT             Custom config file [default:
                                 (outputDir)/config.yaml]
@@ -33,6 +37,7 @@ Options:
   --use-conda / --no-use-conda  Use conda for Snakemake rules  [default: use-
                                 conda]
   --conda-prefix PATH           Custom conda env directory
+  --profile TEXT                Snakemake profile
   --snake-default TEXT          Customise Snakemake runtime args  [default:
                                 --rerun-incomplete, --printshellcmds,
                                 --nolock, --show-failed-logs]
@@ -73,6 +78,8 @@ Options:
 * `--mgfrac` - length threshold to consider single copy marker genes [default: 0.2]
 * `--evalue` - maximum e-value for phrog annotations [default: 1e-10]
 * `--seqidentity` - minimum sequence identity for phrog annotations [default: 0.3]
+* `--covtol` - coverage tolerance for extending subpaths [default: 100]
+* `--alpha` - coverage multiplier for flow interval modelling [default: 1.2]
 * `--output` - path to the output directory [default: `phables.out`]
 * `--configfile` - custom config file [default: `(outputDir)/config.yaml`]
 * `--threads` - number of threads to use  [default: 1]
@@ -132,3 +139,4 @@ The output of Phables will contain the following main files and folders.
 * `resolved_edges.fasta` containing the unitigs that make up the resolved genomes
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
 * `all_phage_like_edges.fasta` containing sequences from all the phage-like components (both resolved and unresolved)
+* `component_phrogs.txt` containing PHROGs found in each component
