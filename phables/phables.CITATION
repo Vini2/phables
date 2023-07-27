@@ -1,9 +1,31 @@
 Please cite phables in your paper using this link:
 https://doi.org/10.1101/2023.04.04.535632
 
+
 Please consider also citing these dependencies:
 Snaketool:
 https://doi.org/10.31219/osf.io/8w5j3
 
 Snakemake:
 https://doi.org/10.12688/f1000research.29032.1
+
+PHROG:
+https://doi.org/10.1093/nargab/lqab067
+
+MMseqs2:
+https://doi.org/10.1038/nbt.3988
+
+Minimap2:
+https://doi.org/10.1093/bioinformatics/bty191
+
+SAMtools:
+https://doi.org/10.1093/bioinformatics/btp352
+
+CoverM
+https://github.com/wwood/CoverM
+
+NetworkX
+https://conference.scipy.org/proceedings/scipy2008/paper_2/
+
+Gurobi Optimization
+https://www.gurobi.com/

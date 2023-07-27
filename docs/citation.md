@@ -31,3 +31,4 @@ Also, please cite the following tools/databases used by Phables.
 * Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R, 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools, Bioinformatics, Volume 25, Issue 16, Pages 2078–2079 (2009). [https://doi.org/10.1093/bioinformatics/btp352](https://doi.org/10.1093/bioinformatics/btp352)
 * Woodcroft BJ, Newell R, CoverM: Read coverage calculator for metagenomics (2017). [https://github.com/wwood/CoverM](https://github.com/wwood/CoverM)
 * Hagberg AA, Schult DA, and Swart PJ. Exploring network structure, dynamics, and function using NetworkX. In Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15 (2008).
+* Gurobi Optimization. [https://www.gurobi.com/](https://www.gurobi.com/).
