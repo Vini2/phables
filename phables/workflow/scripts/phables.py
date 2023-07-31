@@ -271,7 +271,7 @@ def main():
                                 ]
                             )
                             + str(
-                                graph_unitigs[repeat_unitig_name].reverse_complement()[
+                                graph_unitigs[repeat_unitig_name][
                                     link_overlap[(unitig_to_consider, repeat_unitig)] :
                                 ]
                             )
