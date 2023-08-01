@@ -21,7 +21,7 @@ rule koverage:
         edges = EDGES_FILE
     params:
         out_dir = OUTDIR,
-        profile = lambda wildcards: "--profile " + config.profile if config.profile else "",
+        profile = lambda wildcards: "--profile " + config["profile"] if config["profile"] else "",
     output:
         expand(os.path.join(OUTDIR, "temp", "{sample}.{ext}"),
                sample=SAMPLE_NAMES,
