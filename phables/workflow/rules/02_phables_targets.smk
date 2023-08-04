@@ -1,6 +1,7 @@
 
 preprocessTargets = []
 phablesTargets = []
+postprocessTargets = []
 
 
 """PREPROCESSING TARGETS"""
@@ -27,6 +28,18 @@ GRAPH_FILE = INPUT
 
 
 """PHABLES TARGETS"""
-phablesTargets.append(os.path.join(OUTDIR, "resolved_genome_info.txt"))
-phablesTargets.append(os.path.join(OUTDIR, "resolved_component_info.txt"))
-phablesTargets.append(os.path.join(OUTDIR, "component_phrogs.txt"))
+RESOLVED_GENOMES = os.path.join(OUTDIR, "resolved_paths.fasta")
+
+RESOLVED_GENOME_INFO = os.path.join(OUTDIR, "resolved_genome_info.txt")
+phablesTargets.append(RESOLVED_GENOME_INFO)
+
+RESOLVED_COMP_INFO = os.path.join(OUTDIR, "resolved_component_info.txt")
+phablesTargets.append(RESOLVED_COMP_INFO)
+
+COMP_PHROGS = os.path.join(OUTDIR, "component_phrogs.txt")
+phablesTargets.append(COMP_PHROGS)
+
+
+"""POSTPROCESSING TARGETS"""
+GENOME_READ_COUNTS = os.path.join(OUTDIR, "results", "sample_coverage.tsv")
+postprocessTargets.append(GENOME_READ_COUNTS)

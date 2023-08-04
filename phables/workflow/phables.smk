@@ -28,7 +28,7 @@ def targetRule(fn):
     target_rules.append(fn.__name__[2:])
     return fn
 
-localrules: all, preprocess, phables, print_stages, koverage_tsv
+localrules: all, preprocess, phables, print_stages, koverage_tsv, postprocess
 
 
 """Run stages"""
@@ -36,7 +36,8 @@ localrules: all, preprocess, phables, print_stages, koverage_tsv
 rule all:
     input:
         preprocessTargets,
-        phablesTargets
+        phablesTargets,
+        postprocessTargets
 
 
 @targetRule
@@ -49,6 +50,11 @@ rule preprocess:
 rule phables:
     input:
         phablesTargets
+
+@targetRule
+rule postprocess:
+    input:
+        postprocessTargets
 
 
 @targetRule
@@ -77,3 +83,6 @@ include: os.path.join("rules", "genes.smk")
 
 # Step 6: Run Phables
 include: os.path.join("rules", "phables.smk")
+
+# Step 7: Postprocess genomes
+include: os.path.join("rules", "postprocess.smk")
