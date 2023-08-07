@@ -6,18 +6,15 @@ import time
 
 import networkx as nx
 from igraph import *
-from phables_utils import component_utils, edge_graph_utils, flow_utils, gene_utils
-from phables_utils.coverage_utils import get_junction_pe_coverage, get_unitig_coverage
+from phables_utils import (component_utils, edge_graph_utils, flow_utils,
+                           gene_utils)
+from phables_utils.coverage_utils import (get_junction_pe_coverage,
+                                          get_unitig_coverage)
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.output_utils import (
-    write_component_info,
-    write_component_phrog_info,
-    write_path,
-    write_path_fasta,
-    write_res_genome_info,
-    write_unitigs,
-    init_files,
-)
+from phables_utils.output_utils import (init_files, write_component_info,
+                                        write_component_phrog_info, write_path,
+                                        write_path_fasta,
+                                        write_res_genome_info, write_unitigs)
 from tqdm import tqdm
 
 __author__ = "Vijini Mallawaarachchi"
@@ -952,10 +949,11 @@ def main():
                 logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
                 resolved_components.add(my_count)
 
-
         # Get unresolved edges
         unresolved_edges = comp_all_edges.difference(comp_resolved_edges)
-        unresolved_phage_like_edges = unresolved_phage_like_edges.union(unresolved_edges)
+        unresolved_phage_like_edges = unresolved_phage_like_edges.union(
+            unresolved_edges
+        )
         logger.debug(f"Unresolved edges in comp {my_count}: {unresolved_edges}")
 
         # Write genome path to file
@@ -1000,7 +998,13 @@ def main():
         output,
     )
     write_unitigs(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
-    write_unitigs(unresolved_phage_like_edges, unitig_names, graph_unitigs, "unresolved_phage_like_edges", output)
+    write_unitigs(
+        unresolved_phage_like_edges,
+        unitig_names,
+        graph_unitigs,
+        "unresolved_phage_like_edges",
+        output,
+    )
 
     # Record path information
     # ----------------------------------------------------------------------

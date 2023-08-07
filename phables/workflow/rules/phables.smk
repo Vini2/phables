@@ -12,6 +12,7 @@ rule run_phables:
         unitigs = os.path.join(OUTDIR, "resolved_edges.fasta"),
         component_info = os.path.join(OUTDIR, "resolved_component_info.txt"),
         phrog_comp_info = os.path.join(OUTDIR, "component_phrogs.txt"),
+        unresolved_edges = os.path.join(OUTDIR, "unresolved_phage_like_edges.fasta"),
     params:
         graph = GRAPH_FILE,
         hmmout = SMG_FILE,
