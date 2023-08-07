@@ -183,6 +183,8 @@ def main():
     phage_like_edges = set()
     all_phage_like_edges = set()
 
+    unresolved_phage_like_edges = set()
+
     for my_count in tqdm(pruned_vs, desc="Resolving components"):
         component_time_start = time.time()
 
@@ -203,6 +205,10 @@ def main():
 
         all_phage_like_edges = all_phage_like_edges.union(set(candidate_nodes))
 
+        comp_all_edges = set()
+        comp_all_edges = comp_all_edges.union(set(candidate_nodes))
+        comp_resolved_edges = set()
+
         in_degree = []
         out_degree = []
 
@@ -220,6 +226,7 @@ def main():
                 cycle_components.add(my_count)
 
                 phage_like_edges = phage_like_edges.union(set(candidate_nodes))
+                comp_resolved_edges = comp_resolved_edges.union(set(candidate_nodes))
 
                 unitig1 = ""
                 unitig2 = ""
@@ -814,6 +821,7 @@ def main():
                 case_name = "case1_linear"
 
             resolved_edges.add(candidate_nodes[0])
+            comp_resolved_edges.add(candidate_nodes[0])
 
             path_string = str(graph_unitigs[unitig_name])
 
@@ -846,7 +854,6 @@ def main():
         my_genomic_paths.sort(key=lambda x: (x.length, x.coverage), reverse=True)
 
         final_genomic_paths = []
-        comp_resolved_edges = set()
         visited_nodes = set()
         comp_resolved_paths = set()
 
@@ -945,6 +952,12 @@ def main():
                 logger.debug(f"{genomic_path.id}\t{genomic_path.length}")
                 resolved_components.add(my_count)
 
+
+        # Get unresolved edges
+        unresolved_edges = comp_all_edges.difference(comp_resolved_edges)
+        unresolved_phage_like_edges = unresolved_phage_like_edges.union(unresolved_edges)
+        logger.debug(f"Unresolved edges in comp {my_count}: {unresolved_edges}")
+
         # Write genome path to file
         # ----------------------------------------------------------------------
         write_path(final_genomic_paths, output)
@@ -987,6 +1000,7 @@ def main():
         output,
     )
     write_unitigs(resolved_edges, unitig_names, graph_unitigs, "resolved_edges", output)
+    write_unitigs(unresolved_phage_like_edges, unitig_names, graph_unitigs, "unresolved_phage_like_edges", output)
 
     # Record path information
     # ----------------------------------------------------------------------

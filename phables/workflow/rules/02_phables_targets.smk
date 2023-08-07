@@ -41,5 +41,8 @@ phablesTargets.append(COMP_PHROGS)
 
 
 """POSTPROCESSING TARGETS"""
-GENOME_READ_COUNTS = os.path.join(OUTDIR, "results", "sample_coverage.tsv")
+GENOME_KOVERAGE_RES = os.path.join(OUTDIR, "results", "sample_coverage.tsv")
+postprocessTargets.append(GENOME_KOVERAGE_RES)
+
+GENOME_READ_COUNTS = os.path.join(OUTDIR, "sample_genome_read_counts.tsv")
 postprocessTargets.append(GENOME_READ_COUNTS)
