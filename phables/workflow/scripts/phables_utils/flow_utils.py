@@ -48,7 +48,7 @@ def get_source_sink_circular(G_edge, graph_unitigs, minlength, self_looped_nodes
     return source_sink_candidates
 
 
-def get_source_sink_linear(G_edge, graph_unitigs, minlength, self_looped_nodes):
+def get_source_sink_linear(G_edge, self_looped_nodes):
     """
     Identify source/sink vertex for linear components
     """

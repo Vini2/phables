@@ -764,7 +764,7 @@ def main():
                                         # Create GenomePath object with path details
                                         genome_path = GenomePath(
                                             f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                            "case3",
+                                            "case3_circular",
                                             [x for x in path_order],
                                             [
                                                 unitig_names_rev[x[:-1]]
@@ -803,6 +803,393 @@ def main():
 
             else:
                 logger.debug(f"No cycles detected. Found a complex linear component.")
+
+
+                # Identify source/sink vertex
+                # ----------------------------------------------------------------------
+
+                source_candidates, sink_candidates = flow_utils.get_source_sink_linear(G_edge, self_looped_nodes)
+
+                logger.debug(f"Original candidate_nodes: {candidate_nodes}")
+                logger.debug(
+                    f"Identified candidate sources: {source_candidates}"
+                )
+                logger.debug(
+                    f"Identified candidate sinks: {sink_candidates}"
+                )
+
+                if len(source_candidates) == 1 and len(sink_candidates) == 1:
+
+                    logger.debug(f"Found source: {source_candidates[0]}")
+                    logger.debug(f"Found sink: {sink_candidates[0]}")
+                    
+                    candidate_nodes.remove(source_candidates[0])
+                    candidate_nodes.insert(0, source_candidates[0])
+                    candidate_nodes.remove(sink_candidates[0])
+                    candidate_nodes.append(sink_candidates[0])
+
+                    logger.debug(f"Ordered candidate_nodes: {candidate_nodes}")
+                    
+
+                    # Create refined directed graph for flow network
+                    # ----------------------------------------------------------------------
+                    G = nx.DiGraph()
+
+                    for u, v, cov in G_edge.edges(data=True):
+                        if u not in node_indices:
+                            node_indices[u] = my_counter
+                            node_indices_rev[my_counter] = u
+                            my_counter += 1
+                        if v not in node_indices:
+                            node_indices[v] = my_counter
+                            node_indices_rev[my_counter] = v
+                            my_counter += 1
+
+                        logger.debug(f"Edge: {u}, {v}, {cov['weight']}")
+
+                        G.add_edge(node_indices[u], node_indices[v], weight=cov["weight"])
+
+                    # Get connections and degree information
+                    # ----------------------------------------------------------------------
+                    in_degree = []
+                    out_degree = []
+
+                    for node in list(G.nodes):
+                        if node_indices_rev[node][:-1] not in self_looped_nodes:
+                            clean_indegree = len(
+                                [
+                                    x
+                                    for x in G.predecessors(node)
+                                    if node_indices_rev[x][:-1] not in self_looped_nodes
+                                ]
+                            )
+                            in_degree.append(clean_indegree)
+
+                            clean_outdegree = len(
+                                [
+                                    x
+                                    for x in G.successors(node)
+                                    if node_indices_rev[x][:-1] not in self_looped_nodes
+                                ]
+                            )
+                            out_degree.append(clean_outdegree)
+
+                    degrees = in_degree + out_degree
+
+                    if len(degrees) == 0:
+                        logger.debug(
+                            f"Skipping component as no clean connections were found"
+                        )
+                        continue
+
+                    # Create flow network
+                    # ----------------------------------------------------------------------
+                    network_edges = list()
+
+                    edge_list_indices = {}
+
+                    subpaths = {}
+                    subpath_count = 0
+
+                    visited_edges = []
+
+                    logger.debug(f"G_edge.nodes: {list(G_edge.nodes)}")
+                    logger.debug(f"G_edge.edges: {G_edge.edges(data=True)}")
+
+                    for u, v, cov in G_edge.edges(data=True):
+                        u_name = unitig_names_rev[u[:-1]]
+                        v_name = unitig_names_rev[v[:-1]]
+
+                        u_index = candidate_nodes.index(u_name)
+                        v_index = candidate_nodes.index(v_name)
+
+                        edge_list_indices[u_index] = u
+                        edge_list_indices[v_index] = v
+
+                        juction_cov = junction_pe_coverage[(u[:-1], v[:-1])]
+
+                        if (u_index, v_index) not in visited_edges and (
+                            v_index,
+                            u_index,
+                        ) not in visited_edges:
+                            # Get coverage interval
+                            cov_lower_bound = cov["weight"]
+                            cov_upper_bound = int(max_comp_cov * alpha)
+
+                            logger.debug(
+                                f"({v}, {u}), {juction_cov}, {cov_lower_bound}, {cov_upper_bound}"
+                            )
+
+                            if juction_cov == 0:
+                                network_edges.append(
+                                    (u_index, v_index, 0, cov_upper_bound)
+                                )
+                            else:
+                                network_edges.append(
+                                    (
+                                        u_index,
+                                        v_index,
+                                        cov_lower_bound,
+                                        cov_upper_bound,
+                                    )
+                                )
+
+                            visited_edges.append((u_index, v_index))
+
+                            # Add subpaths
+                            if juction_cov >= mincov:
+                                logger.debug(f"Adding subpath {[u_index, v_index]}")
+                                subpaths[subpath_count] = [u_index, v_index]
+                                subpath_count += 1
+
+                                # Extend subpaths using coverages of successors and predecessors
+                                u_pred = [x for x in G_edge.predecessors(u)]
+                                v_succ = [x for x in G_edge.successors(v)]
+
+                                # Extend subpath using coverages of predecessors
+                                for u_pred in G_edge.predecessors(u):
+                                    u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                    u_pred_index = candidate_nodes.index(u_pred_name)
+                                    u_pred_cov = unitig_coverages[u_pred[:-1]]
+                                    u_cov = unitig_coverages[u[:-1]]
+
+                                    if (
+                                        v_index != 0
+                                        and u_index != 0
+                                        and u_pred_index != v_index
+                                    ):
+                                        if (
+                                            abs(min(u_pred_cov, u_cov) - cov["weight"])
+                                            < covtol
+                                        ):
+                                            subpaths[subpath_count] = [
+                                                u_pred_index,
+                                                u_index,
+                                                v_index,
+                                            ]
+                                            logger.debug(
+                                                f"Extending subpath based on predecessor coverage {[u_pred_index, u_index, v_index]}"
+                                            )
+                                            subpath_count += 1
+
+                                # Extend subpath using coverages of successors
+                                for v_succ in G_edge.successors(v):
+                                    v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                    v_succ_index = candidate_nodes.index(v_succ_name)
+                                    v_succ_cov = unitig_coverages[v_succ[:-1]]
+                                    v_cov = unitig_coverages[v[:-1]]
+
+                                    if (
+                                        v_succ_index != 0
+                                        and u_index != 0
+                                        and v_index != 0
+                                        and v_index != len(candidate_nodes)
+                                        and v_succ_index != u_index
+                                    ):
+                                        if (
+                                            abs(min(v_succ_cov, v_cov) - cov["weight"])
+                                            < covtol
+                                        ):
+                                            subpaths[subpath_count] = [
+                                                u_index,
+                                                v_index,
+                                                v_succ_index,
+                                            ]
+                                            logger.debug(
+                                                f"Extending subpath based on successor coverage {[u_index, v_index, v_succ_index]}"
+                                            )
+                                            subpath_count += 1
+
+                            else:
+                                # Extend subpaths of l=3 based on paired-end reads
+                                # aligned to successors and predecessors
+                                u_pred = [x for x in G_edge.predecessors(u)]
+                                v_succ = [x for x in G_edge.successors(v)]
+
+                                for u_pred in G_edge.predecessors(u):
+                                    if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
+                                        u_pred_name = unitig_names_rev[u_pred[:-1]]
+                                        u_pred_index = candidate_nodes.index(u_pred_name)
+                                        if (
+                                            v_index != 0
+                                            and u_index != 0
+                                            and u_pred_index != v_index
+                                        ):
+                                            subpaths[subpath_count] = [
+                                                u_pred_index,
+                                                u_index,
+                                                v_index,
+                                            ]
+                                            logger.debug(
+                                                f"Extending subpath {[u_pred_index, u_index, v_index]}"
+                                            )
+                                            subpath_count += 1
+
+                                for v_succ in G_edge.successors(v):
+                                    if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
+                                        v_succ_name = unitig_names_rev[v_succ[:-1]]
+                                        v_succ_index = candidate_nodes.index(v_succ_name)
+                                        if (
+                                            v_succ_index != 0
+                                            and u_index != 0
+                                            and v_index != 0
+                                            and v_index != len(candidate_nodes)
+                                            and v_succ_index != u_index
+                                        ):
+                                            subpaths[subpath_count] = [
+                                                u_index,
+                                                v_index,
+                                                v_succ_index,
+                                            ]
+                                            logger.debug(
+                                                f"Extending subpath {[u_index, v_index, v_succ_index]}"
+                                            )
+                                            subpath_count += 1
+
+                    logger.debug(f"edge_list_indices: {edge_list_indices}")
+                    logger.debug(f"subpaths: {subpaths}")
+
+                    # Create flow network and run MFD-ILP
+                    # ----------------------------------------------------------------------
+                    G_mfd = {
+                        "Nodes": len(list(G_edge.nodes)),
+                        "list of edges": network_edges,
+                        "subpaths": subpaths,
+                    }
+                    logger.debug(f"G_mfd: {G_mfd}")
+                    solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
+                    logger.debug(f"Number of paths found: {len(solution_paths)}")
+
+                    cycle_components.add(my_count)
+                    case3_found.add(my_count)
+
+                    # Iterate through solution paths
+                    # ----------------------------------------------------------------------
+                    if len(solution_paths) != 0:
+                        phage_like_edges = phage_like_edges.union(
+                            set(original_candidate_nodes)
+                        )
+
+                        cycle_number = 1
+
+                        for solution_path in solution_paths:
+                            coverage_val = solution_paths[solution_path]["weight"]
+
+                            # Filter path by coverage
+                            if coverage_val >= mincov:
+                                logger.debug(
+                                    f"Path {cycle_number} coverage: {coverage_val}"
+                                )
+
+                                # Create graph for path
+                                G_path = nx.DiGraph()
+
+                                # Fill graph with data
+                                G_path.add_edges_from(solution_paths[solution_path]["path"])
+                                logger.debug(
+                                    f"solution path: {solution_paths[solution_path]['path']}"
+                                )
+
+                                if 0 in list(G_path.nodes):
+                                    # Get all simple paths from node 0 to last node
+                                    try:
+                                        candidate_paths = list(
+                                            nx.all_simple_paths(
+                                                G_path, 0, len(candidate_nodes)-1
+                                            )
+                                        )
+
+                                        if len(candidate_paths) > 0:
+                                            logger.debug(
+                                                f"candidate_paths: {candidate_paths[0]}"
+                                            )
+
+                                            # Get mapped unitigs in order from the flow network
+                                            path_order = []
+                                            for path_edge in candidate_paths[0]:
+                                                path_order.append(
+                                                    edge_list_indices[path_edge]
+                                                )
+
+                                            logger.debug(f"path_order: {path_order}")
+
+                                            # Get the order of unitigs in path
+                                            path_string = ""
+                                            total_length = 0
+
+                                            previous_edge = 0
+
+                                            for nodeid in range(len(path_order)):
+                                                node = path_order[nodeid]
+                                                unitig_name = node[:-1]
+
+                                                if node.endswith("+"):
+                                                    unitig_seq = str(
+                                                        graph_unitigs[unitig_name]
+                                                    )
+                                                else:
+                                                    unitig_seq = str(
+                                                        graph_unitigs[
+                                                            unitig_name
+                                                        ].reverse_complement()
+                                                    )
+
+                                                # If first node in path
+                                                if previous_edge == 0:
+                                                    path_string += unitig_seq
+                                                    total_length += len(unitig_seq)
+
+                                                else:
+                                                    trimmed_seq = unitig_seq[
+                                                        link_overlap[
+                                                            (previous_edge, node)
+                                                        ] :
+                                                    ]
+                                                    path_string += trimmed_seq
+                                                    total_length += len(trimmed_seq)
+
+                                                previous_edge = node
+
+                                            # Create GenomePath object with path details
+                                            genome_path = GenomePath(
+                                                f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                                "case3_linear",
+                                                [x for x in path_order],
+                                                [
+                                                    unitig_names_rev[x[:-1]]
+                                                    for x in path_order
+                                                ],
+                                                path_string,
+                                                int(coverage_val),
+                                                total_length,
+                                                (
+                                                    path_string.count("G")
+                                                    + path_string.count("C")
+                                                )
+                                                / len(path_string)
+                                                * 100,
+                                            )
+                                            my_genomic_paths.append(genome_path)
+                                            logger.debug(f"total_length: {total_length}")
+
+                                            cycle_number += 1
+
+                                    except nx.exception.NodeNotFound:
+                                        logger.debug(
+                                            f"Could not resolve a continuous path."
+                                        )
+
+                        logger.debug(f"Number of paths selected: {cycle_number-1}")
+
+                        if cycle_number > 1:
+                            resolved_components.add(my_count)
+                            resolved_cyclic.add(my_count)
+                            case3_resolved.add(my_count)
+
+                    else:
+                        logger.debug(f"No paths detected")
+                        continue
+
 
         # Case 1 components - single unitigs
         elif len(candidate_nodes) == 1:
