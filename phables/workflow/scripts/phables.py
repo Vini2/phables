@@ -822,11 +822,14 @@ def main():
 
                     logger.debug(f"Found source: {source_candidates[0]}")
                     logger.debug(f"Found sink: {sink_candidates[0]}")
+
+                    source_node = unitig_names_rev[source_candidates[0][:-1]]
+                    sink_node = unitig_names_rev[sink_candidates[0][:-1]]
                     
-                    candidate_nodes.remove(source_candidates[0])
-                    candidate_nodes.insert(0, source_candidates[0])
-                    candidate_nodes.remove(sink_candidates[0])
-                    candidate_nodes.append(sink_candidates[0])
+                    candidate_nodes.remove(source_node)
+                    candidate_nodes.insert(0, source_node)
+                    candidate_nodes.remove(sink_node)
+                    candidate_nodes.append(sink_node)
 
                     logger.debug(f"Ordered candidate_nodes: {candidate_nodes}")
                     
