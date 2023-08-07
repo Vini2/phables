@@ -7,7 +7,7 @@ from Bio.Seq import Seq
 from igraph import *
 
 # Create logger
-logger = logging.getLogger("phables 1.1.1")
+logger = logging.getLogger("phables 1.2.0")
 
 
 class BidirectionalError(Exception):
