@@ -6,15 +6,18 @@ import time
 
 import networkx as nx
 from igraph import *
-from phables_utils import (component_utils, edge_graph_utils, flow_utils,
-                           gene_utils)
-from phables_utils.coverage_utils import (get_junction_pe_coverage,
-                                          get_unitig_coverage)
+from phables_utils import component_utils, edge_graph_utils, flow_utils, gene_utils
+from phables_utils.coverage_utils import get_junction_pe_coverage, get_unitig_coverage
 from phables_utils.genome_utils import GenomeComponent, GenomePath
-from phables_utils.output_utils import (init_files, write_component_info,
-                                        write_component_phrog_info, write_path,
-                                        write_path_fasta,
-                                        write_res_genome_info, write_unitigs)
+from phables_utils.output_utils import (
+    init_files,
+    write_component_info,
+    write_component_phrog_info,
+    write_path,
+    write_path_fasta,
+    write_res_genome_info,
+    write_unitigs,
+)
 from tqdm import tqdm
 
 __author__ = "Vijini Mallawaarachchi"
@@ -811,31 +814,27 @@ def main():
                 # Identify source/sink vertex
                 # ----------------------------------------------------------------------
 
-                source_candidates, sink_candidates = flow_utils.get_source_sink_linear(G_edge, self_looped_nodes)
+                source_candidates, sink_candidates = flow_utils.get_source_sink_linear(
+                    G_edge, self_looped_nodes
+                )
 
                 logger.debug(f"Original candidate_nodes: {candidate_nodes}")
-                logger.debug(
-                    f"Identified candidate sources: {source_candidates}"
-                )
-                logger.debug(
-                    f"Identified candidate sinks: {sink_candidates}"
-                )
+                logger.debug(f"Identified candidate sources: {source_candidates}")
+                logger.debug(f"Identified candidate sinks: {sink_candidates}")
 
                 if len(source_candidates) == 1 and len(sink_candidates) == 1:
-
                     logger.debug(f"Found source: {source_candidates[0]}")
                     logger.debug(f"Found sink: {sink_candidates[0]}")
 
                     source_node = unitig_names_rev[source_candidates[0][:-1]]
                     sink_node = unitig_names_rev[sink_candidates[0][:-1]]
-                    
+
                     candidate_nodes.remove(source_node)
                     candidate_nodes.insert(0, source_node)
                     candidate_nodes.remove(sink_node)
                     candidate_nodes.append(sink_node)
 
                     logger.debug(f"Ordered candidate_nodes: {candidate_nodes}")
-                    
 
                     # Create refined directed graph for flow network
                     # ----------------------------------------------------------------------
@@ -853,7 +852,9 @@ def main():
 
                         logger.debug(f"Edge: {u}, {v}, {cov['weight']}")
 
-                        G.add_edge(node_indices[u], node_indices[v], weight=cov["weight"])
+                        G.add_edge(
+                            node_indices[u], node_indices[v], weight=cov["weight"]
+                        )
 
                     # Get connections and degree information
                     # ----------------------------------------------------------------------
@@ -1015,7 +1016,9 @@ def main():
                                 for u_pred in G_edge.predecessors(u):
                                     if junction_pe_coverage[(u_pred[:-1], v[:-1])] > 0:
                                         u_pred_name = unitig_names_rev[u_pred[:-1]]
-                                        u_pred_index = candidate_nodes.index(u_pred_name)
+                                        u_pred_index = candidate_nodes.index(
+                                            u_pred_name
+                                        )
                                         if (
                                             v_index != 0
                                             and u_index != 0
@@ -1034,7 +1037,9 @@ def main():
                                 for v_succ in G_edge.successors(v):
                                     if junction_pe_coverage[(u[:-1], v_succ[:-1])] > 0:
                                         v_succ_name = unitig_names_rev[v_succ[:-1]]
-                                        v_succ_index = candidate_nodes.index(v_succ_name)
+                                        v_succ_index = candidate_nodes.index(
+                                            v_succ_name
+                                        )
                                         if (
                                             v_succ_index != 0
                                             and u_index != 0
@@ -1063,7 +1068,9 @@ def main():
                         "subpaths": subpaths,
                     }
                     logger.debug(f"G_mfd: {G_mfd}")
-                    solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output, nthreads)
+                    solution_paths = flow_utils.solve_mfd(
+                        G_mfd, maxpaths, output, nthreads
+                    )
                     logger.debug(f"Number of paths found: {len(solution_paths)}")
 
                     case3_found.add(my_count)
@@ -1090,7 +1097,9 @@ def main():
                                 G_path = nx.DiGraph()
 
                                 # Fill graph with data
-                                G_path.add_edges_from(solution_paths[solution_path]["path"])
+                                G_path.add_edges_from(
+                                    solution_paths[solution_path]["path"]
+                                )
                                 logger.debug(
                                     f"solution path: {solution_paths[solution_path]['path']}"
                                 )
@@ -1100,7 +1109,7 @@ def main():
                                     try:
                                         candidate_paths = list(
                                             nx.all_simple_paths(
-                                                G_path, 0, len(candidate_nodes)-1
+                                                G_path, 0, len(candidate_nodes) - 1
                                             )
                                         )
 
@@ -1175,7 +1184,9 @@ def main():
                                                 * 100,
                                             )
                                             my_genomic_paths.append(genome_path)
-                                            logger.debug(f"total_length: {total_length}")
+                                            logger.debug(
+                                                f"total_length: {total_length}"
+                                            )
 
                                             cycle_number += 1
 
@@ -1194,7 +1205,6 @@ def main():
                     else:
                         logger.debug(f"No paths detected")
                         continue
-
 
         # Case 1 components - single unitigs
         elif len(candidate_nodes) == 1:

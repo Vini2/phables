@@ -73,8 +73,8 @@ def flowMultipleDecomposition(data, K, nthreads):
 
         # Create a new model
         model = gp.Model("MFD")
-        model.Params.LogToConsole = 0
-        model.setParam('Threads', nthreads)
+        model.setParam("LogToConsole", 0)
+        model.setParam("Threads", nthreads)
 
         # Create variables
         x = model.addVars(T, vtype=GRB.BINARY, name="x")
