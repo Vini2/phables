@@ -70,6 +70,7 @@ rule test_phables:
         covtol = CT,
         alpha = AL,
         output = TESTDIR,
+        nthreads = 2,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))
     log:
         os.path.join(TESTDIR, "phables_output.log")
