@@ -29,7 +29,10 @@ rule run_phables:
         covtol = CT,
         alpha = AL,
         output = OUTDIR,
+        nthreads = config["resources"]["jobCPU"],
         log = os.path.join(LOGSDIR, "phables_output.log")
+    threads:
+        config["resources"]["jobCPU"]
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda:

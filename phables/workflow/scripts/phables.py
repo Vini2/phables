@@ -50,6 +50,7 @@ def main():
     covtol = float(snakemake.params.covtol)
     alpha = float(snakemake.params.alpha)
     output = snakemake.params.output
+    nthreads = int(snakemake.params.nthreads)
     log = snakemake.params.log
 
     # Setup logger
@@ -92,6 +93,7 @@ def main():
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Coverage tolerance for extending subpaths: {covtol}")
     logger.info(f"Coverage multipler for flow interval modelling: {alpha}")
+    logger.info(f"Number of threads to use: {nthreads}")
     logger.info(f"Output folder: {output}")
 
     start_time = time.time()
@@ -667,7 +669,7 @@ def main():
                     "subpaths": subpaths,
                 }
                 logger.debug(f"G_mfd: {G_mfd}")
-                solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
+                solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output, nthreads)
                 logger.debug(f"Number of paths found: {len(solution_paths)}")
 
                 cycle_components.add(my_count)
@@ -804,6 +806,7 @@ def main():
             else:
                 logger.debug(f"No cycles detected. Found a complex linear component.")
 
+                linear_components.add(my_count)
 
                 # Identify source/sink vertex
                 # ----------------------------------------------------------------------
@@ -1060,10 +1063,9 @@ def main():
                         "subpaths": subpaths,
                     }
                     logger.debug(f"G_mfd: {G_mfd}")
-                    solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output)
+                    solution_paths = flow_utils.solve_mfd(G_mfd, maxpaths, output, nthreads)
                     logger.debug(f"Number of paths found: {len(solution_paths)}")
 
-                    cycle_components.add(my_count)
                     case3_found.add(my_count)
 
                     # Iterate through solution paths
@@ -1186,7 +1188,7 @@ def main():
 
                         if cycle_number > 1:
                             resolved_components.add(my_count)
-                            resolved_cyclic.add(my_count)
+                            resolved_linear.add(my_count)
                             case3_resolved.add(my_count)
 
                     else:
@@ -1323,7 +1325,6 @@ def main():
                 all_components.append(genome_comp)
 
             if len(final_genomic_paths) > 0:
-                resolved_cyclic.add(my_count)
                 resolved_components.add(my_count)
                 all_resolved_paths += final_genomic_paths
                 component_elapsed_time = time.time() - component_time_start
@@ -1355,7 +1356,7 @@ def main():
     # ----------------------------------------------------------------------
     logger.info(f"Total number of cyclic components found: {len(cycle_components)}")
     logger.info(f"Total number of cyclic components resolved: {len(resolved_cyclic)}")
-    logger.info(f"single unitigs identified: {len(single_unitigs)}")
+    logger.info(f"Single unitigs identified: {len(single_unitigs)}")
     logger.info(f"Total number of linear components found: {len(linear_components)}")
     logger.info(f"Total number of linear components resolved: {len(resolved_linear)}")
     logger.info(
