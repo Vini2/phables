@@ -65,20 +65,9 @@ def get_components(
 
                     phrogs_found.add(phrog)
 
-            if unitig_names[unitig] in circular:
-                # Check PHROG categories in circular component (should contain at least one)
-                if head_present or connector_present or tail_present or lysis_present:
-                    phrogs_present = True
-
-            else:
-                # Check PHROG categories for circular component (should contain all)
-                if (
-                    head_present
-                    and connector_present
-                    and tail_present
-                    and lysis_present
-                ):
-                    phrogs_present = True
+            # Check PHROG categories in unitig (should contain at least one)
+            if head_present or connector_present or tail_present or lysis_present:
+                phrogs_present = True
 
             if phrogs_present and edges_lengths[unitig_names[unitig]] > cicular_len:
                 pruned_vs[i] = component
