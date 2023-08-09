@@ -141,7 +141,7 @@ def main():
 
     # Get components with viral components
     # ----------------------------------------------------------------------
-    pruned_vs, comp_phrogs = component_utils.get_components(
+    pruned_vs, comp_phrogs, likely_complete = component_utils.get_components(
         assembly_graph,
         unitig_names,
         smg_unitigs,
@@ -207,8 +207,7 @@ def main():
 
         all_phage_like_edges = all_phage_like_edges.union(set(candidate_nodes))
 
-        comp_all_edges = set()
-        comp_all_edges = comp_all_edges.union(set(candidate_nodes))
+        comp_all_edges = set(set(candidate_nodes))
         comp_resolved_edges = set()
 
         in_degree = []
@@ -1208,43 +1207,46 @@ def main():
 
         # Case 1 components - single unitigs
         elif len(candidate_nodes) == 1:
-            case1_found.add(my_count)
 
             unitig_name = unitig_names[candidate_nodes[0]]
 
-            case_name = ""
+            if unitig_name in self_looped_nodes or likely_complete[my_count]:
 
-            if unitig_name in self_looped_nodes:
-                case_name = "case1_circular"
-            else:
-                case_name = "case1_linear"
+                case1_found.add(my_count)
 
-            resolved_edges.add(candidate_nodes[0])
-            comp_resolved_edges.add(candidate_nodes[0])
+                case_name = ""
 
-            path_string = str(graph_unitigs[unitig_name])
+                if unitig_name in self_looped_nodes:
+                    case_name = "case1_circular"
+                else:
+                    case_name = "case1_linear"
 
-            cycle_number = 1
+                resolved_edges.add(candidate_nodes[0])
+                comp_resolved_edges.add(candidate_nodes[0])
 
-            # Create GenomePath object with path details
-            genome_path = GenomePath(
-                f"phage_comp_{my_count}_cycle_{cycle_number}",
-                case_name,
-                [unitig_names[candidate_nodes[0]]],
-                [candidate_nodes[0]],
-                path_string,
-                int(unitig_coverages[unitig_name]),
-                len(graph_unitigs[unitig_name]),
-                (path_string.count("G") + path_string.count("C"))
-                / len(path_string)
-                * 100,
-            )
-            my_genomic_paths.append(genome_path)
-            resolved_components.add(my_count)
-            single_unitigs.add(my_count)
-            case1_resolved.add(my_count)
+                path_string = str(graph_unitigs[unitig_name])
 
-            phage_like_edges = phage_like_edges.union(set(candidate_nodes))
+                cycle_number = 1
+
+                # Create GenomePath object with path details
+                genome_path = GenomePath(
+                    f"phage_comp_{my_count}_cycle_{cycle_number}",
+                    case_name,
+                    [unitig_names[candidate_nodes[0]]],
+                    [candidate_nodes[0]],
+                    path_string,
+                    int(unitig_coverages[unitig_name]),
+                    len(graph_unitigs[unitig_name]),
+                    (path_string.count("G") + path_string.count("C"))
+                    / len(path_string)
+                    * 100,
+                )
+                my_genomic_paths.append(genome_path)
+                resolved_components.add(my_count)
+                single_unitigs.add(my_count)
+                case1_resolved.add(my_count)
+
+                phage_like_edges = phage_like_edges.union(set(candidate_nodes))
 
         # Record final paths for the component
         # ----------------------------------------------------------------------

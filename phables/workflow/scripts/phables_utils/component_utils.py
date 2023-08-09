@@ -13,6 +13,7 @@ def get_components(
     """
 
     pruned_vs = {}
+    likely_complete = {}
 
     i = 0
 
@@ -72,6 +73,13 @@ def get_components(
             if phrogs_present and edges_lengths[unitig_names[unitig]] > cicular_len:
                 pruned_vs[i] = component
                 comp_phrogs[i] = phrogs_found
+
+                # Check if all PHROG categories are present in unitig
+                if head_present and connector_present and tail_present and lysis_present:
+                    likely_complete[i] = 1
+                else:
+                    likely_complete[i] = 0
+
                 i += 1
 
-    return pruned_vs, comp_phrogs
+    return pruned_vs, comp_phrogs, likely_complete
