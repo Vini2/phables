@@ -7,13 +7,14 @@ Phables: from fragmented assemblies to high-quality bacteriophage genomes
 
 [![DOI](https://img.shields.io/badge/Preprint_DOI-10.1101/2023.04.04.535632-blue)](https://doi.org/10.1101/2023.04.04.535632)
 [![DOI](https://zenodo.org/badge/516191931.svg)](https://zenodo.org/badge/latestdoi/516191931)
+![GitHub](https://img.shields.io/github/license/Vini2/phables)
+
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/phables/badges/version.svg)](https://anaconda.org/bioconda/phables)
 ![Conda](https://img.shields.io/conda/dn/bioconda/phables)
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 [![Downloads](https://static.pepy.tech/badge/phables)](https://pepy.tech/project/phables)
 
 [![](https://img.shields.io/static/v1?label=CLI&message=Snaketool&color=blueviolet)](https://github.com/beardymcjohnface/Snaketool)
-![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 [![CodeQL](https://github.com/Vini2/phables/actions/workflows/codeql.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/codeql.yml)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
