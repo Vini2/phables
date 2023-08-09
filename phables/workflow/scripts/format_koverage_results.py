@@ -7,6 +7,7 @@
 import logging
 import os
 import subprocess
+from Bio import SeqIO
 from collections import defaultdict
 
 import pandas as pd
@@ -25,6 +26,8 @@ def main():
 
     samples_file = snakemake.params.samples_file
     koverage_tsv = snakemake.params.koverage_tsv
+    seq_file = snakemake.params.seq_file
+    info_file = snakemake.params.info_file
     output_path = snakemake.params.output_path
     log = snakemake.params.log
 
@@ -131,6 +134,18 @@ def main():
     logger.info(
         f"Estimated mean read depth of resolved genomes can be found in {output_path}sample_genome_mean_coverage.tsv"
     )
+
+    
+    # Make sequence information file
+    with open(info_file, "w") as myfile:
+        myfile.write(f"contig_phables_name\tlength\tcontig_or_phables\n")
+        for index, record in enumerate(SeqIO.parse(seq_file, "fasta")):
+            if "phage_comp" in record.id:
+                myfile.write(f"{record.id}\t{len(record.seq)}\tphables\n")
+            else:
+                myfile.write(f"{record.id}\t{len(record.seq)}\tcontig\n")
+
+    logger.info(f"Sequence information file can be found in {info_file}")
 
     # Exit program
     # --------------

@@ -43,12 +43,15 @@ rule koverage_postprocess:
     """Format TSV of samples and reads from Koverage"""
     input:
         koverage_tsv = os.path.join(OUTDIR, "results", "sample_coverage.tsv"),
-        samples_file = os.path.join(OUTDIR, "phables.samples.tsv")
+        samples_file = os.path.join(OUTDIR, "phables.samples.tsv"),
+        seq_file = os.path.join(OUTDIR, "genomes_and_unresolved_edges.fasta")
     output:
         os.path.join(OUTDIR, "sample_genome_read_counts.tsv")
     params:
         koverage_tsv = os.path.join(OUTDIR, "results", "sample_coverage.tsv"),
         samples_file = os.path.join(OUTDIR, "phables.samples.tsv"),
+        seq_file = os.path.join(OUTDIR, "genomes_and_unresolved_edges.fasta"),
+        info_file = os.path.join(OUTDIR, "genomes_and_unresolved_edges_info.tsv"),
         output_path = OUTDIR,
         log = os.path.join(LOGSDIR, "format_koverage_results_output.log")
     log:
