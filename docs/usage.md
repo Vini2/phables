@@ -64,6 +64,7 @@ Options:
       all             Run everything (default)
       preprocess      Run preprocessing only
       phables         Run phables (and preprocessing if needed)
+      postprocess     Run postprocessing (with preprocessing and phables if needed)
       print_stages    List available stages
 ```
 
