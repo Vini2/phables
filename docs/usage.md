@@ -109,43 +109,6 @@ phables run --input assembly_graph.gfa --reads fastq  --output my_output_folder 
 
 The `phables run` command will run preprocessing steps, perform genome resolution and the perform postprocessing steps.
 
-You can use the following command to **only run the preprocessing steps**.
-
-```bash
-# Only preprocess data
-phables run --input assembly_graph.gfa --reads fastq --threads 8 preprocess
-```
-
-You can use the following command to **only run the genome resolution steps**. Please make sure to have the preprocessing results in the output folder.
-
-```bash
-# Only run phables core
-phables run --input assembly_graph.gfa --reads fastq --threads 8 phables
-```
-
-You can use the following command to **only run the postprocessing steps**.
-
-```bash
-# Only run phables core
-phables run --input assembly_graph.gfa --reads fastq --threads 8 postprocess
-```
-
-The following preprocessing steps will be run with the corresponding files and folders.
-
-* Obtain unitig sequences from assembly graph - `edges.fasta`
-* Map reads to unitig sequences and get BAM files - `bam_files`
-* Calculate coverage of unitig sequences - `coverage.tsv`
-* Scan unitig sequences for single-copy marker genes - `edges.fasta.hmmout`
-* Scan unitig sequences for Prokaryotic Virus Remote Homologous Groups (PHROGs) - `phrogs/phrogs_annotations.tsv`
-
-The following preprocessing steps will be run with the corresponding files and folders.
-
-* Combine resolved genomes and unresolved edges - `genomes_and_unresolved_edges.fasta`
-* Obtain read counts for resolved genomes and unresolved edges - `sample_genome_read_counts.tsv`
-* Obtain mean coverage of resolved genomes and unresolved edges - `sample_genome_mean_coverage.tsv`
-* Obtain RPKM coverage of resolved genomes and unresolved edges - `sample_genome_rpkm.tsv`
-
-
 ## Output
 
 The main output of Phables will contain the following files and folders.
@@ -158,3 +121,47 @@ The main output of Phables will contain the following files and folders.
 * `all_phage_like_edges.fasta` containing sequences from all the phage-like components (both resolved and unresolved)
 * `resolved_component_info.txt` containing the details of the phage bubbles resolved
 * `component_phrogs.txt` containing PHROGs found in each component
+
+## Step-wise usage
+
+### Preprocessing only
+
+You can use the following command to **only run the preprocessing steps**.
+
+```bash
+# Only preprocess data
+phables run --input assembly_graph.gfa --reads fastq --threads 8 preprocess
+```
+
+The following preprocessing steps will be run with the corresponding files and folders.
+
+* Obtain unitig sequences from assembly graph - `edges.fasta`
+* Map reads to unitig sequences and get BAM files - `bam_files`
+* Calculate coverage of unitig sequences - `coverage.tsv`
+* Scan unitig sequences for single-copy marker genes - `edges.fasta.hmmout`
+* Scan unitig sequences for Prokaryotic Virus Remote Homologous Groups (PHROGs) - `phrogs/phrogs_annotations.tsv`
+
+### Genome resolution only
+
+You can use the following command to **only run the genome resolution steps**. Please make sure to have the preprocessing results in the output folder.
+
+```bash
+# Only run phables core
+phables run --input assembly_graph.gfa --reads fastq --threads 8 phables
+```
+
+### Postprocessing only
+
+You can use the following command to **only run the postprocessing steps**.
+
+```bash
+# Only run phables core
+phables run --input assembly_graph.gfa --reads fastq --threads 8 postprocess
+```
+
+The following postprocessing steps will be run with the corresponding files and folders.
+
+* Combine resolved genomes and unresolved edges - `genomes_and_unresolved_edges.fasta`
+* Obtain read counts for resolved genomes and unresolved edges - `sample_genome_read_counts.tsv`
+* Obtain mean coverage of resolved genomes and unresolved edges - `sample_genome_mean_coverage.tsv`
+* Obtain RPKM coverage of resolved genomes and unresolved edges - `sample_genome_rpkm.tsv`
