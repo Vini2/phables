@@ -136,7 +136,7 @@ phables run --input assembly_graph.gfa --reads fastq --threads 8 preprocess
 The following preprocessing steps will be run with the corresponding files and folders.
 
 * Obtain unitig sequences from assembly graph - `edges.fasta`
-* Map reads to unitig sequences and get BAM files - `bam_files`
+* Map reads to unitig sequences and get BAM files - `temp`
 * Calculate coverage of unitig sequences - `coverage.tsv`
 * Scan unitig sequences for single-copy marker genes - `edges.fasta.hmmout`
 * Scan unitig sequences for Prokaryotic Virus Remote Homologous Groups (PHROGs) - `phrogs/phrogs_annotations.tsv`
