@@ -69,20 +69,16 @@ rule print_stages:
 include: os.path.join("rules", "gfa2fasta.smk")
 
 
-# Step 3: Map reads to unitig sequences and get BAM files
-include: os.path.join("rules", "mapping.smk")
-
-
-# Step 4: Calculate coverage of unitig sequences
+# Step 3: Calculate coverage of unitig sequences
 include: os.path.join("rules", "coverage.smk")
 
 
-# Step 5: Scan unitig sequences for single-copy marker genes and PHROGs
+# Step 4: Scan unitig sequences for single-copy marker genes and PHROGs
 include: os.path.join("rules", "genes.smk")
 
 
-# Step 6: Run Phables
+# Step 5: Run Phables
 include: os.path.join("rules", "phables.smk")
 
-# Step 7: Postprocess genomes
+# Step 6: Postprocess genomes
 include: os.path.join("rules", "postprocess.smk")
