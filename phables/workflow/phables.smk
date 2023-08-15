@@ -51,6 +51,7 @@ rule phables:
     input:
         phablesTargets
 
+
 @targetRule
 rule postprocess:
     input:
@@ -79,6 +80,7 @@ include: os.path.join("rules", "genes.smk")
 
 # Step 5: Run Phables
 include: os.path.join("rules", "phables.smk")
+
 
 # Step 6: Postprocess genomes
 include: os.path.join("rules", "postprocess.smk")

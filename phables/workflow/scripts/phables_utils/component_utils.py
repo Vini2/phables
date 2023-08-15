@@ -75,7 +75,12 @@ def get_components(
                 comp_phrogs[i] = phrogs_found
 
                 # Check if all PHROG categories are present in unitig
-                if head_present and connector_present and tail_present and lysis_present:
+                if (
+                    head_present
+                    and connector_present
+                    and tail_present
+                    and lysis_present
+                ):
                     likely_complete[i] = 1
                 else:
                     likely_complete[i] = 0

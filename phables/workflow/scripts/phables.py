@@ -1207,11 +1207,9 @@ def main():
 
         # Case 1 components - single unitigs
         elif len(candidate_nodes) == 1:
-
             unitig_name = unitig_names[candidate_nodes[0]]
 
             if unitig_name in self_looped_nodes or likely_complete[my_count]:
-
                 case1_found.add(my_count)
 
                 case_name = ""

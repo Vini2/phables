@@ -7,10 +7,10 @@
 import logging
 import os
 import subprocess
-from Bio import SeqIO
 from collections import defaultdict
 
 import pandas as pd
+from Bio import SeqIO
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2023, Phables Project"
@@ -135,7 +135,6 @@ def main():
         f"Estimated mean read depth of resolved genomes can be found in {output_path}sample_genome_mean_coverage.tsv"
     )
 
-    
     # Make sequence information file
     with open(info_file, "w") as myfile:
         myfile.write(f"contig_phables_name\tlength\tcontig_or_phables\n")
