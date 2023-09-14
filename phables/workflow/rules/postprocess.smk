@@ -31,6 +31,7 @@ rule koverage_genomes:
     shell:
         """
         koverage run \
+            --no-report \
             --reads {input.tsv} \
             --ref {input.sequences} \
             --threads {threads} \
