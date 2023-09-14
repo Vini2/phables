@@ -110,7 +110,7 @@ Please refer to the [**documentation hosted at Read the Docs**](https://phables.
 
 ##  Issues and Questions
 
-Phables is still under testing. If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
+If you want to test (or break) Phables give it a try and report any issues and suggestions under [Phables Issues](https://github.com/Vini2/phables/issues).
 
 If you come across any questions, please have a look at the [Phables FAQ page](https://phables.readthedocs.io/en/latest/faq/). If your question is not here, feel free to post it under [Phables Issues](https://github.com/Vini2/phables/issues).
 
@@ -125,7 +125,7 @@ Are you interested in contributing to the Phables project? If so, you can check 
 Phables uses the [Gurobi](https://www.gurobi.com/) implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). Special thanks are owed to [Ryan Wick](https://github.com/rrwick) for developing [Bandage](https://rrwick.github.io/Bandage/) to visualise assembly graphs, which I heavily rely upon to investigate, develop and optimise my methods. The Phables logo was designed by [Amber Skye](https://fame.flinders.edu.au/people/2021/01/01/amber-cook).
 
 ## Citation
-The Phables manuscript is currently under review and the preprint is available on biorxiv at DOI: [10.1101/2023.04.04.535632](https://www.biorxiv.org/content/10.1101/2023.04.04.535632v1). 
+Phables is currently accepted at [Bioinformatics](https://academic.oup.com/bioinformatics) and the preprint is available on biorxiv at DOI: [10.1101/2023.04.04.535632](https://www.biorxiv.org/content/10.1101/2023.04.04.535632v1). 
 
 If you use Phables in your work, please cite Phables as,
 
