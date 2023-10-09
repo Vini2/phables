@@ -90,7 +90,106 @@ def common_options(func):
             callback=default_to_output,
             hidden=True,
         ),
+        click.option(
+            "--system_config",
+            default=snake_base(os.path.join("config", "config.yaml")),
+            hidden=True,
+            type=click.Path(),
+        ),
         click.argument("snake_args", nargs=-1),
+    ]
+    for option in reversed(options):
+        func = option(func)
+    return func
+
+
+def run_options(func):
+    """Command line args for run subcommand etc"""
+    options = [
+        click.option(
+            "--input",
+            help="Path to assembly graph file in .GFA format",
+            type=click.Path(),
+            required=True,
+        ),
+        click.option(
+            "--reads",
+            help="Path to directory containing paired-end reads",
+            type=click.Path(exists=True),
+            required=True,
+        ),
+        click.option(
+            "--minlength",
+            default=2000,
+            required=False,
+            help="minimum length of circular unitigs to consider",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--mincov",
+            default=10,
+            required=False,
+            help="minimum coverage of paths to output",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--compcount",
+            default=200,
+            required=False,
+            help="maximum unitig count to consider a component",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--maxpaths",
+            default=10,
+            required=False,
+            help="maximum number of paths to resolve for a component",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--mgfrac",
+            default=0.2,
+            required=False,
+            help="length threshold to consider single copy marker genes",
+            type=float,
+            show_default=True,
+        ),
+        click.option(
+            "--evalue",
+            default=1e-10,
+            required=False,
+            help="maximum e-value for phrog annotations",
+            type=float,
+            show_default=True,
+        ),
+        click.option(
+            "--seqidentity",
+            default=0.3,
+            required=False,
+            help="minimum sequence identity for phrog annotations",
+            type=float,
+            show_default=True,
+        ),
+        click.option(
+            "--covtol",
+            default=100,
+            required=False,
+            help="coverage tolerance for extending subpaths",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--alpha",
+            default=1.2,
+            required=False,
+            help="coverage multiplier for flow interval modelling",
+            type=float,
+            show_default=True,
+        ),
     ]
     for option in reversed(options):
         func = option(func)
@@ -144,134 +243,16 @@ Available targets:
         help_option_names=["-h", "--help"], ignore_unknown_options=True
     ),
 )
-@click.option(
-    "--input",
-    help="Path to assembly graph file in .GFA format",
-    type=click.Path(),
-    required=True,
-)
-@click.option(
-    "--reads",
-    help="Path to directory containing paired-end reads",
-    type=click.Path(exists=True),
-    required=True,
-)
-@click.option(
-    "--minlength",
-    default=2000,
-    required=False,
-    help="minimum length of circular unitigs to consider",
-    type=int,
-    show_default=True,
-)
-@click.option(
-    "--mincov",
-    default=10,
-    required=False,
-    help="minimum coverage of paths to output",
-    type=int,
-    show_default=True,
-)
-@click.option(
-    "--compcount",
-    default=200,
-    required=False,
-    help="maximum unitig count to consider a component",
-    type=int,
-    show_default=True,
-)
-@click.option(
-    "--maxpaths",
-    default=10,
-    required=False,
-    help="maximum number of paths to resolve for a component",
-    type=int,
-    show_default=True,
-)
-@click.option(
-    "--mgfrac",
-    default=0.2,
-    required=False,
-    help="length threshold to consider single copy marker genes",
-    type=float,
-    show_default=True,
-)
-@click.option(
-    "--evalue",
-    default=1e-10,
-    required=False,
-    help="maximum e-value for phrog annotations",
-    type=float,
-    show_default=True,
-)
-@click.option(
-    "--seqidentity",
-    default=0.3,
-    required=False,
-    help="minimum sequence identity for phrog annotations",
-    type=float,
-    show_default=True,
-)
-@click.option(
-    "--covtol",
-    default=100,
-    required=False,
-    help="coverage tolerance for extending subpaths",
-    type=int,
-    show_default=True,
-)
-@click.option(
-    "--alpha",
-    default=1.2,
-    required=False,
-    help="coverage multiplier for flow interval modelling",
-    type=float,
-    show_default=True,
-)
 @common_options
-def run(
-    input,
-    reads,
-    profile,
-    minlength,
-    mincov,
-    compcount,
-    maxpaths,
-    mgfrac,
-    evalue,
-    seqidentity,
-    covtol,
-    alpha,
-    output,
-    log,
-    **kwargs
-):
+@run_options
+def run(**kwargs):
     """Run Phables"""
-    # Config to add or update in configfile
-    merge_config = {
-        "input": input,
-        "reads": reads,
-        "profile": profile,
-        "minlength": minlength,
-        "mincov": mincov,
-        "compcount": compcount,
-        "maxpaths": maxpaths,
-        "mgfrac": mgfrac,
-        "evalue": evalue,
-        "seqidentity": seqidentity,
-        "covtol": covtol,
-        "alpha": alpha,
-        "output": output,
-        "log": log,
-    }
 
     # run!
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "phables.smk")),
-        system_config=snake_base(os.path.join("config", "config.yaml")),
-        merge_config=merge_config,
-        log=log,
+        merge_config=kwargs,
         **kwargs
     )
 
@@ -314,7 +295,6 @@ def test(**kwargs):
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "test_phables.smk")),
-        system_config=snake_base(os.path.join("config", "config.yaml")),
         merge_config=merge_config,
         **kwargs
     )
