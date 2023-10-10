@@ -129,21 +129,23 @@ Phables is published in [Bioinformatics](https://academic.oup.com/bioinformatics
 
 If you use Phables in your work, please cite Phables as,
 
-> Vijini Mallawaarachchi, Michael J Roach, Przemyslaw Decewicz, Bhavya Papudeshi, Sarah K Giles, Susanna R Grigson, George Bouras, Ryan D Hesse, Laura K Inglis, Abbey L K Hutton, Elizabeth A Dinsdale, Robert A Edwards, Phables: from fragmented assemblies to high-quality bacteriophage genomes, Bioinformatics, 2023;, btad586, https://doi.org/10.1093/bioinformatics/btad586
+> Vijini Mallawaarachchi, Michael J Roach, Przemyslaw Decewicz, Bhavya Papudeshi, Sarah K Giles, Susanna R Grigson, George Bouras, Ryan D Hesse, Laura K Inglis, Abbey L K Hutton, Elizabeth A Dinsdale, Robert A Edwards, Phables: from fragmented assemblies to high-quality bacteriophage genomes, Bioinformatics, Volume 39, Issue 10, October 2023, btad586, https://doi.org/10.1093/bioinformatics/btad586
 
 ```bibtex
 @article{10.1093/bioinformatics/btad586,
     author = {Mallawaarachchi, Vijini and Roach, Michael J and Decewicz, Przemyslaw and Papudeshi, Bhavya and Giles, Sarah K and Grigson, Susanna R and Bouras, George and Hesse, Ryan D and Inglis, Laura K and Hutton, Abbey L K and Dinsdale, Elizabeth A and Edwards, Robert A},
     title = "{Phables: from fragmented assemblies to high-quality bacteriophage genomes}",
     journal = {Bioinformatics},
+    volume = {39},
+    number = {10},
     pages = {btad586},
     year = {2023},
     month = {09},
-    abstract = "{Microbial communities have a profound impact on both human health and various environments. Viruses infecting bacteria, known as bacteriophages or phages, play a key role in modulating bacterial communities within environments. High-quality phage genome sequences are essential for advancing our understanding of phage biology, enabling comparative genomics studies and developing phage-based diagnostic tools. Most available viral identification tools consider individual sequences to determine whether they are of viral origin. As a result of challenges in viral assembly, fragmentation of genomes can occur, and existing tools may recover incomplete genome fragments. Therefore, the identification and characterisation of novel phage genomes remains a challenge, leading to the need of improved approaches for phage genome recovery. We introduce Phables, a new computational method to resolve phage genomes from fragmented viral metagenome assemblies. Phables identifies phage-like components in the assembly graph, models each component as a flow network, and uses graph algorithms and flow decomposition techniques to identify genomic paths. Experimental results of viral metagenomic samples obtained from different environments show that Phables recovers on average over 49\\% more high-quality phage genomes compared to existing viral identification tools. Furthermore, Phables can resolve variant phage genomes with over 99\\% average nucleotide identity, a distinction that existing tools are unable to make. Phables is available on GitHub at https://github.com/Vini2/phables.}",
+    abstract = "{Microbial communities have a profound impact on both human health and various environments. Viruses infecting bacteria, known as bacteriophages or phages, play a key role in modulating bacterial communities within environments. High-quality phage genome sequences are essential for advancing our understanding of phage biology, enabling comparative genomics studies and developing phage-based diagnostic tools. Most available viral identification tools consider individual sequences to determine whether they are of viral origin. As a result of challenges in viral assembly, fragmentation of genomes can occur, and existing tools may recover incomplete genome fragments. Therefore, the identification and characterization of novel phage genomes remain a challenge, leading to the need of improved approaches for phage genome recovery.We introduce Phables, a new computational method to resolve phage genomes from fragmented viral metagenome assemblies. Phables identifies phage-like components in the assembly graph, models each component as a flow network, and uses graph algorithms and flow decomposition techniques to identify genomic paths. Experimental results of viral metagenomic samples obtained from different environments show that Phables recovers on average over 49\\% more high-quality phage genomes compared to existing viral identification tools. Furthermore, Phables can resolve variant phage genomes with over 99\\% average nucleotide identity, a distinction that existing tools are unable to make.Phables is available on GitHub at https://github.com/Vini2/phables.}",
     issn = {1367-4811},
     doi = {10.1093/bioinformatics/btad586},
     url = {https://doi.org/10.1093/bioinformatics/btad586},
-    eprint = {https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btad586/51721473/btad586.pdf},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/doi/10.1093/bioinformatics/btad586/51972145/btad586.pdf},
 }
 ```
 
