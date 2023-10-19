@@ -211,6 +211,16 @@ def cli():
 help_msg_extra = """
 \b
 \b
+If you use Phables in your work, please cite Phables as,
+\b
+Vijini Mallawaarachchi, Michael J Roach, Przemyslaw Decewicz, 
+Bhavya Papudeshi, Sarah K Giles, Susanna R Grigson, George Bouras, 
+Ryan D Hesse, Laura K Inglis, Abbey L K Hutton, Elizabeth A Dinsdale, 
+Robert A Edwards, Phables: from fragmented assemblies to high-quality 
+bacteriophage genomes, Bioinformatics, Volume 39, Issue 10, 
+October 2023, btad586, https://doi.org/10.1093/bioinformatics/btad586
+\b
+\b
 For more information on Phables please visit:
 https://phables.readthedocs.io/
 \b
