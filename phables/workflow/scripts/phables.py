@@ -215,37 +215,46 @@ def main():
 
         # Case 2 components
         if len(candidate_nodes) == 2:
-            all_self_looped = True
+            all_self_looped = False
+            one_circular = False
 
-            for node in candidate_nodes:
-                if unitig_names[node] not in self_looped_nodes:
+            if unitig_names[candidate_nodes[0]] in self_looped_nodes and unitig_names[candidate_nodes[1]] in self_looped_nodes:
+                all_self_looped = True
+            else:
+                if unitig_names[candidate_nodes[0]] in self_looped_nodes:
+                    one_circular = True
+                    all_self_looped = False
+                if unitig_names[candidate_nodes[1]] in self_looped_nodes:
+                    one_circular = True
                     all_self_looped = False
 
-            if all_self_looped:
-                case2_found.add(my_count)
+            unitig1 = ""
+            unitig2 = ""
 
-                cycle_components.add(my_count)
+            for edge in pruned_graph.es:
+                source_vertex_id = edge.source
+                target_vertex_id = edge.target
 
-                phage_like_edges = phage_like_edges.union(set(candidate_nodes))
-                comp_resolved_edges = comp_resolved_edges.union(set(candidate_nodes))
+                if source_vertex_id != target_vertex_id:
+                    unitig1 = candidate_nodes[source_vertex_id]
+                    unitig2 = candidate_nodes[target_vertex_id]
 
-                unitig1 = ""
-                unitig2 = ""
+            unitig1_name = unitig_names[unitig1]
+            unitig2_name = unitig_names[unitig2]
 
-                for edge in pruned_graph.es:
-                    source_vertex_id = edge.source
-                    target_vertex_id = edge.target
+            unitig1_len = len(str(graph_unitigs[unitig1_name]))
+            unitig2_len = len(str(graph_unitigs[unitig2_name]))
 
-                    if source_vertex_id != target_vertex_id:
-                        unitig1 = candidate_nodes[source_vertex_id]
-                        unitig2 = candidate_nodes[target_vertex_id]
+            if unitig1 != "" and unitig2 != "":
 
-                if unitig1 != "" and unitig2 != "":
-                    unitig1_name = unitig_names[unitig1]
-                    unitig2_name = unitig_names[unitig2]
+                # Case 2 - both are circular
+                if all_self_looped:
+                    case2_found.add(my_count)
 
-                    unitig1_len = len(str(graph_unitigs[unitig1_name]))
-                    unitig2_len = len(str(graph_unitigs[unitig2_name]))
+                    cycle_components.add(my_count)
+
+                    phage_like_edges = phage_like_edges.union(set(candidate_nodes))
+                    comp_resolved_edges = comp_resolved_edges.union(set(candidate_nodes))
 
                     unitig_to_consider = -1
                     unitig_name = ""
@@ -289,18 +298,18 @@ def main():
                         )
 
                         genome_path = GenomePath(
-                            f"phage_comp_{my_count}_cycle_{cycle_number}",
-                            "case2",
-                            [
+                            id = f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            bubble_case = "case2_circular",
+                            node_order = [
                                 f"{repeat_unitig_name}+",
                                 f"{unitig_name}+",
                                 f"{repeat_unitig_name}-",
                             ],
-                            [repeat_unitig, unitig_to_consider, repeat_unitig],
-                            path_string,
-                            int(unitig_coverages[unitig_name]),
-                            len(path_string),
-                            (path_string.count("G") + path_string.count("C"))
+                            node_id_order = [repeat_unitig, unitig_to_consider, repeat_unitig],
+                            path = path_string,
+                            coverage = int(unitig_coverages[unitig_name]),
+                            length = len(path_string),
+                            gc = (path_string.count("G") + path_string.count("C"))
                             / len(path_string)
                             * 100,
                         )
@@ -308,6 +317,81 @@ def main():
                         resolved_components.add(my_count)
                         resolved_cyclic.add(my_count)
                         case2_resolved.add(my_count)
+
+                # Case 2 - only one is circular
+                elif one_circular:
+
+                    case2_found.add(my_count)
+
+                    cycle_components.add(my_count)
+
+                    phage_like_edges = phage_like_edges.union(set(candidate_nodes))
+                    comp_resolved_edges = comp_resolved_edges.union(set(candidate_nodes))
+                    
+                    unitig_to_consider = -1
+                    unitig_name = ""
+
+                    repeat_unitig = -1
+                    repeat_unitig_name = ""
+
+                    if unitig1_len > unitig2_len and unitig1_len > minlength and unitig2_name in self_looped_nodes:
+                        unitig_to_consider = unitig1
+                        unitig_name = unitig1_name
+                        repeat_unitig = unitig2
+                        repeat_unitig_name = unitig2_name
+                    elif unitig2_len > unitig1_len and unitig2_len > minlength  and unitig1_name in self_looped_nodes:
+                        unitig_to_consider = unitig2
+                        unitig_name = unitig2_name
+                        repeat_unitig = unitig1
+                        repeat_unitig_name = unitig1_name
+
+                    if unitig_to_consider != -1:
+                        logger.debug(
+                            f"Case 2 component: {unitig1_name} is {unitig1_len} bp long and {unitig2_name} is {unitig2_len} bp long."
+                        )
+                        cycle_number = 1
+                        resolved_edges.add(unitig_to_consider)
+                        resolved_edges.add(repeat_unitig)
+
+                        # Get repeat count
+
+                        repeat_count = max(int(unitig_coverages[repeat_unitig_name]/unitig_coverages[unitig_name]), 1)
+                        logger.debug(f"Repeat count: {repeat_count}")
+
+                        path_string = (
+                            str(
+                                graph_unitigs[unitig_name][
+                                    link_overlap[(repeat_unitig, unitig_to_consider)] :
+                                ]
+                            )
+                            + str(
+                                graph_unitigs[repeat_unitig_name][
+                                    link_overlap[(unitig_to_consider, repeat_unitig)] :
+                                ]
+                            ) * repeat_count
+                        )
+                        logger.debug(
+                            f"Terminal repeat detected is {repeat_unitig_name}"
+                        )
+
+                        path_with_repeats = [f"{unitig_name}+"] + [f"{repeat_unitig_name}+" for x in range(repeat_count)]
+                        node_id_order_with_repeats = [unitig_to_consider] + [repeat_unitig for x in range(repeat_count)]
+
+                        genome_path = GenomePath(
+                            id = f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            bubble_case = "case2_linear",
+                            node_order = path_with_repeats,
+                            node_id_order = node_id_order_with_repeats,
+                            path = path_string,
+                            coverage = int(unitig_coverages[unitig_name]),
+                            length = len(path_string),
+                            gc = (path_string.count("G") + path_string.count("C")) / len(path_string) * 100,
+                        )
+                        my_genomic_paths.append(genome_path)
+                        resolved_components.add(my_count)
+                        resolved_cyclic.add(my_count)
+                        case2_resolved.add(my_count)
+
 
         # Case 3 components
         elif len(candidate_nodes) > 2 and len(candidate_nodes) <= compcount:
@@ -767,17 +851,17 @@ def main():
 
                                         # Create GenomePath object with path details
                                         genome_path = GenomePath(
-                                            f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                            "case3_circular",
-                                            [x for x in path_order],
-                                            [
+                                            id = f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                            bubble_case = "case3_circular",
+                                            node_order = [x for x in path_order],
+                                            node_id_order = [
                                                 unitig_names_rev[x[:-1]]
                                                 for x in path_order
                                             ],
-                                            path_string,
-                                            int(coverage_val),
-                                            total_length,
-                                            (
+                                            path = path_string,
+                                            coverage = int(coverage_val),
+                                            length = total_length,
+                                            gc = (
                                                 path_string.count("G")
                                                 + path_string.count("C")
                                             )
@@ -1165,17 +1249,17 @@ def main():
 
                                             # Create GenomePath object with path details
                                             genome_path = GenomePath(
-                                                f"phage_comp_{my_count}_cycle_{cycle_number}",
-                                                "case3_linear",
-                                                [x for x in path_order],
-                                                [
+                                                id = f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                                bubble_case = "case3_linear",
+                                                node_order = [x for x in path_order],
+                                                node_id_order = [
                                                     unitig_names_rev[x[:-1]]
                                                     for x in path_order
                                                 ],
-                                                path_string,
-                                                int(coverage_val),
-                                                total_length,
-                                                (
+                                                path = path_string,
+                                                coverage = int(coverage_val),
+                                                length = total_length,
+                                                gc = (
                                                     path_string.count("G")
                                                     + path_string.count("C")
                                                 )
@@ -1228,14 +1312,14 @@ def main():
 
                 # Create GenomePath object with path details
                 genome_path = GenomePath(
-                    f"phage_comp_{my_count}_cycle_{cycle_number}",
-                    case_name,
-                    [unitig_names[candidate_nodes[0]]],
-                    [candidate_nodes[0]],
-                    path_string,
-                    int(unitig_coverages[unitig_name]),
-                    len(graph_unitigs[unitig_name]),
-                    (path_string.count("G") + path_string.count("C"))
+                    id = f"phage_comp_{my_count}_cycle_{cycle_number}",
+                    bubble_case = case_name,
+                    node_order = [unitig_names[candidate_nodes[0]]],
+                    node_id_order = [candidate_nodes[0]],
+                    path = path_string,
+                    coverage = int(unitig_coverages[unitig_name]),
+                    length = len(graph_unitigs[unitig_name]),
+                    gc = (path_string.count("G") + path_string.count("C"))
                     / len(path_string)
                     * 100,
                 )
