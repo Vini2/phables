@@ -6,13 +6,13 @@ rule run_phables:
         SMG_FILE,
         preprocessTargets
     output:
-        genomes_fasta = os.path.join(OUTDIR, "resolved_paths.fasta"),
-        genomes_folder = directory(os.path.join(OUTDIR, "resolved_phages")),
-        genome_info = os.path.join(OUTDIR, "resolved_genome_info.txt"),
-        unitigs = os.path.join(OUTDIR, "resolved_edges.fasta"),
-        component_info = os.path.join(OUTDIR, "resolved_component_info.txt"),
-        phrog_comp_info = os.path.join(OUTDIR, "component_phrogs.txt"),
-        unresolved_edges = os.path.join(OUTDIR, "unresolved_phage_like_edges.fasta"),
+        genomes_fasta = os.path.join(OUTDIR, "phables", "resolved_paths.fasta"),
+        genomes_folder = directory(os.path.join(OUTDIR, "phables", "resolved_phages")),
+        genome_info = os.path.join(OUTDIR, "phables", "resolved_genome_info.txt"),
+        unitigs = os.path.join(OUTDIR, "phables", "resolved_edges.fasta"),
+        component_info = os.path.join(OUTDIR, "phables", "resolved_component_info.txt"),
+        phrog_comp_info = os.path.join(OUTDIR, "phables", "component_phrogs.txt"),
+        unresolved_edges = os.path.join(OUTDIR, "phables", "unresolved_phage_like_edges.fasta"),
     params:
         graph = GRAPH_FILE,
         hmmout = SMG_FILE,
@@ -28,7 +28,7 @@ rule run_phables:
         seqidentity = SI,
         covtol = CT,
         alpha = AL,
-        output = OUTDIR,
+        output = os.path.join(OUTDIR, "phables"),
         nthreads = config["resources"]["jobCPU"],
         log = os.path.join(LOGSDIR, "phables_output.log")
     threads:

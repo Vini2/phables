@@ -6,7 +6,7 @@ Use combine_cov to combine the coverage values of multiple samples into one file
 rule koverage_tsv:
     """Generate TSV of samples and reads for Koverage"""
     output:
-        os.path.join(OUTDIR,"phables.samples.tsv")
+        os.path.join(OUTDIR, "preprocess", "phables.samples.tsv")
     params:
         SAMPLE_READS
     run:
@@ -17,16 +17,16 @@ rule koverage_tsv:
 rule koverage:
     """Get coverage statistics with Koverage + CoverM"""
     input:
-        tsv = os.path.join(OUTDIR,"phables.samples.tsv"),
+        tsv = os.path.join(OUTDIR, "preprocess", "phables.samples.tsv"),
         edges = EDGES_FILE
     params:
-        out_dir = OUTDIR,
+        out_dir = os.path.join(OUTDIR, "preprocess"),
         profile = lambda wildcards: "--profile " + config["profile"] if config["profile"] else "",
     output:
-        expand(os.path.join(OUTDIR, "temp", "{sample}.{ext}"),
+        expand(os.path.join(OUTDIR, "preprocess", "temp", "{sample}.{ext}"),
                sample=SAMPLE_NAMES,
                ext=["bam","bam.bai"]),
-        os.path.join(OUTDIR, "results", "sample_coverm_coverage.tsv")
+        os.path.join(OUTDIR, "preprocess", "results", "sample_coverm_coverage.tsv")
     threads:
         config["resources"]["jobCPU"]
     resources:
@@ -48,9 +48,9 @@ rule koverage:
 rule run_combine_cov:
     """Sample\tContig\tCount\tRPKM\tTPM\tMean\tCovered_bases\tVariance\n"""
     input:
-        os.path.join(OUTDIR, "results", "sample_coverm_coverage.tsv")
+        os.path.join(OUTDIR, "preprocess", "results", "sample_coverm_coverage.tsv")
     output:
-        os.path.join(OUTDIR, "coverage.tsv")
+        os.path.join(OUTDIR, "preprocess", "coverage.tsv")
     shell:
         """
         sed -i '1d' {input}

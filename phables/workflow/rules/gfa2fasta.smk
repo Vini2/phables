@@ -10,7 +10,7 @@ rule run_gfa2fasta:
         EDGES_FILE
     params:
         graph = GRAPH_FILE,
-        output = OUTDIR,
+        output = os.path.join(OUTDIR, "preprocess"),
         log = os.path.join(LOGSDIR, "gfa2fasta.log")
     log:
         os.path.join(LOGSDIR, "gfa2fasta.log")

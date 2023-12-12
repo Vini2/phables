@@ -13,7 +13,7 @@ rule scan_smg:
         mem_mb = config["resources"]["jobMem"],
         mem = str(config["resources"]["jobMem"]) + "MB"
     output:
-        hmmout = os.path.join(OUTDIR, "edges.fasta.hmmout")
+        hmmout = os.path.join(OUTDIR, "preprocess", "edges.fasta.hmmout")
     params:
         frag = EDGES_FILE + ".frag",
         frag_faa = EDGES_FILE + ".frag.faa",
@@ -41,12 +41,12 @@ rule scan_phrogs:
         mem_mb = config["resources"]["jobMem"],
         mem = str(config["resources"]["jobMem"]) + "MB"
     output:
-        os.path.join(OUTDIR, "phrogs_annotations.tsv")
+        os.path.join(OUTDIR, "preprocess", "phrogs_annotations.tsv")
     params:
-        out_path = os.path.join(OUTDIR, "phrogs"),
-        target_seq = os.path.join(OUTDIR, "phrogs", "target_seq"),
-        results_mmseqs = os.path.join(OUTDIR, "phrogs", "results_mmseqs"),
-        tmp = os.path.join(OUTDIR, "phrogs", "tmp"),
+        out_path = os.path.join(OUTDIR, "preprocess", "phrogs"),
+        target_seq = os.path.join(OUTDIR, "preprocess", "phrogs", "target_seq"),
+        results_mmseqs = os.path.join(OUTDIR, "preprocess", "phrogs", "results_mmseqs"),
+        tmp = os.path.join(OUTDIR, "preprocess", "phrogs", "tmp"),
     log:
         os.path.join(LOGSDIR, "phrogs_scan.log")
     conda: 
