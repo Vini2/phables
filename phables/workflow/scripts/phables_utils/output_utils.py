@@ -5,7 +5,7 @@ import subprocess
 FASTA_LINE_LEN = 60
 
 # Create logger
-logger = logging.getLogger("phables 1.2.1")
+logger = logging.getLogger("phables 1.2.2")
 
 
 def write_unitigs(nodes, unitig_names, graph_unitigs, filename, output):
