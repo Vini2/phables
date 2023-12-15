@@ -10,6 +10,8 @@ If you come across any issues while using Phables, you can open an [issue on Git
 
 Phables supports any assembly graph in GFA (`.gfa`) format. You can use any assembler that produces the assembly graph in GFA format to assemble your samples OR you can convert an assembly graph in FASTG format to GFA format using a tool such as [fastg2gfa](https://github.com/lh3/gfa1/blob/master/misc/fastg2gfa.c).
 
+If you use metaSPAdes for assembly, you can use the `assembly_graph_after_simplification.gfa` as input for Phables.
+
 ### Q4: What can I do after running Phables?
 
 Once you have run Phables, check out the [EVALUATION](https://phables.readthedocs.io/en/latest/quality/) section where you can read on how to check and compare the quality of the resolved genomes, interpret graph statistics and visualise the results.
