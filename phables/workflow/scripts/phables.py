@@ -52,6 +52,7 @@ def main():
     seqidentity = float(snakemake.params.seqidentity)
     covtol = float(snakemake.params.covtol)
     alpha = float(snakemake.params.alpha)
+    longreads = float(snakemake.params.longreads)
     output = snakemake.params.output
     nthreads = int(snakemake.params.nthreads)
     log = snakemake.params.log
@@ -96,6 +97,7 @@ def main():
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Coverage tolerance for extending subpaths: {covtol}")
     logger.info(f"Coverage multipler for flow interval modelling: {alpha}")
+    logger.info(f"Input long reads: {longreads}")
     logger.info(f"Number of threads to use: {nthreads}")
     logger.info(f"Output folder: {output}")
 

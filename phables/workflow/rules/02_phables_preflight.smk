@@ -36,6 +36,7 @@ EV = config['evalue']
 SI = config['seqidentity']
 CT = config['covtol']
 AL = config['alpha']
+LR = config['longreads']
 
 
 """DIRECTORIES/FILES etc.
