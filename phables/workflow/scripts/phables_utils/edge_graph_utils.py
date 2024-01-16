@@ -260,21 +260,22 @@ def remove_dead_ends(G_edge):
 
 
 def get_all_sub_paths(assembly_graph, unitig_names):
-
     sub_paths = defaultdict(int)
 
     for v in range(assembly_graph.vcount()):
-
         # Get all paths starting from vertex 'v' of length exactly 2
         paths_from_v = assembly_graph.get_all_simple_paths(v, cutoff=2)
 
         for path in paths_from_v:
-            if len(path) == 3:  # Length 2 means 3 vertices (2 edges)
-
+            if len(path) == 3:  # Length 3 means 3 vertices (2 edges)
                 node1 = unitig_names[path[0]]
                 node2 = unitig_names[path[1]]
                 node3 = unitig_names[path[2]]
-
                 sub_paths[tuple([node1, node2, node3])] = 0
+
+            if len(path) == 2:  # Length 2 means 2 vertices (1 edge)
+                node1 = unitig_names[path[0]]
+                node2 = unitig_names[path[1]]
+                sub_paths[tuple([node1, node2])] = 0
 
     return sub_paths

@@ -4,8 +4,18 @@ import logging
 import sys
 import time
 
-from phables_utils import component_utils, edge_graph_utils, gene_utils, short_utils
-from phables_utils.coverage_utils import get_junction_pe_coverage, get_sub_path_coverage, get_unitig_coverage
+from phables_utils import (
+    component_utils,
+    edge_graph_utils,
+    gene_utils,
+    long_utils,
+    short_utils,
+)
+from phables_utils.coverage_utils import (
+    get_junction_pe_coverage,
+    get_sub_path_coverage,
+    get_unitig_coverage,
+)
 from phables_utils.output_utils import (
     init_files,
     write_component_info,
@@ -159,23 +169,62 @@ def main():
 
     # If long reads are provided
     if longreads:
-
         logger.info(f"Long reads provided")
 
+        # Get sub path coverages
         sub_path_cov = edge_graph_utils.get_all_sub_paths(assembly_graph, unitig_names)
         sub_path_cov = get_sub_path_coverage(sub_path_cov, bampath, output)
 
-        logger.info(f"sub_paths: {sub_path_cov}")
-
-        # sys.exit(0)
+        # Resolve genomes
+        (
+            resolved_edges,
+            all_resolved_paths,
+            all_components,
+            cycle_components,
+            linear_components,
+            resolved_components,
+            resolved_linear,
+            single_unitigs,
+            resolved_cyclic,
+            case1_found,
+            case1_resolved,
+            case2_found,
+            case2_resolved,
+            case3_found,
+            case3_resolved,
+            phage_like_edges,
+            all_phage_like_edges,
+            unresolved_phage_like_edges,
+        ) = long_utils.resolve_long(
+            assembly_graph,
+            pruned_vs,
+            unitig_names,
+            unitig_names_rev,
+            self_looped_nodes,
+            graph_unitigs,
+            minlength,
+            link_overlap,
+            unitig_coverages,
+            compcount,
+            oriented_links,
+            sub_path_cov,
+            likely_complete,
+            alpha,
+            mincov,
+            covtol,
+            maxpaths,
+            output,
+            nthreads,
+        )
 
     # Else default to short reads
     else:
-        # Get junction pe coverages
-        # ------------------------------------------------------------------
+        logger.info(f"Short reads provided")
 
+        # Get junction pe coverages
         junction_pe_coverage = get_junction_pe_coverage(bampath, output)
 
+        # Resolve genomes
         (
             resolved_edges,
             all_resolved_paths,

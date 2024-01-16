@@ -88,9 +88,7 @@ def get_junction_pe_coverage(bam_path, output):
 
 
 def get_sub_path_coverage(sub_path_cov, bam_path, output):
-
     if os.path.isfile(f"{output}/sub_path_coverage.pickle"):
-
         sub_path_cov = defaultdict(int)
         with open(f"{output}/sub_path_coverage.pickle", "rb") as handle:
             sub_path_cov = pickle.load(handle)
@@ -99,7 +97,6 @@ def get_sub_path_coverage(sub_path_cov, bam_path, output):
         bam_files = glob.glob(bam_path + "/*.bam")
 
         for bam_file in bam_files:
-
             unitig_reads = defaultdict(set)
 
             bam = pysam.AlignmentFile(bam_file, "rb")
@@ -111,14 +108,24 @@ def get_sub_path_coverage(sub_path_cov, bam_path, output):
                     unitig_reads[target_id].add(query_id)
 
             for sub_path in sub_path_cov.keys():
+                if len(sub_path) == 3:
+                    node1 = sub_path[0]
+                    node2 = sub_path[1]
+                    node3 = sub_path[2]
 
-                node1 = sub_path[0]
-                node2 = sub_path[1]
-                node3 = sub_path[2]
+                    intersection_set = unitig_reads[node1].intersection(
+                        unitig_reads[node2], unitig_reads[node3]
+                    )
+                    sub_path_cov[sub_path] += len(intersection_set)
 
-                intersection_set = unitig_reads[node1].intersection(unitig_reads[node2], unitig_reads[node3])
+                elif len(sub_path) == 2:
+                    node1 = sub_path[0]
+                    node2 = sub_path[1]
 
-                sub_path_cov[sub_path] += len(intersection_set)
+                    intersection_set = unitig_reads[node1].intersection(
+                        unitig_reads[node2]
+                    )
+                    sub_path_cov[sub_path] += len(intersection_set)
 
     return sub_path_cov
 
