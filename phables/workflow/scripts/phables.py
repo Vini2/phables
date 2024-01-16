@@ -101,7 +101,7 @@ def main():
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Coverage tolerance for extending subpaths: {covtol}")
     logger.info(f"Coverage multipler for flow interval modelling: {alpha}")
-    logger.info(f"Input long reads: {longreads}")
+    logger.info(f"Input long reads: {bool(longreads)}")
     logger.info(f"Number of threads to use: {nthreads}")
     logger.info(f"Output folder: {output}")
 

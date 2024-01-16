@@ -1,3 +1,4 @@
+import gc
 import glob
 import os
 import pickle
@@ -126,6 +127,10 @@ def get_sub_path_coverage(sub_path_cov, bam_path, output):
                         unitig_reads[node2]
                     )
                     sub_path_cov[sub_path] += len(intersection_set)
+
+            del unitig_reads
+            del bam
+            gc.collect()
 
     return sub_path_cov
 
