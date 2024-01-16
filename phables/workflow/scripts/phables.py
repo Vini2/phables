@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import logging
-import sys
 import time
 
 from phables_utils import (
@@ -32,8 +31,6 @@ __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Development"
 
-MAX_VAL = sys.maxsize
-LEN_THRESHOLD = 0.95
 
 # Phables main code
 # ----------------------------------------------------------------------
