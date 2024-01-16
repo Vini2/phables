@@ -89,6 +89,10 @@ def get_junction_pe_coverage(bam_path, output):
 
 
 def get_sub_path_coverage(sub_path_cov, bam_path, output):
+    """
+    Get coverage values of sub paths using long reads
+    """
+
     if os.path.isfile(f"{output}/sub_path_coverage.pickle"):
         sub_path_cov = defaultdict(int)
         with open(f"{output}/sub_path_coverage.pickle", "rb") as handle:

@@ -38,6 +38,10 @@ def resolve_short(
     output,
     nthreads,
 ):
+    """
+    Resolve genomic paths using short reads
+    """
+
     resolved_edges = set()
 
     all_resolved_paths = []

@@ -38,6 +38,10 @@ def resolve_long(
     output,
     nthreads,
 ):
+    """
+    Resolve genomic paths using long reads
+    """
+
     resolved_edges = set()
 
     all_resolved_paths = []
