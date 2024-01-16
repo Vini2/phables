@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from Bio import SeqIO
 from Bio.Seq import Seq
-from igraph import *
+from igraph import Graph
 
 # Create logger
 logger = logging.getLogger("phables 1.2.2")
