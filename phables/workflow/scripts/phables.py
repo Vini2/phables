@@ -5,7 +5,7 @@ import sys
 import time
 
 from phables_utils import component_utils, edge_graph_utils, gene_utils, short_utils
-from phables_utils.coverage_utils import get_junction_pe_coverage, get_unitig_coverage
+from phables_utils.coverage_utils import get_junction_pe_coverage, get_sub_path_coverage, get_unitig_coverage
 from phables_utils.output_utils import (
     init_files,
     write_component_info,
@@ -159,8 +159,15 @@ def main():
 
     # If long reads are provided
     if longreads:
+
         logger.info(f"Long reads provided")
-        sys.exit(0)
+
+        sub_path_cov = edge_graph_utils.get_all_sub_paths(assembly_graph, unitig_names)
+        sub_path_cov = get_sub_path_coverage(sub_path_cov, bampath, output)
+
+        logger.info(f"sub_paths: {sub_path_cov}")
+
+        # sys.exit(0)
 
     # Else default to short reads
     else:
