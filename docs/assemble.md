@@ -7,7 +7,7 @@ Phables requires paired-end sequencing reads from viral metagenomic samples to b
 
 Please make sure that the names of the read files are in the following format. Assuming that your paired-end sequencing reads are in the folder `fastq`, please make sure that the reads are in the format `{sampleName}{pattern}{fileExtension}`. `fileExtension` can be `.fq`, `.fastq`, `.fq.gz` or `.fastq.gz`.
 
-Please make sure that your file `pattern` match one of the following patters.
+Please make sure that your file `pattern` matches one of the following patterns.
 
 ```
 _R1_ and _R2_
