@@ -1355,23 +1355,23 @@ def resolve_short(
         write_path(final_genomic_paths, output)
         write_path_fasta(final_genomic_paths, f"{output}/resolved_phages")
 
-        return (
-            resolved_edges,
-            all_resolved_paths,
-            all_components,
-            cycle_components,
-            linear_components,
-            resolved_components,
-            resolved_linear,
-            single_unitigs,
-            resolved_cyclic,
-            case1_found,
-            case1_resolved,
-            case2_found,
-            case2_resolved,
-            case3_found,
-            case3_resolved,
-            phage_like_edges,
-            all_phage_like_edges,
-            unresolved_phage_like_edges,
-        )
+    return (
+        resolved_edges,
+        all_resolved_paths,
+        all_components,
+        cycle_components,
+        linear_components,
+        resolved_components,
+        resolved_linear,
+        single_unitigs,
+        resolved_cyclic,
+        case1_found,
+        case1_resolved,
+        case2_found,
+        case2_resolved,
+        case3_found,
+        case3_resolved,
+        phage_like_edges,
+        all_phage_like_edges,
+        unresolved_phage_like_edges,
+    )
