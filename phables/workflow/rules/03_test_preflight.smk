@@ -24,6 +24,7 @@ EV = config['evalue']
 SI = config['seqidentity']
 CT = config['covtol']
 AL = config['alpha']
+LR = config['longreads']
 
 
 """ONSTART/END/ERROR

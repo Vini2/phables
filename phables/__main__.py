@@ -190,6 +190,14 @@ def run_options(func):
             type=float,
             show_default=True,
         ),
+        click.option(
+            "--longreads",
+            help="provide long reads as input (else defaults to short reads)",
+            is_flag=True,
+            default=False,
+            show_default=True,
+            required=False,
+        ),
     ]
     for option in reversed(options):
         func = option(func)

@@ -69,6 +69,7 @@ rule test_phables:
         seqidentity = SI,
         covtol = CT,
         alpha = AL,
+        longreads = LR,
         output = TESTDIR,
         nthreads = 2,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))
