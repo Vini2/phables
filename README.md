@@ -19,13 +19,13 @@ Phables: from fragmented assemblies to high-quality bacteriophage genomes
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Vini2/phables/develop?color=8a35da)
 
-Phables is a tool developed to resolve bacteriophage genomes using phage bubbles in viral metagenomic data. It models phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
+Phables is a tool developed to resolve bacteriophage genomes using assembly graphs of viral metagenomic data. It models phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
 Phables is now available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
 
-**NEW:** Phables can now resolve linear bacteriophage genomes.
+**NEW:** Phables can now resolve bacteriophage genomes from long read assemblies.
 
 ## Setting up Phables
 
@@ -101,9 +101,11 @@ phables test
 ### Run on your own data
 
 ```bash
-# Run Phables
-# locally: using 8 threads (default is 1 thread)
+# Run Phables using short read data
 phables run --input assembly_graph.gfa --reads fastq/ --threads 8
+
+# Run Phables using long read data
+phables run --input assembly_graph.gfa --reads fastq/ --threads 8 --longreads
 ```
 
 Please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/) for further information on how to run Phables.
