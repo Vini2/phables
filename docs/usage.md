@@ -8,6 +8,17 @@ Usage: phables run [OPTIONS] [SNAKE_ARGS]...
   Run Phables
 
 Options:
+  --output PATH                 Output directory  [default: phables.out]
+  --configfile TEXT             Custom config file [default:
+                                (outputDir)/config.yaml]
+  --threads INTEGER             Number of threads to use  [default: 1]
+  --use-conda / --no-use-conda  Use conda for Snakemake rules  [default: use-
+                                conda]
+  --conda-prefix PATH           Custom conda env directory
+  --profile TEXT                Snakemake profile
+  --snake-default TEXT          Customise Snakemake runtime args  [default:
+                                --rerun-incomplete, --printshellcmds,
+                                --nolock, --show-failed-logs]
   --input PATH                  Path to assembly graph file in .GFA format
                                 [required]
   --reads PATH                  Path to directory containing paired-end reads
@@ -28,21 +39,22 @@ Options:
                                 annotations  [default: 0.3]
   --covtol INTEGER              coverage tolerance for extending subpaths
                                 [default: 100]
-  --alpha FLOAT                 coverage multiplier for flow interval modelling
-                                [default: 1.2]
-  --output PATH                 Output directory  [default: phables.out]
-  --configfile TEXT             Custom config file [default:
-                                (outputDir)/config.yaml]
-  --threads INTEGER             Number of threads to use  [default: 1]
-  --use-conda / --no-use-conda  Use conda for Snakemake rules  [default: use-
-                                conda]
-  --conda-prefix PATH           Custom conda env directory
-  --profile TEXT                Snakemake profile
-  --snake-default TEXT          Customise Snakemake runtime args  [default:
-                                --rerun-incomplete, --printshellcmds,
-                                --nolock, --show-failed-logs]
+  --alpha FLOAT                 coverage multiplier for flow interval
+                                modelling  [default: 1.2]
+  --longreads                   provide long reads as input (else defaults to
+                                short reads)
   -h, --help                    Show this message and exit.
 
+  
+  If you use Phables in your work, please cite Phables as,
+  
+  Vijini Mallawaarachchi, Michael J Roach, Przemyslaw Decewicz, 
+  Bhavya Papudeshi, Sarah K Giles, Susanna R Grigson, George Bouras, 
+  Ryan D Hesse, Laura K Inglis, Abbey L K Hutton, Elizabeth A Dinsdale, 
+  Robert A Edwards, Phables: from fragmented assemblies to high-quality 
+  bacteriophage genomes, Bioinformatics, Volume 39, Issue 10, 
+  October 2023, btad586, https://doi.org/10.1093/bioinformatics/btad586
+  
   
   For more information on Phables please visit:
   https://phables.readthedocs.io/
@@ -81,6 +93,7 @@ Options:
 * `--seqidentity` - minimum sequence identity for phrog annotations [default: 0.3]
 * `--covtol` - coverage tolerance for extending subpaths [default: 100]
 * `--alpha` - coverage multiplier for flow interval modelling [default: 1.2]
+* `--longreads` - provide long reads as input. If this flag is not provided phables defaults to short reads
 * `--output` - path to the output directory [default: `phables.out`]
 * `--configfile` - custom config file [default: `(outputDir)/config.yaml`]
 * `--threads` - number of threads to use  [default: 1]
@@ -93,9 +106,18 @@ Options:
 
 Assuming your assembly graph file is `assembly_graph.gfa` and reads folder as `fastq`, you can run `phables` as follows.
 
+### Using short reads
+
 ```bash
 # Preprocess data using 8 threads (default is 1 thread)
 phables run --input assembly_graph.gfa --reads fastq --threads 8
+```
+
+### Using long reads
+
+```bash
+# Preprocess data using 8 threads (default is 1 thread)
+phables run --input assembly_graph.gfa --reads fastq --threads 8 --longreads
 ```
 
 Note that you should provide the path to the GFA file to the `--input` parameter and the folder containing your sequencing reads to the `--reads` parameter. 
@@ -104,7 +126,7 @@ The output of Phables is set by default to `phables.out`. You can update the out
 
 ```bash
 # Preprocess data using 8 threads (default is 1 thread)
-phables run --input assembly_graph.gfa --reads fastq  --output my_output_folder --threads 8
+phables run --input assembly_graph.gfa --reads fastq --output my_output_folder --threads 8
 ```
 
 The `phables run` command will run preprocessing steps, perform genome resolution and the perform postprocessing steps.
@@ -176,8 +198,11 @@ phables run --input assembly_graph.gfa --reads fastq --threads 8 preprocess
 You can use the following command to **only run the genome resolution steps**. Please make sure to have the preprocessing results in the output folder.
 
 ```bash
-# Only run phables core
+# Only run phables core using short reads
 phables run --input assembly_graph.gfa --reads fastq --threads 8 phables
+
+# Only run phables core using long reads
+phables run --input assembly_graph.gfa --reads fastq --threads 8 phables --longreads
 ```
 
 ### Postprocessing only
