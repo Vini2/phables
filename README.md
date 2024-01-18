@@ -7,17 +7,16 @@ Phables: from fragmented assemblies to high-quality bacteriophage genomes
 ===============
 
 [![DOI](https://img.shields.io/badge/DOI-10.1093/bioinformatics/btad586-blue)](https://doi.org/10.1093/bioinformatics/btad586)
-[![DOI](https://zenodo.org/badge/516191931.svg)](https://zenodo.org/badge/latestdoi/516191931)
 ![GitHub](https://img.shields.io/github/license/Vini2/phables)
 [![](https://img.shields.io/static/v1?label=CLI&message=Snaketool&color=blueviolet)](https://github.com/beardymcjohnface/Snaketool)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Vini2/phables/develop?color=8a35da)
 ![Conda](https://img.shields.io/conda/v/bioconda/phables)
 [![PyPI version](https://badge.fury.io/py/phables.svg)](https://badge.fury.io/py/phables)
 ![Conda](https://img.shields.io/conda/dn/bioconda/phables)
 [![CI](https://github.com/Vini2/phables/actions/workflows/testing.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/testing.yml)
 [![CodeQL](https://github.com/Vini2/phables/actions/workflows/codeql.yml/badge.svg)](https://github.com/Vini2/phables/actions/workflows/codeql.yml)
 [![Documentation Status](https://readthedocs.org/projects/phables/badge/?version=latest)](https://phables.readthedocs.io/en/latest/?badge=latest)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/Vini2/phables/develop?color=8a35da)
 
 Phables is a tool developed to resolve bacteriophage genomes using assembly graphs of viral metagenomic data. It models phage-like components in the viral metagenomic assembly as flow networks, models as a minimum flow decomposition problem and resolves genomic paths corresponding to flow paths determined. Phables uses the [Minimum Flow Decomposition via Integer Linear Programming](https://github.com/algbio/MFD-ILP) implementation to obtain the flow paths.
 
