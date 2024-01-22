@@ -24,7 +24,7 @@ For detailed instructions on installation and usage, please refer to the [**docu
 
 Phables is now available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
 
-**NEW:** Phables can now resolve bacteriophage genomes from long read assemblies.
+**NEW:** Phables can now resolve bacteriophage genomes from long-read assemblies.
 
 ## Setting up Phables
 
