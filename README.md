@@ -103,7 +103,7 @@ phables test
 # Run Phables using short read data
 phables run --input assembly_graph.gfa --reads fastq/ --threads 8
 
-# Run Phables using long read data
+# Run Phables using long-read data
 phables run --input assembly_graph.gfa --reads fastq/ --threads 8 --longreads
 ```
 
