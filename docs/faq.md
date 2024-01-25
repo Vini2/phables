@@ -82,7 +82,15 @@ Error 10009: HostID mismatch (licensed to <host_1>, hostid is <host_2>)
 
 You will have to contact your system admin and setup a floating network license. You can find more details at [https://support.gurobi.com/hc/en-us/articles/360013195412-How-do-I-obtain-a-free-academic-license-for-a-cluster-or-a-shared-computer-lab-](https://support.gurobi.com/hc/en-us/articles/360013195412-How-do-I-obtain-a-free-academic-license-for-a-cluster-or-a-shared-computer-lab-).
 
-### Q4: How can I get a Gurobi license for a cluster?
+### Q4: icense not valid for Gurobi version x
+
+If you get the following error when running Phables, this means the version in your license does not match the installed version. You can install the correct version or get a new license for the latest version.
+
+```bash
+ERROR - Error code 10009: Request denied: license not valid for Gurobi version 11
+```
+
+### Q5: How can I get a Gurobi license for a cluster?
 
 If you want to run Phables on a cluster, your cluster should have a [floating network license](https://en.wikipedia.org/wiki/Floating_licensing) for Gurobi for the `run` subcommand to execute properly.
 
