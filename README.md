@@ -23,7 +23,7 @@ Phables is a tool developed to resolve bacteriophage genomes using assembly grap
 
 For detailed instructions on installation and usage, please refer to the [**documentation hosted at Read the Docs**](https://phables.readthedocs.io/en/latest/).
 
-Phables is now available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
+Phables is available on bioconda at [https://anaconda.org/bioconda/phables](https://anaconda.org/bioconda/phables) and on PyPI at [https://pypi.org/project/phables/](https://pypi.org/project/phables/). Feel free to pick your package manager, but we recommend that you use [`conda`](https://docs.conda.io/en/latest/).
 
 **NEW:** Phables can now resolve bacteriophage genomes from long-read assemblies.
 
@@ -104,7 +104,7 @@ phables test
 # Run Phables using short read data
 phables run --input assembly_graph.gfa --reads fastq/ --threads 8
 
-# Run Phables using long-read data
+# Run Phables using long read data
 phables run --input assembly_graph.gfa --reads fastq/ --threads 8 --longreads
 ```
 
