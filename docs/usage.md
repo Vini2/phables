@@ -43,6 +43,7 @@ Options:
                                 modelling  [default: 1.2]
   --longreads                   provide long reads as input (else defaults to
                                 short reads)
+  --prefix TEXT                 prefix for genome identifier
   -h, --help                    Show this message and exit.
 
   
@@ -94,6 +95,7 @@ Options:
 * `--covtol` - coverage tolerance for extending subpaths [default: 100]
 * `--alpha` - coverage multiplier for flow interval modelling [default: 1.2]
 * `--longreads` - provide long reads as input. If this flag is not provided phables defaults to short reads
+* `--prefix` - prefix for genome identifier [default: None]
 * `--output` - path to the output directory [default: `phables.out`]
 * `--configfile` - custom config file [default: `(outputDir)/config.yaml`]
 * `--threads` - number of threads to use  [default: 1]
