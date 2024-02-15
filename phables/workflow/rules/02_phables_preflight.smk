@@ -37,6 +37,7 @@ SI = config['seqidentity']
 CT = config['covtol']
 AL = config['alpha']
 LR = config['longreads']
+PR = config['prefix']
 
 
 """DIRECTORIES/FILES etc.

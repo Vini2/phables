@@ -53,7 +53,8 @@ def main():
     seqidentity = float(snakemake.params.seqidentity)
     covtol = float(snakemake.params.covtol)
     alpha = float(snakemake.params.alpha)
-    longreads = float(snakemake.params.longreads)
+    longreads = bool(snakemake.params.longreads)
+    prefix = snakemake.params.prefix
     output = snakemake.params.output
     nthreads = int(snakemake.params.nthreads)
     log = snakemake.params.log
@@ -98,9 +99,15 @@ def main():
     logger.info(f"Minimum sequence identity for phrog annotations: {seqidentity}")
     logger.info(f"Coverage tolerance for extending subpaths: {covtol}")
     logger.info(f"Coverage multipler for flow interval modelling: {alpha}")
-    logger.info(f"Input long reads: {bool(longreads)}")
+    logger.info(f"Input long reads: {longreads}")
+    logger.info(f"Prefix for genome identifiers: {prefix}")
     logger.info(f"Number of threads to use: {nthreads}")
     logger.info(f"Output folder: {output}")
+
+    if prefix is None or prefix == "":
+        prefix = ""
+    else:
+        prefix = f"{prefix}_"
 
     start_time = time.time()
 
@@ -210,6 +217,7 @@ def main():
             mincov,
             covtol,
             maxpaths,
+            prefix,
             output,
             nthreads,
         )
@@ -259,6 +267,7 @@ def main():
             mincov,
             covtol,
             maxpaths,
+            prefix,
             output,
             nthreads,
         )

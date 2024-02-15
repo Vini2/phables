@@ -29,6 +29,7 @@ rule run_phables:
         covtol = CT,
         alpha = AL,
         longreads = LR,
+        prefix = PR,
         output = os.path.join(OUTDIR, "phables"),
         nthreads = config["resources"]["jobCPU"],
         log = os.path.join(LOGSDIR, "phables_output.log")

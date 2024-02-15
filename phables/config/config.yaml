@@ -27,3 +27,4 @@ seqidentity: 0.3
 covtol: 100
 alpha: 1.2
 longreads: False
+prefix: 

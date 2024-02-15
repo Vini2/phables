@@ -198,6 +198,12 @@ def run_options(func):
             show_default=True,
             required=False,
         ),
+        click.option(
+            "--prefix",
+            help="prefix for genome identifier",
+            type=str,
+            required=False,
+        ),
     ]
     for option in reversed(options):
         func = option(func)

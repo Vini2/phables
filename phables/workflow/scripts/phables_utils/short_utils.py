@@ -35,6 +35,7 @@ def resolve_short(
     mincov,
     covtol,
     maxpaths,
+    prefix,
     output,
     nthreads,
 ):
@@ -182,7 +183,7 @@ def resolve_short(
                         )
 
                         genome_path = GenomePath(
-                            id=f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                             bubble_case="case2_circular",
                             node_order=[
                                 f"{repeat_unitig_name}+",
@@ -286,7 +287,7 @@ def resolve_short(
                         ]
 
                         genome_path = GenomePath(
-                            id=f"phage_comp_{my_count}_cycle_{cycle_number}",
+                            id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                             bubble_case="case2_linear",
                             node_order=path_with_repeats,
                             node_id_order=node_id_order_with_repeats,
@@ -760,7 +761,7 @@ def resolve_short(
 
                                         # Create GenomePath object with path details
                                         genome_path = GenomePath(
-                                            id=f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                            id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                                             bubble_case="case3_circular",
                                             node_order=[x for x in path_order],
                                             node_id_order=[
@@ -1158,7 +1159,7 @@ def resolve_short(
 
                                             # Create GenomePath object with path details
                                             genome_path = GenomePath(
-                                                id=f"phage_comp_{my_count}_cycle_{cycle_number}",
+                                                id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                                                 bubble_case="case3_linear",
                                                 node_order=[x for x in path_order],
                                                 node_id_order=[
@@ -1221,7 +1222,7 @@ def resolve_short(
 
                 # Create GenomePath object with path details
                 genome_path = GenomePath(
-                    id=f"phage_comp_{my_count}_cycle_{cycle_number}",
+                    id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                     bubble_case=case_name,
                     node_order=[unitig_names[candidate_nodes[0]]],
                     node_id_order=[candidate_nodes[0]],
@@ -1302,7 +1303,7 @@ def resolve_short(
             ):
                 # Create GenomeComponent object with component details
                 genome_comp = GenomeComponent(
-                    f"phage_comp_{my_count}",
+                    f"{prefix}phage_comp_{my_count}",
                     len(original_candidate_nodes),
                     len(final_genomic_paths),
                     max(graph_degree),
