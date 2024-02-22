@@ -1,6 +1,6 @@
 # Assembly
 
-Phables requires paired-end sequencing reads from viral metagenomic samples to be assembled. The following steps explain the steps required to be carried out beforehand.
+Phables requires either short or long read sequencing data from metagenomic samples to be assembled. The following steps explain the steps required to be carried out beforehand.
 
 
 ## Paired-end read files for short read assembly
@@ -60,13 +60,13 @@ You can use [MEGAHIT](https://github.com/voutcn/megahit) to assemble your paired
 megahit -1 reads_1.fastq -2 reads_2.fastq -o megahit_out
 ```
 
-By default, MEGAHIT does not produce an assembly graph file. To get the assembly graph file, you have to to run `contig2fastg` command from the MEGAHIT toolkit to build the assembly graph. `contig2fastg` requires you to input the k-mer size used for the assembly. You can get the k-mer size from the contig IDs in the `final.contigs.fa` file. For example, you can use the `grep` command to print out the contig IDs as follows.
+By default, MEGAHIT does not produce an assembly graph file. You have to to run `contig2fastg` command from the MEGAHIT toolkit to build the assembly graph file. `contig2fastg` requires you to input the k-mer size used for the assembly. You can get the k-mer size from the contig IDs in the `final.contigs.fa` file. For example, you can use the `grep` command to print out the contig IDs as follows.
 
 ```bash
 grep "^>" final.contigs.fa
 ```
 
-For example, you will get an output as follows. Here the k-mer size is 141 as denoted by `k141`.
+Imagine you get the output as follows. Here the k-mer size is 141 as denoted by `k141`.
 
 ```bash
 >k141_1456397 flag=0 multi=11.7570 len=1137
@@ -88,10 +88,11 @@ The MEGAHIT toolkit will result in a FASTG file which you can convert to GFA usi
 fastg2gfa final.graph.fastg > final.graph.gfa
 ```
 
-If you want to run Phables on an assembly from a different `k` value output found in the MEGAHIT output folder `intermediate_contigs`, please make sure to build the `.fastg` file from the `.fa` file with the correct `k` value. For example, if you want to run Phables on the contigs from `k79.final.contigs.fa`, you should first build the corresponding `k79.final.graph.fastg` file and then run `fastg2gfa` as follows.
+If you want to run Phables on an assembly from a different `k` value found in the MEGAHIT output folder `intermediate_contigs`, please make sure to build the `.fastg` file from the `.fa` file with the corresponding `k` value. For example, if you want to run Phables on the contigs from `k99.contigs.fa`, you should first build the corresponding `k99.graph.fastg` file and then run `fastg2gfa` as follows.
 
 ```bash
-fastg2gfa 79.final.graph.fastg > 79.final.graph.gfa
+megahit_toolkit contig2fastg 99 k99.contigs.fa > k99.graph.fastg
+fastg2gfa k99.graph.fastg > k99.graph.gfa
 ```
 
 ### metaSPAdes
