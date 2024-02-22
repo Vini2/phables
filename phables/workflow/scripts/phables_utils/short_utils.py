@@ -190,6 +190,7 @@ def resolve_short(
                                 f"{unitig_name}+",
                                 f"{repeat_unitig_name}-",
                             ],
+                            node_order_human=f"{repeat_unitig_name}:fwd,{unitig_name}:fwd,{repeat_unitig_name}:rev",
                             node_id_order=[
                                 repeat_unitig,
                                 unitig_to_consider,
@@ -279,9 +280,13 @@ def resolve_short(
                             f"Terminal repeat detected is {repeat_unitig_name}"
                         )
 
+                        # Format path node order
                         path_with_repeats = [f"{unitig_name}+"] + [
                             f"{repeat_unitig_name}+" for x in range(repeat_count)
                         ]
+
+                        repeat_order = f"{repeat_unitig_name}:fwd," * repeat_count
+                        path_with_repeats_human = f"{unitig_name}:fwd,{repeat_order[:-1]}"
                         node_id_order_with_repeats = [unitig_to_consider] + [
                             repeat_unitig for x in range(repeat_count)
                         ]
@@ -290,6 +295,7 @@ def resolve_short(
                             id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                             bubble_case="case2_linear",
                             node_order=path_with_repeats,
+                            node_order_human=path_with_repeats_human,
                             node_id_order=node_id_order_with_repeats,
                             path=path_string,
                             coverage=int(unitig_coverages[unitig_name]),
@@ -759,11 +765,23 @@ def resolve_short(
 
                                             previous_edge = node
 
+                                        # Format genomic path
+                                        path_node_order_human = ""
+
+                                        for c in path_order:
+                                            if c.endswith("+"):
+                                                path_node_order_human += f"{c[:-1]}:fwd,"
+                                            else:
+                                                path_node_order_human += f"{c[:-1]}:rev,"
+                                        
+                                        path_node_order_human = path_node_order_human[:-1]
+
                                         # Create GenomePath object with path details
                                         genome_path = GenomePath(
                                             id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                                             bubble_case="case3_circular",
                                             node_order=[x for x in path_order],
+                                            node_order_human=path_node_order_human,
                                             node_id_order=[
                                                 unitig_names_rev[x[:-1]]
                                                 for x in path_order
@@ -1157,11 +1175,23 @@ def resolve_short(
 
                                                 previous_edge = node
 
+                                            # Format genomic path
+                                            path_node_order_human = ""
+
+                                            for c in path_order:
+                                                if c.endswith("+"):
+                                                    path_node_order_human += f"{c[:-1]}:fwd,"
+                                                else:
+                                                    path_node_order_human += f"{c[:-1]}:rev,"
+                                            
+                                            path_node_order_human = path_node_order_human[:-1]
+
                                             # Create GenomePath object with path details
                                             genome_path = GenomePath(
                                                 id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                                                 bubble_case="case3_linear",
                                                 node_order=[x for x in path_order],
+                                                node_order_human=path_node_order_human,
                                                 node_id_order=[
                                                     unitig_names_rev[x[:-1]]
                                                     for x in path_order
@@ -1225,6 +1255,7 @@ def resolve_short(
                     id=f"{prefix}phage_comp_{my_count}_cycle_{cycle_number}",
                     bubble_case=case_name,
                     node_order=[unitig_names[candidate_nodes[0]]],
+                    node_order_human=f"{unitig_names[candidate_nodes[0]]}:fwd",
                     node_id_order=[candidate_nodes[0]],
                     path=path_string,
                     coverage=int(unitig_coverages[unitig_name]),
