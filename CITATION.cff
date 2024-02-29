@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use this software, please cite our article in Bioinformatics as below."
 authors:
 - family-names: "Mallawaarachchi"
   given-names: "Vijini"
@@ -81,11 +81,11 @@ preferred-citation:
   - family-names: "Edwards"
     given-names: "Robert A."
     orcid: "https://orcid.org/0000-0001-8383-8949"
-  doi: "10.0000/00000"
+  doi: "10.1093/bioinformatics/btad586"
   journal: "Bioinformatics"
   month: 9
   title: "Phables: from fragmented assemblies to high-quality bacteriophage genomes"
-  pages: "btad586"
+  start: "btad586"
   issue: 10
   volume: 39
   year: 2023
