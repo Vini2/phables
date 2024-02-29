@@ -91,7 +91,7 @@ def write_res_genome_info(all_resolved_paths, output):
     """
 
     with open(f"{output}/resolved_genome_info.txt", "w") as myfile:
-        myfile.write(f"Path\tCase\tCoverage\tLength\tGC content\tNode order\tNode order human\n")
+        myfile.write(f"Path\tCase\tCoverage\tLength\tGC content\tNode order (gfa link format)\tNode order (human readable)\n")
         for genomic_path in all_resolved_paths:
             myfile.write(
                 f"{genomic_path.id}\t{genomic_path.bubble_case}\t{genomic_path.coverage}\t{genomic_path.length}\t{genomic_path.gc}\t{genomic_path.node_order}\t{genomic_path.node_order_human}\n"
