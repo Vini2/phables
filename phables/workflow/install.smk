@@ -40,7 +40,7 @@ rule phrogs_mmseqs_download:
         os.path.join("envs", "curl.yaml")
     shell:
         """
-            curl -Lo {params.file} {params.url}
+            curl -Lko {params.file} {params.url}
             tar -xf {params.file} -C {params.db_path}
             rm -rf {params.file}
         """
@@ -54,7 +54,7 @@ rule smg_hmm_download:
         os.path.join("envs", "curl.yaml")
     shell:
         """
-            curl -Lo {output} {params.url}
+            curl -Lko {output} {params.url}
         """
 
 rule phrog_annot_download:
@@ -66,5 +66,5 @@ rule phrog_annot_download:
         os.path.join("envs", "curl.yaml")
     shell:
         """
-            curl -Lo {output} {params.url}
+            curl -Lko {output} {params.url}
         """
