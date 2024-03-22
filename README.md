@@ -1,6 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Vini2/phables/master/phables_logo_light.png#gh-light-mode-only" width="500" title="phables logo" alt="phables logo">
-  <img src="https://raw.githubusercontent.com/Vini2/phables/master/phables_logo_dark.png#gh-dark-mode-only" width="500" title="phables logo" alt="phables logo">
+  <img src="https://raw.githubusercontent.com/Vini2/phables/master/phables_logo_light.png" width="500" title="phables logo" alt="phables logo">
 </p>
 
 Phables: from fragmented assemblies to high-quality bacteriophage genomes
