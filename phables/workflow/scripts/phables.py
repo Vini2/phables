@@ -26,7 +26,7 @@ from phables_utils.output_utils import (
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Stable Release"
