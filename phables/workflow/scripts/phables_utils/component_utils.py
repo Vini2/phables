@@ -27,11 +27,24 @@ def get_components(
         tail_present = False
         lysis_present = False
 
+        # Check every unitig in the component for a bacterial single-copy marker
+        # gene before scoring any PHROG evidence. This has to be a separate,
+        # unconditional pass over the whole component: doing the SMG check and
+        # the PHROG-category scan in the same loop with a `break` on SMG only
+        # stops iterating -- it doesn't undo category flags a unitig earlier in
+        # the same component already set, so whether a mixed component got
+        # excluded ended up depending on iteration order, not on whether an SMG
+        # was actually present. Skip PHROG scoring entirely once any SMG is
+        # found; there's no point computing it for a component that's excluded
+        # either way.
+        has_smg = any(unitig_names[unitig] in smg_unitigs for unitig in component)
+
+        if has_smg:
+            continue
+
         if len(component) > 1:
             for unitig in component:
-                if unitig_names[unitig] in smg_unitigs:
-                    break
-                elif unitig_names[unitig] in unitig_phrogs:
+                if unitig_names[unitig] in unitig_phrogs:
                     for phrog in unitig_phrogs[unitig_names[unitig]]:
                         if "head and packaging" in phrog_dict[phrog]:
                             head_present = True
