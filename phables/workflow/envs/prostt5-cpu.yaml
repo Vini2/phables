@@ -1,0 +1,47 @@
+name: prostt5-cpu
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  # Kept separate from the main phables env deliberately: phables.yaml pins
+  # python>=3.10 for its own deps, while ProstT5/transformers/torch want a
+  # broadly current Python, and Setonix's ROCm containers ship newer still.
+  - python>=3.10
+  # Build-string wildcard, not a pinned version: conda's solver picks whatever
+  # cpu-tagged pytorch build matches everything else in the env, so this
+  # doesn't need bumping by hand as new pytorch releases land (unlike the pip
+  # --extra-index-url approach in prostt5-cuda.yaml's history -- verified via
+  # `mamba search -c conda-forge pytorch=*=cpu*` that these tagged builds
+  # exist and are current, e.g. 2.9.1 cpu_generic_py310_h55e7c71_2).
+  # >=2.6 floor: transformers' checkpoint loader refuses torch.load() on any
+  # older torch outright (CVE-2025-32434 hardening in check_torch_load_is_safe),
+  # which broke loading Rostlab/ProstT5_fp16 (no safetensors file) when the
+  # bare wildcard let the solver pick something pre-2.6.
+  - pytorch[version=">=2.6",build=cpu*]
+  - transformers
+  - sentencepiece
+  - h5py
+  - loguru
+  - numpy
+  - protobuf
+  - requests
+  - tqdm
+  - alive-progress
+  - about-time
+  - pip
+  - pip:
+    # pholdlib itself isn't packaged on any conda channel (checked). Wanted
+    # --no-deps here to stop pip from re-resolving torch/transformers/etc
+    # that conda already solved above -- turns out conda/mamba both write
+    # the pip: list to a real requirements.txt and current pip rejects
+    # --no-deps as a file directive (CLI-only now), so that's not achievable
+    # this way at all (confirmed empirically, not just from docs: both conda
+    # and mamba fail identically with "no such option: --no-deps").
+    # Verified instead: pholdlib's own `torch` requirement is unconstrained
+    # (any installed version satisfies it), so a real `pip install pholdlib`
+    # against this env left torch's conda-solved build untouched -- it did
+    # reinstall a couple of pholdlib's smaller transitive deps
+    # (about-time/alive-progress) to versions matching its own metadata,
+    # which is harmless. Re-check this if a future pholdlib release adds a
+    # version constraint on torch specifically.
+    - pholdlib>=0.1.2

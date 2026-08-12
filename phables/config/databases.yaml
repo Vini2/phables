@@ -10,3 +10,20 @@ phrogs_mmseqs_folder: "phrogs_mmseqs_db/"
 # PROHGs annotations
 phrog_annot: "https://phrogs.lmge.uca.fr/downloads_from_website/phrog_annot_v4.tsv"
 phrog_annot_file: "phrog_annot_v4.tsv"
+
+# Phage-hallmark Foldseek subDB -- structural PHROG-category evidence for
+# --phagedetection prostt5-foldseek. A pre-built tarball, not built fresh by
+# `phables install` itself: it's subset from phold's full structure DB (a
+# multi-GB, separately-versioned asset -- see docs/hallmark_db.md), which this
+# project doesn't re-host in full. workflow/scripts/build_hallmark_db.py is
+# the real script that built this exact tarball, kept for reproducibility/
+# rebuilding, not something a normal user needs to run.
+#
+# NOT named "hallmark_db" (unlike the smg_hmm/phrogs_mmseqs pattern above,
+# where the bare key holds the URL) -- config.yaml already uses that exact key
+# name for the *runtime* --hallmark-db path, and configfile: entries share one
+# flat config dict, so reusing it here would silently clobber that value with
+# this download URL instead. Caught before it shipped, not after.
+hallmark_db_url: "https://zenodo.org/records/21884331/files/hallmark_db.tar.gz?download=1"
+hallmark_db_file: "hallmark_db.tar.gz"
+hallmark_db_folder: "hallmark_db/"

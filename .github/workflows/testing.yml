@@ -19,7 +19,12 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.9", "3.10"]
+        # setup.py's python_requires is ">=3.11" (snakemake>=8's own floor --
+        # see setup.py's comment on why). This matrix was still 3.9/3.10 despite
+        # that, which fails `pip install .` outright on both -- confirmed by
+        # reading setup.py, not run against real CI (no Actions access from
+        # here). Bumped to match what the package actually supports.
+        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: "actions/checkout@v3"
@@ -38,10 +43,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install .
-      
+
       - name: "Generate coverage report on ${{ matrix.os }} for Python ${{ matrix.python-version }}"
         run: |
-          pip install pytest pytest-cov
+          # pytest itself + the one real (non-deferred) extra import the test
+          # suite needs beyond `pip install .`: tests/test_gene_caller.py calls
+          # into workflow/scripts/gene_caller.py directly (not through a
+          # Snakemake rule), which needs pyrodigal-gv -- normally supplied at
+          # real runtime by envs/genecall.yaml, a per-rule conda env this base
+          # CI install never touches. (format_koverage_results.py's own
+          # pandas/biopython need is deliberately NOT listed here -- those
+          # imports were moved inside main() specifically so
+          # test_format_koverage_results.py doesn't need them at all; adding
+          # them back here would be masking that, not needing it.)
+          pip install pytest pytest-cov pyrodigal-gv
           pytest --cov=./ --cov-report xml --cov-report lcov --cov-append
           
       - name: Coveralls Parallel
@@ -58,7 +73,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.11", "3.12"]
     steps:
     - name: Coveralls Finished
       uses: coverallsapp/github-action@master

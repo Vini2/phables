@@ -71,6 +71,10 @@ rule test_phables:
         alpha = AL,
         longreads = LR,
         prefix = PR,
+        phagedetection = PD,
+        hallmark_categories = config["hallmark_categories"],
+        hallmark_evalue = config["hallmark_evalue"],
+        hallmark_minbits = config["hallmark_minbits"],
         output = TESTDIR,
         nthreads = 2,
         log = temp(os.path.join(TESTDIR, "phables_output.log"))

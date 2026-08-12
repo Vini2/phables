@@ -1,0 +1,19 @@
+name: coverm
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  # Only coverm is listed explicitly -- it already declares minimap2 and
+  # samtools as its own bioconda dependencies (confirmed against its real
+  # recipe: minimap2>=2.28, samtools>=1.9, plus a large pile of other bundled
+  # tools -- bwa, fastani, gsl, skani, strobealign, etc.). Explicitly pinning
+  # our own separate `minimap2>=2.24`/`samtools>=1.15` here on top of that (as
+  # this file originally did) forces mamba to solve TWO independent version
+  # constraints across coverm's already tightly-pinned dependency graph at
+  # once, rather than just the one bioconda actually built/tested coverm
+  # against -- real, hit on Setonix: `LibMambaUnsatisfiableError`, every
+  # samtools from 1.14 to 1.24 rejected on a libdeflate lattice conflict
+  # somewhere in that combined graph. coverm alone pulls in a mutually
+  # compatible minimap2 + samtools already, so nothing else is needed for the
+  # `coverm_map` rule's minimap2/samtools/coverm calls.
+  - coverm>=0.6

@@ -22,9 +22,73 @@ mincov: 10
 compcount: 200
 maxpaths: 10
 mgfrac: 0.2
+genecaller: pyrodigal-gv
 evalue: 1E-10
 seqidentity: 0.3
 covtol: 100
 alpha: 1.2
 longreads: False
-prefix: 
+prefix:
+
+# Align resolved genomes + build a phylogenetic tree (MAFFT + piqtree/IQ-TREE).
+# Off by default -- slow at metagenome scale (thousands of genomes); run
+# phylogenetics separately on resolved_paths.fasta instead unless a per-run
+# tree is specifically needed.
+build_tree: False
+
+# Phage-gene detection: mmseqs (PHROGs, default) or prostt5-foldseek (structural,
+# see notes/phables_audit.md section 4d in the parent project for the full design).
+# The prostt5-foldseek path needs a prebuilt hallmark structure DB and a ProstT5 CNN
+# checkpoint -- neither is auto-downloaded yet, so both must be supplied explicitly
+# when selecting this path.
+phagedetection: mmseqs
+hallmark_db:
+hallmark_categories:
+hallmark_evalue: 1E-8
+hallmark_minbits: 0
+prostt5_checkpoint:
+prostt5_model: Rostlab/ProstT5_fp16
+prostt5_model_dir:
+prostt5_half_precision: True
+prostt5_cpu: False
+# Which PyTorch build predict_3di's conda env solves: cpu, cuda, or rocm (e.g.
+# Setonix's MI250X nodes). Independent of prostt5_cpu above, which forces
+# ProstT5 onto the CPU device at *runtime* even inside a GPU-capable env --
+# gpu_backend controls which env gets *built*. foldseek_gpu (below) is
+# separate again: foldseek's own --gpu mode is CUDA-only, so it stays off
+# regardless of gpu_backend unless explicitly requested and gpu_backend=cuda.
+gpu_backend: cpu
+foldseek_gpu: False
+# Optional: a single container image with EVERY per-rule tool this workflow
+# needs already installed (e.g. "docker://quay.io/gbouras13/phables:<tag>" --
+# see container/Dockerfile). When set, every rule in the workflow runs with
+# ONLY `container:` -- no `conda:` -- eliminating Snakemake's own per-rule
+# --use-conda env creation entirely (and the real race condition that comes
+# with it when many samples run as separate concurrent processes on an HPC
+# array: multiple jobs needing the same not-yet-built shared env at once can
+# corrupt each other's env-creation). Deliberately not combined with a
+# `conda:` directive for the same reason as prostt5_container below:
+# Snakemake's documented "conda inside container" feature builds a *separate*
+# env inside the container rather than using what's already installed, which
+# defeats the entire point here. When empty, every rule falls back to its own
+# conda: env exactly as before.
+# Needs `--use-singularity` (Apptainer/Singularity on most HPC, incl. Setonix)
+# passed through phables' existing snake_args passthrough, since --use-conda
+# alone won't honour the container: directive -- and --use-conda should
+# generally NOT also be passed alongside this, for the reason above.
+container:
+# Optional: a container image (e.g. "docker://quay.io/gbouras13/phold:<tag>")
+# that already has pholdlib + torch/ROCm baked in, used for JUST the
+# predict_3di rule -- e.g. to point predict_3di at a different image than the
+# rest of the workflow. Falls back to `container` above when unset, so
+# setting `container` alone is enough to route predict_3di through it too;
+# only set this separately if predict_3di specifically needs a different
+# image. When both are empty, falls back to the conda envs selected by
+# gpu_backend above. Same --use-singularity requirement as `container` above.
+prostt5_container:
+# Batch limits are device-specific -- the defaults are conservative CPU/laptop-MPS
+# values, not tuned for any particular GPU. Retune per device (phold's autotune.py
+# is the reference approach) rather than trusting these at scale.
+prostt5_max_residues: 4000
+prostt5_max_seq_len: 4000
+prostt5_max_batch: 20

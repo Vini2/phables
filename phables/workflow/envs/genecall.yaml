@@ -1,0 +1,7 @@
+name: genecall
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.9
+  - pyrodigal-gv>=0.3.1

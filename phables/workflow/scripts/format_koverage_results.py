@@ -1,14 +1,30 @@
 #!/usr/bin/python3
 
-"""format_koverage_results.py: Format koverage results."""
+"""format_koverage_results.py: Format the per-genome coverage table into
+phables' report TSVs.
+
+NOTE the filename is now a misnomer: koverage was removed from the workflow
+entirely (PLAN.md 4.8) and this reads a `coverm contig`-derived table. Kept
+under the original name to preserve git history/blame on Vijini's original
+script; renaming it (plus its test, log filename, and postprocess.smk
+reference) is a safe, purely-cosmetic follow-up.
+"""
 
 import logging
 import os
 import subprocess
 from collections import defaultdict
 
-import pandas as pd
-from Bio import SeqIO
+# pandas/biopython imports deliberately deferred to main(), not module level --
+# both are provided at real Snakemake-runtime by envs/phables.yaml (this
+# script's rule: conda: phables.yaml), but importing this module standalone
+# (as tests/test_format_koverage_results.py does, to unit-test
+# parse_koverage_row/IDX_* in isolation) shouldn't require the whole package
+# install to include a data-science stack just to reach two constants and a
+# tuple-unpacking function that never touch either library. Confirmed CI's own
+# `build/environment.yml` does not install either -- module-level imports here
+# would fail collection in a clean CI env even though nothing test-relevant
+# uses them.
 
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2023, Phables Project"
@@ -18,7 +34,62 @@ __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 
 
+# sample_coverage.tsv column layout
+# ---------------------------------------------------------------------------
+# postprocess.smk no longer runs koverage at all -- its per-genome coverage is
+# now produced by a direct `coverm contig` invocation (rules coverm_map_genomes
+# / coverm_bam2counts_genomes / coverm_combine_genomes), completing PLAN.md
+# §4.8. The indices below therefore describe the CoverM-mode header:
+#
+#   Sample  Contig  Count  RPKM  TPM  Mean  Covered_fraction  Variance
+#     0       1       2     3    4     5           6             7
+#
+# ("Covered_fraction" is coverm's `covered_fraction` method as it appears after
+# coverm_combine_genomes strips the per-column "<bam filename> " prefix.)
+#
+# HISTORICAL, for anyone reading old output or an older checkout: this script
+# previously parsed Koverage's *native* "map" mode file, whose header is
+# different and LONGER (confirmed against upstream source on 2026-08-10,
+# https://github.com/beardymcjohnface/Koverage -- coverage.smk's
+# all_sample_coverage rule + scripts/sampleCoverage.py):
+#
+#   Sample  Contig  Count  RPM  RPKM  RPK  TPM  Mean  Median  Hitrate  Variance
+#     0       1       2     3    4     5    6    7      8        9        10
+#
+# -- i.e. RPKM was index 4 and Mean was index 7, not 3 and 5. Mixing the two
+# layouts up silently mislabels RPKM/TPM or Mean/Variance in the report tables
+# rather than erroring, so if you ever point this script at a
+# sample_coverage.tsv produced by anything other than coverm_combine_genomes,
+# check its header first.
+IDX_SAMPLE = 0
+IDX_CONTIG = 1
+IDX_COUNT = 2
+IDX_RPKM = 3
+IDX_MEAN = 5
+
+
+def parse_koverage_row(strings):
+    """Parse one data row (i.e. not the header) of the CoverM-mode
+    sample_coverage.tsv written by postprocess.smk's coverm_combine_genomes.
+
+    Args:
+        strings (list[str]): tab-split fields of one data line.
+
+    Returns:
+        tuple: (sample, contig, count, rpkm, mean_coverage)
+    """
+    sample = strings[IDX_SAMPLE]
+    contig = strings[IDX_CONTIG]
+    count = int(float(strings[IDX_COUNT]))
+    rpkm_val = float(strings[IDX_RPKM])
+    mean_val = float(strings[IDX_MEAN])
+    return sample, contig, count, rpkm_val, mean_val
+
+
 def main():
+    import pandas as pd
+    from Bio import SeqIO
+
     # Get arguments
     # -----------------------
 
@@ -67,7 +138,7 @@ def main():
 
     # Log inputs
     logger.info(f"Samples file: {samples_file}")
-    logger.info(f"Koverage results: {koverage_tsv}")
+    logger.info(f"Per-genome coverage table: {koverage_tsv}")
     logger.info(f"Output path: {output_path}")
 
     # Get sample names
@@ -87,9 +158,10 @@ def main():
     with open(koverage_tsv, "r") as mf:
         for line in mf.readlines()[1:]:
             strings = line.strip().split("\t")
-            read_counts[strings[1]][strings[0]] = int(float(strings[2]))
-            rpkm[strings[1]][strings[0]] = float(strings[4])
-            mean_cov[strings[1]][strings[0]] = float(strings[7])
+            sample, contig, count, rpkm_val, mean_val = parse_koverage_row(strings)
+            read_counts[contig][sample] = count
+            rpkm[contig][sample] = rpkm_val
+            mean_cov[contig][sample] = mean_val
 
     # Add records to dataframe
     counter = 0
@@ -147,7 +219,7 @@ def main():
     # Exit program
     # --------------
 
-    logger.info("Thank you for using format_koverage_results!")
+    logger.info("Thank you for using phables!")
 
 
 if __name__ == "__main__":

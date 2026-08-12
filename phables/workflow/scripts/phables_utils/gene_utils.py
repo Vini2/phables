@@ -63,7 +63,19 @@ def get_phrog_unitigs(phrogs, e_value, seq_identity):
         for line in myfile.readlines():
             if not line.startswith("phrog"):
                 strings = line.strip().split("\t")
-                phrog_dict[f"phrog_{strings[0]}"] = f"{strings[2]} {strings [3]}"
+                # Category only (not concatenated with the product/annot text at
+                # strings[2]) -- component_utils.get_components does an exact-match
+                # test against this value. Concatenating the two let genuinely
+                # unrelated PHROGs slip through: e.g. phrog_5's product is "tail
+                # completion or Neck1 protein" with category "connector", and the
+                # word "tail" in that product text used to satisfy a substring test
+                # for the tail category even though this PHROG isn't one. Confirmed
+                # against the real annotation table: 110 PHROGs hit this exact
+                # failure mode (103 false "tail" matches, 7 false "connector"
+                # matches), all from category-appropriate product names that happen
+                # to mention another hallmark word. phrog_dict has no other
+                # consumer anywhere in the codebase (checked), so this is safe.
+                phrog_dict[f"phrog_{strings[0]}"] = strings[3]
 
     # Get unitigs containing phrogs
     unitig_phrogs = {}

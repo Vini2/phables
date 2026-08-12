@@ -7,7 +7,7 @@ from cogent3 import load_aligned_seqs
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "1.5.0"
+__version__ = "2.0.0"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Stable Release"

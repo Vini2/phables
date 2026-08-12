@@ -1,0 +1,28 @@
+name: prostt5-rocm
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pip
+  - pip:
+    # Unlike CUDA, ROCm is never the default pip torch build -- this index
+    # override is required, not just for reproducibility.
+    - --extra-index-url https://download.pytorch.org/whl/rocm6.3
+    # torch==2.7.1+rocm6.3 pinned exactly, not just floored -- matches Setonix's
+    # own verified-working Pawsey container (quay.io/pawsey/pytorch:2.7.1-rocm6.3.3),
+    # confirmed real via https://download.pytorch.org/whl/rocm6.3/torch/ (the
+    # exact wheel exists for cp39-cp313). Switched to this conda-env path instead
+    # of the --prostt5-container route after repeatedly hitting container-specific
+    # problems on Setonix that had nothing to do with phables/pholdlib itself:
+    # a broken torchaudio needing libomp.so, --home overriding the container's
+    # apparent CWD so relative output paths silently resolved to the wrong place,
+    # and a missing MIOpen AI-heuristic kernel-selection file for gfx90a. All real,
+    # all diagnosed, none of them things a plain conda env run directly on the host
+    # (no container namespace, no bind-mount surface) is exposed to at all.
+    # >=2.6 would already avoid transformers' checkpoint loader refusing
+    # torch.load() on older torch outright (CVE-2025-32434 hardening in
+    # check_torch_load_is_safe, which broke loading Rostlab/ProstT5_fp16 -- no
+    # safetensors file); pinning to exactly 2.7.1 goes further, matching a
+    # version already confirmed to work on this exact hardware (MI250X, gfx90a).
+    - torch==2.7.1
+    - pholdlib>=0.1.2

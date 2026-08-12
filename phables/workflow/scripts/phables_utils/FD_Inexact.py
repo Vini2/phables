@@ -1,12 +1,24 @@
-# Source: https://github.com/algbio/MFD-ILP
+#!/usr/bin/env python3
 
+# Source: https://github.com/algbio/flowpaths
+
+import itertools
 import logging
 
-import more_itertools
+import flowpaths as fp
 import networkx as nx
 
-# create logger
-logger = logging.getLogger("phables 1.5.0")
+__author__ = "Vijini Mallawaarachchi"
+__copyright__ = "Copyright 2026"
+__license__ = "MIT"
+__version__ = "0.5.0"
+__maintainer__ = "Vijini Mallawaarachchi"
+__email__ = "viji.mallawaarachchi@gmail.com"
+__status__ = "Development"
+
+
+# Create logger
+logger = logging.getLogger(__name__)
 
 
 def read_input(graphfile, number_subpath):
@@ -46,137 +58,200 @@ def read_input(graphfile, number_subpath):
     return listOfGraphs
 
 
-# FD-Subpath-Inexact-Gurobi
+# FD-Subpath-Inexact-Flowpaths
 # --------------------------------------------
-def flowMultipleDecomposition(data, K, nthreads):
-    # libraries
-    import gurobipy as gp
-    from gurobipy import GRB
+class InexactFlowDecomposition(fp.AbstractPathModelDAG):
+    def __init__(
+        self,
+        G,
+        lb,
+        ub,
+        num_paths,
+        subpath_constraints=None,
+        threads=1,
+    ):
+        self.G = fp.stDAG(G)
+        self.lb = lb
+        self.ub = ub
+        self._solution = None
 
-    # calculate the minimal flow decomposition based on such graph
-    V = data["vertices"]
-    E = data["edges"]
-    W = data["maxFlow"]
-    S = data["sources"]
-    D = data["targets"]
-    AD_in = data["adj_in"]
-    AD_out = data["adj_out"]
-    f_low = data["flows_low"]
-    f_up = data["flows_up"]
-    subpaths = data["subpaths"]
+        trusted_edges_for_safety = self.G.get_non_zero_flow_edges(flow_attr=self.lb)
+
+        super().__init__(
+            self.G,
+            num_paths,
+            subpath_constraints=subpath_constraints or [],
+            optimization_options={
+                "trusted_edges_for_safety": trusted_edges_for_safety,
+            },
+            solver_options={
+                "threads": threads,
+                "log_to_console": "false",
+            },
+        )
+
+        self.create_solver_and_paths()
+        self._encode_flow_intervals()
+
+    def _encode_flow_intervals(self):
+        maximum_allowed_path_weight = max(
+            data.get(self.ub, 0) for _, _, data in self.G.edges(data=True)
+        )
+
+        self.path_weights_vars = self.solver.add_variables(
+            self.path_indexes,
+            name_prefix="w",
+            lb=0,
+            ub=maximum_allowed_path_weight,
+            var_type="integer",
+        )
+        self.pi_vars = self.solver.add_variables(
+            self.edge_indexes,
+            name_prefix="pi",
+            lb=0,
+            ub=maximum_allowed_path_weight,
+        )
+
+        for u, v, data in self.G.edges(data=True):
+            if (u, v) in self.G.source_sink_edges:
+                continue
+
+            for i in range(self.k):
+                self.solver.add_binary_continuous_product_constraint(
+                    binary_var=self.edge_vars[(u, v, i)],
+                    continuous_var=self.path_weights_vars[i],
+                    product_var=self.pi_vars[(u, v, i)],
+                    lb=0,
+                    ub=maximum_allowed_path_weight,
+                    name=f"product_u={u}_v={v}_i={i}",
+                )
+
+            edge_weight = self.solver.quicksum(
+                self.pi_vars[(u, v, i)] for i in range(self.k)
+            )
+            self.solver.add_constraint(
+                edge_weight >= data[self.lb],
+                name=f"lowerbound_u={u}_v={v}",
+            )
+            self.solver.add_constraint(
+                edge_weight <= data[self.ub],
+                name=f"upperbound_u={u}_v={v}",
+            )
+
+    def get_solution(self):
+        self.check_is_solved()
+
+        if self._solution is not None:
+            return self._solution
+
+        weights = self.solver.get_values(self.path_weights_vars)
+        self._solution = {
+            "paths": self.get_solution_paths(),
+            "weights": [weights[i] for i in range(self.k)],
+        }
+
+        return self._solution
+
+    def get_objective_value(self):
+        return self.solver.get_objective_value()
+
+    def get_lowerbound_k(self):
+        weight_function = {
+            (u, v): 1
+            for u, v, edge_data in self.G.edges(data=True)
+            if edge_data.get(self.lb, 0) > 0
+        }
+        return self.G.compute_max_edge_antichain(weight_function=weight_function)
+
+    def is_valid_solution(self):
+        if not self.is_solved():
+            return False
+
+        solution = self.get_solution()
+        for u, v, edge_data in self.G.base_graph.edges(data=True):
+            observed_weight = 0
+            for path, weight in zip(solution["paths"], solution["weights"]):
+                path_edges = set(itertools.pairwise(path))
+                if (u, v) in path_edges:
+                    observed_weight += weight
+
+            if (
+                observed_weight < edge_data[self.lb]
+                or observed_weight > edge_data[self.ub]
+            ):
+                return False
+
+        return True
+
+
+def _get_subpath_constraints(subpaths, edges, to_flowpaths_node=str):
+    subpath_constraints = []
+    for subpath in subpaths.values():
+        subpath_edges = list(itertools.pairwise(subpath))
+        if subpath_edges and all(edge in edges for edge in subpath_edges):
+            subpath_constraints.append(
+                [
+                    (to_flowpaths_node(edge[0]), to_flowpaths_node(edge[1]))
+                    for edge in subpath_edges
+                ]
+            )
+
+    return subpath_constraints
+
+
+def _path_to_edges(path, from_flowpaths_node=lambda node: node):
+    restored_path = [from_flowpaths_node(node) for node in path]
+    return list(itertools.pairwise(restored_path))
+
+
+def flowMultipleDecomposition(data, K, nthreads):
+    graph = data["graph"]
+    node_labels = {node: str(node) for node in graph.nodes}
+    original_node_labels = {
+        flowpaths_node: node for node, flowpaths_node in node_labels.items()
+    }
+    flowpaths_graph = nx.relabel_nodes(graph, node_labels, copy=True)
+    subpath_constraints = _get_subpath_constraints(
+        data["subpaths"], data["edges"], node_labels.__getitem__
+    )
 
     try:
-        # create extra sets
-        T = [(i, j, k) for (i, j) in E for k in range(0, K)]
-        SC = [k for k in range(0, K)]
-        R = [(k, s) for k in range(0, K) for s in range(0, len(subpaths))]
-
-        # Create a new model
-        model = gp.Model("MFD")
-        model.setParam("LogToConsole", 0)
-        model.setParam("Threads", nthreads)
-
-        # Create variables
-        x = model.addVars(T, vtype=GRB.BINARY, name="x")
-        w = model.addVars(SC, vtype=GRB.INTEGER, name="w", lb=0)
-        z = model.addVars(T, vtype=GRB.CONTINUOUS, name="z", lb=0)
-        r = model.addVars(R, vtype=GRB.BINARY, name="r")
-
-        model.setObjective(GRB.MINIMIZE)
-
-        # flow conservation
-        for k in range(0, K):
-            for i in V:
-                if i in S:
-                    model.addConstr(sum(x[i, j, k] for j in AD_out[i]) == 1)
-                if i in D:
-                    model.addConstr(sum(x[j, i, k] for j in AD_in[i]) == 1)
-                if i not in S and i not in D:
-                    model.addConstr(
-                        sum(x[i, j, k] for j in AD_out[i])
-                        - sum(x[j, i, k] for j in AD_in[i])
-                        == 0
-                    )
-
-        # flow balance
-        model.addConstrs(
-            f_up[i, j] >= gp.quicksum(z[i, j, k] for k in range(0, K)) for (i, j) in E
+        model = InexactFlowDecomposition(
+            flowpaths_graph,
+            lb="flow_low",
+            ub="flow_up",
+            num_paths=K,
+            subpath_constraints=subpath_constraints,
+            threads=nthreads,
         )
-        model.addConstrs(
-            f_low[i, j] <= gp.quicksum(z[i, j, k] for k in range(0, K)) for (i, j) in E
-        )
+        model.solve()
 
-        # linearization
-        for i, j in E:
-            for k in range(0, K):
-                model.addConstr(z[i, j, k] <= W * x[i, j, k])
-                model.addConstr(w[k] - (1 - x[i, j, k]) * W <= z[i, j, k])
-                model.addConstr(z[i, j, k] <= w[k])
-
-        # subpath constraints
-        for k in range(0, K):
-            for sp_len in range(0, len(subpaths)):
-                subpath_edges = list(more_itertools.pairwise(subpaths[sp_len]))
-                try:
-                    model.addConstr(
-                        gp.quicksum(x[i, j, k] for (i, j) in subpath_edges)
-                        >= len(subpath_edges) * r[k, sp_len]
-                    )
-                except:
-                    continue
-
-        model.addConstrs(
-            gp.quicksum(r[k, sp_len] for k in range(0, K)) >= 1
-            for sp_len in range(0, len(subpaths))
-        )
-
-        # objective function
-        model.optimize()
-
-        w_sol = [0] * len(range(0, K))
-        x_sol = {}
-        paths = [list() for i in range(0, K)]
-
-        if model.status == GRB.OPTIMAL:
+        if model.is_solved():
+            solution = model.get_solution()
             data["message"] = "solved"
-            data["runtime"] = model.Runtime
-
-            for v in model.getVars():
-                if "w" in v.VarName:
-                    for k in range(0, K):
-                        if str(k) in v.VarName:
-                            w_sol[k] = v.x
-
-                if "x" in v.VarName:
-                    for i, j, k in T:
-                        if str(i) + "," + str(j) + "," + str(k) in v.VarName:
-                            x_sol[i, j, k] = v.x
-
-            for i, j, k in T:
-                if x_sol[i, j, k] == 1:
-                    paths[k].append((i, j))
-
-            data["weights"] = w_sol
-            data["solution"] = paths
-
-        if model.status == GRB.INFEASIBLE:
+            data["runtime"] = model.solve_statistics.get(
+                f"milp_solve_time_for_num_paths_{K}", 0
+            )
+            data["weights"] = solution["weights"]
+            data["solution"] = [
+                _path_to_edges(path, original_node_labels.__getitem__)
+                for path in solution["paths"]
+            ]
+        else:
             data["message"] = "unsolved"
-
-    except gp.GurobiError as e:
-        logger.error(f"Error code {e.errno}: {str(e)}")
-
-    except AttributeError:
-        logger.error(f"Encountered an attribute error")
+            data["runtime"] = model.solve_statistics.get(
+                f"milp_solve_time_for_num_paths_{K}", 0
+            )
+    except (ValueError, RuntimeError, AttributeError) as e:
+        data["message"] = "unsolved"
+        logger.debug(f"Flowpaths could not solve the MFD instance with K={K}: {e}")
 
     return data
 
 
 def FD_Algorithm(data, max_paths, nthreads):
-    listOfEdges = data["edges"]
-    solutionMap = data["graph"]
-    solutionSet = 0
-    Kmin = data["minK"]
     solutionWeights = 0
+    solutionSet = 0
 
     for i in range(1, max_paths + 1):
         data = flowMultipleDecomposition(data, i, nthreads)
@@ -197,8 +272,13 @@ def FD_Algorithm(data, max_paths, nthreads):
 
 
 def SolveInstances(Graphs, max_paths, outfile, recfile, nthreads):
-    fp = open(outfile, "w+")
-    fc = open(recfile, "w+")
+    # Not populated with per-path debug output -- that was already true in the
+    # original Gurobi-based implementation (the file handles were opened but
+    # never written to). Still created here because workflow/test_phables.smk
+    # declares both as Snakemake rule outputs; a declared output missing from
+    # disk after the rule runs is a hard Snakemake failure, not a warning.
+    open(outfile, "w").close()
+    open(recfile, "w").close()
 
     for s in range(0, 1):
         f_low = {}
@@ -208,7 +288,7 @@ def SolveInstances(Graphs, max_paths, outfile, recfile, nthreads):
         listOfEdges = Graphs[s]["list of edges"]
 
         for k in range(0, len(listOfEdges)):
-            (a, b, c, d) = listOfEdges[k]
+            a, b, c, d = listOfEdges[k]
             Edges.add((a, b))
             V.add(a)
             V.add(b)
@@ -218,8 +298,9 @@ def SolveInstances(Graphs, max_paths, outfile, recfile, nthreads):
         # creation of graphs
         # creation of graphs
         G = nx.DiGraph()
-        G.add_edges_from(Edges, weights=f_low)
         G.add_nodes_from(V)
+        for edge in Edges:
+            G.add_edge(edge[0], edge[1], flow_low=f_low[edge], flow_up=f_up[edge])
 
         # creation of adjacent matrix
         AD_in = {}

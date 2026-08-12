@@ -30,6 +30,10 @@ rule run_phables:
         alpha = AL,
         longreads = LR,
         prefix = PR,
+        phagedetection = PD,
+        hallmark_categories = config["hallmark_categories"],
+        hallmark_evalue = config["hallmark_evalue"],
+        hallmark_minbits = config["hallmark_minbits"],
         output = os.path.join(OUTDIR, "phables"),
         nthreads = config["resources"]["jobCPU"],
         log = os.path.join(LOGSDIR, "phables_output.log")
@@ -38,6 +42,8 @@ rule run_phables:
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda:
-        os.path.join("..", "envs", "phables.yaml")
+        None if CONTAINER_IMAGE else os.path.join("..", "envs", "phables.yaml")
+    container:
+        CONTAINER_IMAGE
     script:
         os.path.join("..", "scripts", "phables.py")

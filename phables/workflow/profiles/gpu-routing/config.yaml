@@ -1,0 +1,52 @@
+# Optional Snakemake workflow profile: route predict_3di (and scan_hallmark, when
+# --foldseek-gpu is set) to a GPU partition via SLURM, while every other rule stays on
+# whatever partition your cluster's own default profile / sbatch defaults provide.
+#
+# This is deliberately NOT baked into the Snakefile itself. None of the rules in
+# genes.smk hardcode slurm_partition or a gpu resource -- per Snakemake's own executor
+# docs (snakemake-executor-plugin-slurm), platform-specific resources like these belong
+# in a profile, set at the system/user/workflow level, precisely so a user without GPU
+# access can just not use this profile and get an entirely CPU-only run. Forcing GPU
+# partition routing into the Snakefile would mean every user pays for it, including
+# those who intentionally chose --gpu-backend cpu / never set --foldseek-gpu.
+#
+# Usage: pass this via phables' existing snake_args passthrough (nargs=-1 in
+# common_options), since --use-conda alone doesn't read workflow profiles:
+#
+#   phables run --input ... --phagedetection prostt5-foldseek ... \
+#     --workflow-profile phables/workflow/profiles/gpu-routing
+#
+# A user who doesn't want GPU routing at all simply omits --workflow-profile. Every
+# rule then falls back to the cluster's own default partition/resources -- nothing in
+# the Snakefile forces a GPU request.
+#
+# Before using this for real: replace "gpu" below with your actual SLURM GPU partition
+# name, and confirm the gpu=1 resource maps the way you expect (Snakemake's SLURM plugin
+# translates it to `--gpus=1`; use `gres: "gpu:<model>:1"` instead if your cluster expects
+# --gres). Neither has been tested against a real SLURM cluster from here.
+
+executor: slurm
+
+set-resources:
+  predict_3di:
+    slurm_partition: "gpu"
+    gpu: 1
+    # Match to whatever CPU count your cluster expects per GPU allocation --
+    # unrelated to phables' own --threads, which controls torch's CPU thread count
+    # inside the job, not how many CPUs SLURM reserves for it.
+    cpus_per_gpu: 8
+
+  # Only relevant if --foldseek-gpu is also passed (scan_hallmark stays CPU-only
+  # otherwise, foldseek's --gpu mode being CUDA-only per phold's own run_foldseek.py --
+  # see the fork audit). Harmless to leave in if you never use --foldseek-gpu: this
+  # entry is simply never exercised.
+  scan_hallmark:
+    slurm_partition: "gpu"
+    gpu: 1
+    cpus_per_gpu: 8
+
+# Everything else (call_genes, scan_smg, scan_phrogs, koverage, build_hallmark_query_db,
+# run_phables, ...) is untouched here and uses whatever default-resources your cluster's
+# own base profile provides -- typically a CPU partition. Add entries under
+# default-resources: here only if you want a specific non-GPU partition name enforced
+# for every other rule too; leaving it out defers entirely to your system/user profile.

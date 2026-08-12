@@ -4,7 +4,12 @@ channels:
 dependencies:
   - python>=3.11, <3.14
   - mafft
-  - cogent3
+  # cogent3>=2026.7.6a0 pulls in scinexus>=2026.5.16, which only resolves to a
+  # tqdm build requiring python-3.14.0rc1 (a release candidate needing the
+  # _python_rc virtual package) -- unsatisfiable on any normal install.
+  # Confirmed via bioconda's release metadata: every cogent3 build through
+  # 2026.4.13a0 has no scinexus dependency at all.
+  - cogent3 <2026.7
   - pip
   - pip:
     - piqtree

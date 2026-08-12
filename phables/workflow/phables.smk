@@ -28,7 +28,7 @@ def targetRule(fn):
     target_rules.append(fn.__name__[2:])
     return fn
 
-localrules: all, preprocess, phables, print_stages, koverage_tsv, postprocess
+localrules: all, preprocess, phables, print_stages, samples_tsv, postprocess
 
 
 """Run stages"""

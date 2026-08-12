@@ -10,6 +10,15 @@ def get_components(
 ):
     """
     Get connected components with PHROGs and no SMGs.
+
+    Category checks are exact-match against phrog_dict[phrog] (gene_utils.get_phrog_unitigs
+    now stores just the category, not concatenated with the product/annot text). Used to be
+    a substring test, which false-matched real data: e.g. phrog_5's product is "tail
+    completion or Neck1 protein" with category "connector", and the word "tail" in that
+    product text satisfied `"tail" in phrog_dict[phrog]` even though the PHROG isn't a tail
+    gene. 110 PHROGs hit this in the current annotation table (103 false "tail" matches, 7
+    false "connector" matches) -- mostly connector-category genes whose product names
+    reference the tail apparatus they connect to.
     """
 
     pruned_vs = {}
@@ -46,13 +55,13 @@ def get_components(
             for unitig in component:
                 if unitig_names[unitig] in unitig_phrogs:
                     for phrog in unitig_phrogs[unitig_names[unitig]]:
-                        if "head and packaging" in phrog_dict[phrog]:
+                        if phrog_dict[phrog] == "head and packaging":
                             head_present = True
-                        if "connector" in phrog_dict[phrog]:
+                        if phrog_dict[phrog] == "connector":
                             connector_present = True
-                        if "tail" in phrog_dict[phrog]:
+                        if phrog_dict[phrog] == "tail":
                             tail_present = True
-                        if "lysis" in phrog_dict[phrog]:
+                        if phrog_dict[phrog] == "lysis":
                             lysis_present = True
 
                         phrogs_found.add(phrog)
@@ -68,13 +77,13 @@ def get_components(
 
             if unitig_names[unitig] in unitig_phrogs:
                 for phrog in unitig_phrogs[unitig_names[unitig]]:
-                    if "head and packaging" in phrog_dict[phrog]:
+                    if phrog_dict[phrog] == "head and packaging":
                         head_present = True
-                    if "connector" in phrog_dict[phrog]:
+                    if phrog_dict[phrog] == "connector":
                         connector_present = True
-                    if "tail" in phrog_dict[phrog]:
+                    if phrog_dict[phrog] == "tail":
                         tail_present = True
-                    if "lysis" in phrog_dict[phrog]:
+                    if phrog_dict[phrog] == "lysis":
                         lysis_present = True
 
                     phrogs_found.add(phrog)

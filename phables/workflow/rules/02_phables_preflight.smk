@@ -32,6 +32,25 @@ MC = config['mincov']
 CC = config['compcount']
 MP = config['maxpaths']
 MGF = config['mgfrac']
+GC = config['genecaller']
+PD = config['phagedetection']
+GPU_BACKEND = config['gpu_backend']
+FOLDSEEK_GPU = config['foldseek_gpu']
+# CONTAINER_IMAGE: workflow-wide container (e.g. a phables release image with
+# every per-rule tool baked in), replacing --use-conda's per-rule env creation
+# entirely when set -- every rule below does
+# `conda: None if CONTAINER_IMAGE else os.path.join(...)` +
+# `container: CONTAINER_IMAGE`, so a real value here disables conda for ALL of
+# them at once (not just predict_3di). Run with --use-singularity, no
+# --use-conda, once this is set.
+#
+# PROSTT5_CONTAINER falls back to CONTAINER_IMAGE when not set explicitly --
+# --prostt5-container remains available to point JUST predict_3di at a
+# different image (e.g. phold's own) than the rest of the workflow, but
+# --container alone is now sufficient to route everything, predict_3di
+# included, through one image.
+PROSTT5_CONTAINER = config['prostt5_container'] or config['container']
+CONTAINER_IMAGE = config['container']
 EV = config['evalue']
 SI = config['seqidentity']
 CT = config['covtol']

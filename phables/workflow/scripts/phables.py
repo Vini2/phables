@@ -4,7 +4,7 @@ import logging
 import time
 
 from phables_utils import (component_utils, edge_graph_utils, gene_utils,
-                           long_utils, short_utils)
+                           hallmark_utils, long_utils, short_utils)
 from phables_utils.coverage_utils import (get_junction_pe_coverage,
                                           get_sub_path_coverage,
                                           get_unitig_coverage)
@@ -15,7 +15,7 @@ from phables_utils.output_utils import (init_files, write_component_info,
 __author__ = "Vijini Mallawaarachchi"
 __copyright__ = "Copyright 2022, Phables Project"
 __license__ = "MIT"
-__version__ = "1.5.0"
+__version__ = "2.0.0"
 __maintainer__ = "Vijini Mallawaarachchi"
 __email__ = "viji.mallawaarachchi@gmail.com"
 __status__ = "Stable Release"
@@ -44,6 +44,10 @@ def main():
     alpha = float(snakemake.params.alpha)
     longreads = bool(snakemake.params.longreads)
     prefix = snakemake.params.prefix
+    phagedetection = snakemake.params.phagedetection
+    hallmark_categories = snakemake.params.hallmark_categories
+    hallmark_evalue = float(snakemake.params.hallmark_evalue)
+    hallmark_minbits = float(snakemake.params.hallmark_minbits)
     output = snakemake.params.output
     nthreads = int(snakemake.params.nthreads)
     log = snakemake.params.log
@@ -134,9 +138,15 @@ def main():
 
     # Get unitigs with PHROGs
     # ----------------------------------------------------------------------
-    unitig_phrogs, phrog_dict = gene_utils.get_phrog_unitigs(
-        phrogs, evalue, seqidentity
-    )
+    if phagedetection == "prostt5-foldseek":
+        hallmark_cats = hallmark_utils.load_hallmark_categories(hallmark_categories)
+        unitig_phrogs, phrog_dict = hallmark_utils.get_hallmark_unitigs(
+            phrogs, hallmark_cats, hallmark_evalue, hallmark_minbits
+        )
+    else:
+        unitig_phrogs, phrog_dict = gene_utils.get_phrog_unitigs(
+            phrogs, evalue, seqidentity
+        )
 
     # Get components with viral components
     # ----------------------------------------------------------------------

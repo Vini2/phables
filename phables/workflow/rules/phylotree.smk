@@ -11,7 +11,9 @@ rule build_msa:
     log:
         os.path.join(LOGSDIR, "mafft_output.log")
     conda:
-        os.path.join("..", "envs", "phylotree.yaml")
+        None if CONTAINER_IMAGE else os.path.join("..", "envs", "phylotree.yaml")
+    container:
+        CONTAINER_IMAGE
     shell:
         """
         mafft --auto --thread {threads} {input} > {output}
@@ -34,6 +36,8 @@ rule build_tree:
     log:
         os.path.join(LOGSDIR, "piqtree_output.log")
     conda:
-        os.path.join("..", "envs", "phylotree.yaml")
+        None if CONTAINER_IMAGE else os.path.join("..", "envs", "phylotree.yaml")
+    container:
+        CONTAINER_IMAGE
     script:
         os.path.join("..", "scripts", "phylotree.py")

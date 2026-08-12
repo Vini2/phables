@@ -26,6 +26,7 @@ CT = config['covtol']
 AL = config['alpha']
 LR = config['longreads']
 PR = config['prefix']
+PD = config['phagedetection']
 
 
 """ONSTART/END/ERROR

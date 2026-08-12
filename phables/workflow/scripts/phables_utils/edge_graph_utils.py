@@ -1,4 +1,5 @@
 import copy
+import inspect
 import logging
 from collections import defaultdict
 
@@ -7,7 +8,7 @@ from Bio.Seq import Seq
 from igraph import Graph
 
 # Create logger
-logger = logging.getLogger("phables 1.5.0")
+logger = logging.getLogger("phables 2.0.0")
 
 
 class BidirectionalError(Exception):
@@ -259,6 +260,22 @@ def remove_dead_ends(G_edge):
     return set(dead_ends_to_remove)
 
 
+def _simple_paths_maxlen_kwarg():
+    """Name of get_all_simple_paths' path-length-limit kwarg for the installed igraph.
+
+    igraph 1.0.0 renamed it `cutoff` -> `maxlen`; passing the old name raises
+    TypeError: got an unexpected keyword argument 'cutoff'. Semantics are unchanged
+    (both count *edges*, so a value of 2 yields paths of up to 3 vertices --
+    verified directly against igraph 1.0.0, not assumed from the rename). Detect it
+    rather than pinning igraph, so the fork works on both sides of that release.
+    """
+    params = inspect.signature(Graph.get_all_simple_paths).parameters
+    return "maxlen" if "maxlen" in params else "cutoff"
+
+
+_MAXLEN_KWARG = _simple_paths_maxlen_kwarg()
+
+
 def get_all_sub_paths(assembly_graph, unitig_names):
     """
     Get all sub paths of length 2 and 3
@@ -268,7 +285,7 @@ def get_all_sub_paths(assembly_graph, unitig_names):
 
     for v in range(assembly_graph.vcount()):
         # Get all paths starting from vertex 'v' of length exactly 2
-        paths_from_v = assembly_graph.get_all_simple_paths(v, cutoff=2)
+        paths_from_v = assembly_graph.get_all_simple_paths(v, **{_MAXLEN_KWARG: 2})
 
         for path in paths_from_v:
             if len(path) == 3:  # Length 3 means 3 vertices (2 edges)

@@ -34,6 +34,19 @@ def default_to_output(ctx, param, value):
     return value
 
 
+def create_output_dir(ctx, param, value):
+    """Callback for --output; creates the directory as soon as its value is resolved.
+
+    --output is the first option processed by common_options, before --configfile and
+    --log (both of which use default_to_output above to place themselves inside it).
+    Without this, run/install/test crash before Snakemake ever starts: run_snakemake's
+    own copy_config step opens f"{output}/phables.log" to write its first log message,
+    and FileHandler-style opens don't create missing parent directories.
+    """
+    os.makedirs(value, exist_ok=True)
+    return value
+
+
 def common_options(func):
     """Common command line args
     Define common command line args here, and include them with the @common_options decorator below.
@@ -45,6 +58,7 @@ def common_options(func):
             type=click.Path(dir_okay=True, writable=True, readable=True),
             default="phables.out",
             show_default=True,
+            callback=create_output_dir,
         ),
         click.option(
             "--configfile",
@@ -55,6 +69,16 @@ def common_options(func):
         ),
         click.option(
             "--threads", help="Number of threads to use", default=1, show_default=True
+        ),
+        click.option(
+            "--databases",
+            default=None,
+            required=False,
+            help=(
+                "Path to databases directory "
+                "[default: <install_dir>/databases, i.e. wherever `phables install` put them]"
+            ),
+            type=click.Path(),
         ),
         click.option(
             "--use-conda/--no-use-conda",
@@ -68,6 +92,20 @@ def common_options(func):
             help="Custom conda env directory",
             type=click.Path(),
             show_default=False,
+        ),
+        click.option(
+            "--container",
+            default=None,
+            required=False,
+            help=(
+                "container image with every per-rule tool already installed "
+                "(container/Dockerfile), replacing --use-conda's per-rule env "
+                "creation for the WHOLE workflow -- not just predict_3di "
+                "(--prostt5-container). Needs --use-singularity passed as a "
+                "trailing snakemake arg; don't also pass --use-conda alongside "
+                "this."
+            ),
+            type=click.Path(),
         ),
         click.option(
             "--profile", help="Snakemake profile", default=None, show_default=False
@@ -122,7 +160,12 @@ def run_options(func):
             "--minlength",
             default=2000,
             required=False,
-            help="minimum length of circular unitigs to consider",
+            help=(
+                "minimum length of circular unitigs to consider as standalone "
+                "genomes, and the minimum length for any resolved LINEAR path "
+                "to be kept -- circular paths are exempt regardless of length, "
+                "since a closed cycle is itself strong completeness evidence"
+            ),
             type=int,
             show_default=True,
         ),
@@ -157,6 +200,172 @@ def run_options(func):
             help="length threshold to consider single copy marker genes",
             type=float,
             show_default=True,
+        ),
+        click.option(
+            "--build-tree/--no-build-tree",
+            default=False,
+            required=False,
+            help=(
+                "align resolved genomes (MAFFT) and build a phylogenetic tree "
+                "(IQ-TREE via piqtree). Off by default -- slow at metagenome "
+                "scale (thousands of genomes); run phylogenetics as a "
+                "separate step on the resolved genomes instead unless you "
+                "specifically need a per-run tree"
+            ),
+            show_default=True,
+        ),
+        click.option(
+            "--genecaller",
+            default="pyrodigal-gv",
+            required=False,
+            help="gene caller to use for unitig gene prediction",
+            type=click.Choice(["pyrodigal-gv", "fraggenescan"]),
+            show_default=True,
+        ),
+        click.option(
+            "--phagedetection",
+            default="mmseqs",
+            required=False,
+            help=(
+                "phage-gene detection method: mmseqs (PHROGs, default) or "
+                "prostt5-foldseek (structural; needs --hallmark-db, "
+                "--hallmark-categories and --prostt5-checkpoint)"
+            ),
+            type=click.Choice(["mmseqs", "prostt5-foldseek"]),
+            show_default=True,
+        ),
+        click.option(
+            "--gpu-backend",
+            default="cpu",
+            required=False,
+            help=(
+                "PyTorch build for the ProstT5 conda env: cpu, cuda, or rocm "
+                "(e.g. Setonix's MI250X nodes). Independent of --prostt5-cpu, "
+                "which forces ProstT5 onto the CPU device at runtime even "
+                "inside a GPU-capable env -- this controls which env gets built"
+            ),
+            type=click.Choice(["cpu", "cuda", "rocm"]),
+            show_default=True,
+        ),
+        click.option(
+            "--foldseek-gpu",
+            is_flag=True,
+            default=False,
+            required=False,
+            help=(
+                "use foldseek's CUDA GPU search mode for the hallmark scan "
+                "(requires --gpu-backend cuda, a CUDA-capable foldseek build "
+                "on PATH -- not the plain bioconda package -- and a "
+                "*_gpu-suffixed, makepaddedseqdb-prepared hallmark DB)"
+            ),
+            show_default=True,
+        ),
+        click.option(
+            "--hallmark-db",
+            default=None,
+            required=False,
+            help="foldseek hallmark structure subDB prefix, only used with --phagedetection "
+            "prostt5-foldseek. Auto-resolves to the copy `phables install` fetches under "
+            "--databases (docs/hallmark_db.md) when not set -- override only if you built "
+            "your own with build_hallmark_db.py",
+            type=click.Path(),
+        ),
+        click.option(
+            "--hallmark-categories",
+            default=None,
+            required=False,
+            help="hallmark PHROG categories TSV, only used with --phagedetection "
+            "prostt5-foldseek. Auto-resolves alongside --hallmark-db when not set -- "
+            "see build_hallmark_db.py/docs/hallmark_db.md",
+            type=click.Path(),
+        ),
+        click.option(
+            "--hallmark-evalue",
+            default=1e-8,
+            required=False,
+            help="maximum e-value for hallmark structural hits",
+            type=float,
+            show_default=True,
+        ),
+        click.option(
+            "--hallmark-minbits",
+            default=0,
+            required=False,
+            help="minimum bitscore for hallmark structural hits",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-checkpoint",
+            default=None,
+            required=False,
+            help="ProstT5 CNN prediction-head checkpoint (required for --phagedetection prostt5-foldseek)",
+            type=click.Path(),
+        ),
+        click.option(
+            "--prostt5-model",
+            default="Rostlab/ProstT5_fp16",
+            required=False,
+            help="ProstT5 HuggingFace model identifier",
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-model-dir",
+            default=None,
+            required=False,
+            help="directory to cache the ProstT5 model in [default: ~/.cache/prostt5]",
+            type=click.Path(),
+        ),
+        click.option(
+            "--prostt5-half-precision/--prostt5-full-precision",
+            default=True,
+            required=False,
+            help="run ProstT5 in half precision (ignored on CPU)",
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-cpu",
+            is_flag=True,
+            default=False,
+            required=False,
+            help="force ProstT5 onto CPU even if a GPU is available",
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-max-residues",
+            default=4000,
+            required=False,
+            help="max total residues per ProstT5 batch -- device-specific, tune per GPU",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-max-seq-len",
+            default=4000,
+            required=False,
+            help="sequences longer than this flush a ProstT5 batch immediately",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-max-batch",
+            default=20,
+            required=False,
+            help="max sequences per ProstT5 batch -- device-specific, tune per GPU",
+            type=int,
+            show_default=True,
+        ),
+        click.option(
+            "--prostt5-container",
+            default=None,
+            required=False,
+            help=(
+                "container image with pholdlib + torch already installed (e.g. "
+                "phold's own image), used instead of a conda env for predict_3di. "
+                "Needs --use-singularity passed as a trailing snakemake arg -- "
+                "--use-conda alone won't honour it. Overrides --gpu-backend for "
+                "this rule."
+            ),
         ),
         click.option(
             "--evalue",
@@ -296,6 +505,11 @@ def install(output, **kwargs):
     run_snakemake(
         # Full path to Snakefile
         snakefile_path=snake_base(os.path.join("workflow", "install.smk")),
+        # Without merge_config, --databases (and any other common_options value)
+        # never reaches install.smk's config -- config['databases'] stays whatever
+        # the config.yaml default is (null), so 00_database_preflight.smk silently
+        # falls back to <repo_root>/databases instead of the path the user passed.
+        merge_config=kwargs,
         **kwargs
     )
 

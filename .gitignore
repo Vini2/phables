@@ -1,3 +1,7 @@
+# Local benchmark reads/assemblies for the gene-caller ablation — large, fetched from
+# ENA/HPC on demand, never intended to be committed
+tests/data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
