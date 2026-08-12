@@ -43,10 +43,10 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE=quay.io/${{ secrets.QUAY_USERNAME }}/phables:${{ github.sha }}
+          IMAGE=quay.io/${{ secrets.QUAY_NAMESPACE }}/phables:${{ github.sha }}
           docker build -f container/Dockerfile -t $IMAGE .
 
       - name: Push Docker image
         run: |
-          IMAGE=quay.io/${{ secrets.QUAY_USERNAME }}/phables:${{ github.sha }}
+          IMAGE=quay.io/${{ secrets.QUAY_NAMESPACE }}/phables:${{ github.sha }}
           docker push $IMAGE
