@@ -171,4 +171,4 @@ Also, please cite the following tools/databases used by Phables.
 * Subha Kalyaanamoorthy, Bui Quang Minh, Thomas K F Wong, et al. ModelFinder: fast model selection for accurate phylogenetic estimates. Nature Methods volume 14, pages587–589 (2017).
 * Hagberg AA, Schult DA, and Swart PJ. Exploring network structure, dynamics, and function using NetworkX. In Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15 (2008).
 * Gurobi Optimization. [https://www.gurobi.com/](https://www.gurobi.com/).
-* Cogent3. [https://cogent3.org/](https://cogent3.org/)
+* Cogent3. [https://cogent3.org/](https://cogent3.org/).
