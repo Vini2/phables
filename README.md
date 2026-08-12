@@ -42,6 +42,8 @@ conda create -n phables -c conda-forge -c anaconda -c bioconda phables
 conda activate phables
 ```
 
+Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
+
 
 ### Option 2: Installing Phables using pip
 
@@ -50,6 +52,28 @@ You can install Phables from PyPI at [https://pypi.org/project/phables/](https:/
 ```bash
 pip install phables
 ```
+
+Now you can go to [Setting up Gurobi](#setting-up-gurobi) to configure Gurobi.
+
+### Setting up Gurobi
+
+The MFD implementation uses the linear programming solver [Gurobi](https://www.gurobi.com/). The `phables` conda environment and pip setup does not include Gurobi. You have to install Gurobi using one of the following commands depending on your package manager.
+
+```bash
+# conda
+conda install -c gurobi gurobi
+
+# pip
+pip install gurobipy
+```
+
+To handle large models without any model size limitations, once you have installed Gurobi, you have to activate the (academic) license and add the key using the following command. You only have to do this once.
+
+```bash
+grbgetkey <KEY>
+```
+
+You can refer to further instructions at [https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/). 
 
 
 ### Test the installation
@@ -104,7 +128,7 @@ Are you interested in contributing to the Phables project? If so, you can check 
 
 ## Acknowledgement
 
-Phables uses the [flowpaths](https://github.com/algbio/flowpaths) implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). Special thanks are owed to [Ryan Wick](https://github.com/rrwick) for developing [Bandage](https://rrwick.github.io/Bandage/) to visualise assembly graphs, which I heavily rely upon to investigate, develop and optimise my methods. The Phables logo was designed by [Amber Skye](https://fame.flinders.edu.au/people/2021/01/01/amber-cook).
+Phables uses the [Gurobi](https://www.gurobi.com/) implementation of [MFD-ILP](https://github.com/algbio/MFD-ILP) and code snippets from [STRONG](https://github.com/chrisquince/STRONG), [METAMVGL](https://github.com/ZhangZhenmiao/METAMVGL), [GraphBin](https://github.com/metagentools/GraphBin), [MetaCoAG](https://github.com/metagentools/MetaCoAG) and [Hecatomb](https://hecatomb.readthedocs.io/en/latest/). Special thanks are owed to [Ryan Wick](https://github.com/rrwick) for developing [Bandage](https://rrwick.github.io/Bandage/) to visualise assembly graphs, which I heavily rely upon to investigate, develop and optimise my methods. The Phables logo was designed by [Amber Skye](https://fame.flinders.edu.au/people/2021/01/01/amber-cook).
 
 ## Citation
 Phables is published in [Bioinformatics](https://academic.oup.com/bioinformatics) at DOI: [10.1093/bioinformatics/btad586](https://doi.org/10.1093/bioinformatics/btad586). 
@@ -146,4 +170,5 @@ Also, please cite the following tools/databases used by Phables.
 * Lam-Tung Nguyen, Heiko A. Schmidt, Arndt von Haeseler and Bui Quang Minh. IQ-TREE: A Fast and Effective Stochastic Algorithm for Estimating Maximum-Likelihood Phylogenies. Molecular Biology and Evolution, Volume 32, Issue 1, Pages 268–274, (2015).
 * Subha Kalyaanamoorthy, Bui Quang Minh, Thomas K F Wong, et al. ModelFinder: fast model selection for accurate phylogenetic estimates. Nature Methods volume 14, pages587–589 (2017).
 * Hagberg AA, Schult DA, and Swart PJ. Exploring network structure, dynamics, and function using NetworkX. In Proceedings of the 7th Python in Science Conference (SciPy2008), Gäel Varoquaux, Travis Vaught, and Jarrod Millman (Eds), (Pasadena, CA USA), pp. 11–15 (2008).
+* Gurobi Optimization. [https://www.gurobi.com/](https://www.gurobi.com/).
 * Cogent3. [https://cogent3.org/](https://cogent3.org/)
