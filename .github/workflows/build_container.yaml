@@ -43,10 +43,18 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE=quay.io/${{ secrets.QUAY_NAMESPACE }}/phables:${{ github.sha }}
-          docker build -f container/Dockerfile -t $IMAGE .
+          IMAGE=quay.io/${{ secrets.QUAY_NAMESPACE }}/phables
+          docker build -f container/Dockerfile \
+            -t $IMAGE:${{ github.sha }} \
+            .
 
       - name: Push Docker image
         run: |
-          IMAGE=quay.io/${{ secrets.QUAY_NAMESPACE }}/phables:${{ github.sha }}
-          docker push $IMAGE
+          IMAGE=quay.io/${{ secrets.QUAY_NAMESPACE }}/phables
+          docker push $IMAGE:${{ github.sha }}
+
+          if [ "${{ github.event_name }}" = "push" ] && \
+             [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            docker tag $IMAGE:${{ github.sha }} $IMAGE:latest
+            docker push $IMAGE:latest
+          fi
