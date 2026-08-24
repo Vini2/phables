@@ -36,14 +36,13 @@ rule run_phables:
         hallmark_minbits = config["hallmark_minbits"],
         output = os.path.join(OUTDIR, "phables"),
         nthreads = config["resources"]["jobCPU"],
+        mfd_workers = MFD_WORKERS,
         log = os.path.join(LOGSDIR, "phables_output.log")
     threads:
         config["resources"]["jobCPU"]
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "phables.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "phables.yaml")
     script:
         os.path.join("..", "scripts", "phables.py")

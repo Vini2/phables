@@ -41,11 +41,19 @@ __email__ = "viji.mallawaarachchi@gmail.com"
 # / coverm_bam2counts_genomes / coverm_combine_genomes), completing PLAN.md
 # §4.8. The indices below therefore describe the CoverM-mode header:
 #
-#   Sample  Contig  Count  RPKM  TPM  Mean  Covered_fraction  Variance
-#     0       1       2     3    4     5           6             7
+#   Sample  Contig  Read Count  RPKM  TPM  Mean  Covered Fraction  Variance
+#     0       1        2         3     4    5           6              7
 #
-# ("Covered_fraction" is coverm's `covered_fraction` method as it appears after
-# coverm_combine_genomes strips the per-column "<bam filename> " prefix.)
+# (Those are CoverM's own literal header strings as they appear after
+# coverm_combine_genomes strips the per-column "<stoit> " prefix -- verified
+# against CoverM 0.7.0 source, mosdepth_genome_coverage_estimators.rs::
+# column_headers. The `count` method's header is "Read Count" and
+# `covered_fraction`'s is "Covered Fraction" -- two space-separated words, NOT
+# "Covered_fraction" as this comment previously claimed. Column ORDER follows
+# the order the -m flags are passed in postprocess.smk, not any canonical
+# order: bin/coverm.rs builds the estimator list by iterating the flags with
+# .enumerate(). Only the indices below actually matter to this script; the
+# names are documentation.)
 #
 # HISTORICAL, for anyone reading old output or an older checkout: this script
 # previously parsed Koverage's *native* "map" mode file, whose header is

@@ -59,6 +59,19 @@ def get_unitig_lengths(edge_file):
     return unitig_lengths
 
 
+def _oriented_links_inner():
+    """Inner factory for oriented_links.
+
+    A module-level function rather than the `lambda: defaultdict(list)` this
+    used to be, purely so the resulting structure can be PICKLED. Lambdas
+    cannot be, which meant oriented_links could not cross a process boundary --
+    it broke resolve_short_parallel's worker pool with
+    `PicklingError: Can't pickle <function <lambda>>` the first time it ran on
+    real data. Behaviour is identical: missing keys still get a defaultdict(list).
+    """
+    return defaultdict(list)
+
+
 def get_links(assembly_graph_file):
     """
     Get links from the assembly graph
@@ -67,7 +80,7 @@ def get_links(assembly_graph_file):
     node_count = 0
     graph_contigs = {}
     edges_lengths = {}
-    oriented_links = defaultdict(lambda: defaultdict(list))
+    oriented_links = defaultdict(_oriented_links_inner)
     link_overlap = defaultdict(int)
     links = []
 

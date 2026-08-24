@@ -94,20 +94,6 @@ def common_options(func):
             show_default=False,
         ),
         click.option(
-            "--container",
-            default=None,
-            required=False,
-            help=(
-                "container image with every per-rule tool already installed "
-                "(container/Dockerfile), replacing --use-conda's per-rule env "
-                "creation for the WHOLE workflow -- not just predict_3di "
-                "(--prostt5-container). Needs --use-singularity passed as a "
-                "trailing snakemake arg; don't also pass --use-conda alongside "
-                "this."
-            ),
-            type=click.Path(),
-        ),
-        click.option(
             "--profile", help="Snakemake profile", default=None, show_default=False
         ),
         click.option(
@@ -242,9 +228,14 @@ def run_options(func):
                 "PyTorch build for the ProstT5 conda env: cpu, cuda, or rocm "
                 "(e.g. Setonix's MI250X nodes). Independent of --prostt5-cpu, "
                 "which forces ProstT5 onto the CPU device at runtime even "
-                "inside a GPU-capable env -- this controls which env gets built"
+                "inside a GPU-capable env -- this controls which env gets "
+                "built. 'system' builds NO env at all and uses the torch + "
+                "pholdlib already installed in the ambient python -- for when "
+                "a working GPU torch is already in place (e.g. inside the "
+                "container, or a module-loaded torch on HPC) and installing a "
+                "second one would be wasteful or wrong"
             ),
-            type=click.Choice(["cpu", "cuda", "rocm"]),
+            type=click.Choice(["cpu", "cuda", "rocm", "system"]),
             show_default=True,
         ),
         click.option(
@@ -356,16 +347,20 @@ def run_options(func):
             show_default=True,
         ),
         click.option(
-            "--prostt5-container",
-            default=None,
+            "--mfd-workers",
+            default=1,
             required=False,
             help=(
-                "container image with pholdlib + torch already installed (e.g. "
-                "phold's own image), used instead of a conda env for predict_3di. "
-                "Needs --use-singularity passed as a trailing snakemake arg -- "
-                "--use-conda alone won't honour it. Overrides --gpu-backend for "
-                "this rule."
+                "number of worker processes for the flow-decomposition step. "
+                "Components are independent, so they are split across workers "
+                "and merged in order (results are identical to --mfd-workers 1, "
+                "including genome numbering). 1 = sequential, as before. Note "
+                "this is separate from --threads: the MILP solver itself gets "
+                "no measurable benefit from extra threads, so parallelism has "
+                "to come from running components concurrently"
             ),
+            type=int,
+            show_default=True,
         ),
         click.option(
             "--evalue",

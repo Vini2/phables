@@ -75,9 +75,7 @@ rule coverm_map_genomes:
     resources:
         mem_mb = config["resources"]["jobMem"]
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "coverm.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "coverm.yaml")
     log:
         os.path.join(LOGSDIR, "coverm_map_genomes.{sample}.log")
     shell:
@@ -90,22 +88,55 @@ rule coverm_map_genomes:
 
 
 rule coverm_bam2counts_genomes:
-    """Per-sample coverage stats over the resolved genomes."""
+    """Per-sample coverage stats over the resolved genomes.
+
+    Guarded against the zero-alignment case, which is a NORMAL outcome, not an
+    error: a sample where phables resolved no genomes AND had no unresolved
+    phage-like edges produces an empty genomes_and_unresolved_edges.fasta, so
+    coverm_map_genomes maps against an empty reference and emits a valid but
+    empty BAM. CoverM 0.7.0 panics outright on such a BAM rather than printing
+    an empty table --
+
+        [WARN  coverm::contig] No primary alignments were observed for sample X
+        thread 'main' panicked at src/coverage_printer.rs:467:61:
+        index out of bounds: the len is 0 but the index is 0
+
+    -- which killed the whole run at the very last stage, after all the
+    expensive work had already succeeded. Everything downstream of here already
+    handles an empty table correctly (coverm_combine_genomes writes header-only
+    output; format_koverage_results.py's `readlines()[1:]` yields no rows and
+    pandas writes header-only report TSVs), so emitting the header ourselves is
+    all that's needed for the run to finish normally with empty report tables.
+
+    The header below reproduces CoverM's own exactly -- "<stoit> <metric>",
+    space-joined, in the order the -m flags are given (confirmed against CoverM
+    0.7.0 source: coverage_printer.rs writes "\\t{stoit_name} {estimator_header}",
+    mosdepth_genome_coverage_estimators.rs::column_headers defines the metric
+    strings, and bin/coverm.rs builds the estimator list by iterating the -m
+    flags in order). Note "Covered Fraction" is two space-separated words.
+    Stoit name is the BAM's basename without .bam, i.e. exactly {sample}.
+    """
     input:
         os.path.join(OUTDIR, "postprocess", "temp", "{sample}.bam")
     output:
         temp(os.path.join(OUTDIR, "postprocess", "temp", "{sample}.cov"))
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "coverm.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "coverm.yaml")
     log:
         os.path.join(LOGSDIR, "coverm_bam2counts_genomes.{sample}.log")
     shell:
         """
-        coverm contig -b {input} \
-            -m count -m rpkm -m tpm -m mean -m covered_fraction -m variance \
-            > {output} 2> {log}
+        n_aln=$(samtools view -c {input})
+        if [ "$n_aln" -eq 0 ]; then
+            echo "No alignments in {input} -- no genomes were resolved for this sample (and no unresolved phage-like edges), so there is nothing to compute coverage over. Writing a header-only coverage table instead of running coverm, which panics on a zero-alignment BAM. The run continues and finishes normally; the per-genome report tables will be empty." > {log}
+            S={wildcards.sample}
+            printf 'Contig\\t%s Read Count\\t%s RPKM\\t%s TPM\\t%s Mean\\t%s Covered Fraction\\t%s Variance\\n' \
+                "$S" "$S" "$S" "$S" "$S" "$S" > {output}
+        else
+            coverm contig -b {input} \
+                -m count -m rpkm -m tpm -m mean -m covered_fraction -m variance \
+                > {output} 2> {log}
+        fi
         """
 
 
@@ -151,8 +182,6 @@ rule format_genome_coverage:
     log:
         os.path.join(LOGSDIR, "format_koverage_results_output.log")
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "phables.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "phables.yaml")
     script:
         os.path.join("..", "scripts", "format_koverage_results.py")

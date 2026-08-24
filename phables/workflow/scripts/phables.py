@@ -50,6 +50,7 @@ def main():
     hallmark_minbits = float(snakemake.params.hallmark_minbits)
     output = snakemake.params.output
     nthreads = int(snakemake.params.nthreads)
+    mfd_workers = int(snakemake.params.mfd_workers)
     log = snakemake.params.log
 
     # Setup logger
@@ -95,6 +96,7 @@ def main():
     logger.info(f"Input long reads: {longreads}")
     logger.info(f"Prefix for genome identifiers: {prefix}")
     logger.info(f"Number of threads to use: {nthreads}")
+    logger.info(f"Number of flow-decomposition workers: {mfd_workers}")
     logger.info(f"Output folder: {output}")
 
     if prefix is None or prefix == "":
@@ -248,7 +250,7 @@ def main():
             phage_like_edges,
             all_phage_like_edges,
             unresolved_phage_like_edges,
-        ) = short_utils.resolve_short(
+        ) = short_utils.resolve_short_parallel(
             assembly_graph,
             pruned_vs,
             unitig_names,
@@ -269,6 +271,7 @@ def main():
             prefix,
             output,
             nthreads,
+            mfd_workers,
         )
 
     # Log final summary information

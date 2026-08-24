@@ -15,8 +15,6 @@ rule run_gfa2fasta:
     log:
         os.path.join(LOGSDIR, "gfa2fasta.log")
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "phables.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "phables.yaml")
     script:
         os.path.join('..', 'scripts', 'gfa2fasta.py')

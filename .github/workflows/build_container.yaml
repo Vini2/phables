@@ -24,6 +24,16 @@ jobs:
       # pre-pulled docker images), freeing ~25-30GB. ``tool-cache: false``
       # keeps the runner's node/python toolcache so other actions (checkout,
       # docker login) still work fast.
+      #
+      # NOTE this image is MONOLITHIC -- on top of that base it installs
+      # miniforge and pre-builds every per-rule conda env. It deliberately does
+      # NOT build a prostt5-* env: predict_3di reuses the base image's own ROCm
+      # torch via --gpu-backend system, which keeps several GB out of the image.
+      # Even so this is close to what a hosted runner can manage after the
+      # cleanup below. If a build starts failing on "no space left on device",
+      # the honest fix is building on a machine with real disk and pushing
+      # manually, not shaving more off here. The ``df -h`` steps exist to make
+      # that diagnosis obvious rather than a guess.
       - name: Free up disk space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -47,6 +57,11 @@ jobs:
           docker build -f container/Dockerfile \
             -t $IMAGE:${{ github.sha }} \
             .
+
+      - name: Show image size and free disk after build
+        run: |
+          docker image ls
+          df -h
 
       - name: Push Docker image
         run: |

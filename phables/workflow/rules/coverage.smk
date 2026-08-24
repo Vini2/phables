@@ -96,9 +96,7 @@ rule coverm_map:
     resources:
         mem_mb = config["resources"]["jobMem"]
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "coverm.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "coverm.yaml")
     log:
         os.path.join(LOGSDIR, "coverm_map.{sample}.log")
     shell:
@@ -119,9 +117,7 @@ rule coverm_bam2counts:
     output:
         os.path.join(OUTDIR, "preprocess", "temp", "{sample}.cov")
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "coverm.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "coverm.yaml")
     log:
         os.path.join(LOGSDIR, "coverm_bam2counts.{sample}.log")
     shell:

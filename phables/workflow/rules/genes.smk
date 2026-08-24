@@ -25,9 +25,7 @@ if GC == "pyrodigal-gv":
         log:
             os.path.join(LOGSDIR, "gene_call_pyrodigal_gv.log")
         conda:
-            None if CONTAINER_IMAGE else os.path.join("..", "envs", "genecall.yaml")
-        container:
-            CONTAINER_IMAGE
+            os.path.join("..", "envs", "genecall.yaml")
         script:
             os.path.join("..", "scripts", "gene_caller.py")
 
@@ -48,9 +46,7 @@ else:
             out = os.path.join(LOGSDIR, "gene_call_fraggenescan_out.log"),
             err = os.path.join(LOGSDIR, "gene_call_fraggenescan_err.log"),
         conda:
-            None if CONTAINER_IMAGE else os.path.join("..", "envs", "smg.yaml")
-        container:
-            CONTAINER_IMAGE
+            os.path.join("..", "envs", "smg.yaml")
         shell:
             """
                 run_FragGeneScan.pl -genome={input.genome} -out={params.frag} -complete=0 -train=complete -thread={threads} 1>{log.out} 2>{log.err}
@@ -71,9 +67,7 @@ rule scan_smg:
         hmm_out=os.path.join(LOGSDIR, "smg_scan_hmm_out.log"),
         hmm_err=os.path.join(LOGSDIR, "smg_scan_hmm_err.log")
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "smg.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "smg.yaml")
     shell:
         """
             hmmsearch --domtblout {output.hmmout} --cut_tc --cpu {threads} {input.hmm} {input.faa} 1>{log.hmm_out} 2> {log.hmm_err}
@@ -98,9 +92,7 @@ rule scan_phrogs:
     log:
         os.path.join(LOGSDIR, "phrogs_scan.log")
     conda:
-        None if CONTAINER_IMAGE else os.path.join("..", "envs", "mmseqs.yaml")
-    container:
-        CONTAINER_IMAGE
+        os.path.join("..", "envs", "mmseqs.yaml")
     shell:
         """
         mkdir -p {params.out_path}
@@ -135,74 +127,42 @@ if PD == "prostt5-foldseek":
     QUERY_3DI = os.path.join(OUTDIR, "preprocess", "hallmark", "proteins_3di.fasta")
 
 
-    if PROSTT5_CONTAINER:
-
-        # container:-only, deliberately with no conda: alongside it. Snakemake's
-        # documented way to combine the two ("Ad-hoc combination of Conda package
-        # management with containers") builds a fresh, isolated conda env *inside*
-        # the container rather than exposing what the image already has installed
-        # -- which would just reinstall a second, redundant torch and ignore the
-        # image's own verified-working one (e.g. phold's own container, which
-        # already bundles pholdlib + a working torch/ROCm stack for Setonix, per
-        # the same logic phold's own Snakemake rules use). Needs
-        # `--use-singularity` passed through phables' snake_args passthrough --
-        # --use-conda alone won't honour this directive.
-        rule predict_3di:
-            input:
-                faa = PROTEINS_FILE,
-            threads:
-                config["resources"]["jobCPU"]
-            resources:
-                mem_mb = config["resources"]["jobMem"]
-            output:
-                threedi = QUERY_3DI
-            params:
-                checkpoint = config["prostt5_checkpoint"],
-                model_name = config["prostt5_model"],
-                model_dir = config["prostt5_model_dir"],
-                half_precision = config["prostt5_half_precision"],
-                cpu = config["prostt5_cpu"],
-                max_residues = config["prostt5_max_residues"],
-                max_seq_len = config["prostt5_max_seq_len"],
-                max_batch = config["prostt5_max_batch"],
-            log:
-                os.path.join(LOGSDIR, "predict_3di.log")
-            container:
-                PROSTT5_CONTAINER
-            script:
-                os.path.join("..", "scripts", "predict_3di.py")
-
-    else:
-
-        rule predict_3di:
-            input:
-                faa = PROTEINS_FILE,
-            threads:
-                config["resources"]["jobCPU"]
-            resources:
-                mem_mb = config["resources"]["jobMem"]
-            output:
-                threedi = QUERY_3DI
-            params:
-                checkpoint = config["prostt5_checkpoint"],
-                model_name = config["prostt5_model"],
-                model_dir = config["prostt5_model_dir"],
-                half_precision = config["prostt5_half_precision"],
-                cpu = config["prostt5_cpu"],
-                max_residues = config["prostt5_max_residues"],
-                max_seq_len = config["prostt5_max_seq_len"],
-                max_batch = config["prostt5_max_batch"],
-            log:
-                os.path.join(LOGSDIR, "predict_3di.log")
-            conda:
-                # gpu_backend selects which torch build this env solves against --
-                # cpu/cuda/rocm need different PyTorch wheels (conda envs are
-                # solved once from a static file, so this has to be three files,
-                # not one file with a runtime switch). See the individual env
-                # files for what each backend actually needs and why.
-                os.path.join("..", "envs", f"prostt5-{GPU_BACKEND}.yaml")
-            script:
-                os.path.join("..", "scripts", "predict_3di.py")
+    rule predict_3di:
+        input:
+            faa = PROTEINS_FILE,
+        threads:
+            config["resources"]["jobCPU"]
+        resources:
+            mem_mb = config["resources"]["jobMem"]
+        output:
+            threedi = QUERY_3DI
+        params:
+            checkpoint = config["prostt5_checkpoint"],
+            model_name = config["prostt5_model"],
+            model_dir = config["prostt5_model_dir"],
+            half_precision = config["prostt5_half_precision"],
+            cpu = config["prostt5_cpu"],
+            max_residues = config["prostt5_max_residues"],
+            max_seq_len = config["prostt5_max_seq_len"],
+            max_batch = config["prostt5_max_batch"],
+        log:
+            os.path.join(LOGSDIR, "predict_3di.log")
+        # gpu_backend selects which torch build this rule runs against.
+        # cpu/cuda/rocm each need a different PyTorch wheel, and a conda env is
+        # solved once from a static file, so those are three separate env files
+        # rather than one file with a runtime switch.
+        #
+        # `system` is the odd one out and takes NO conda: directive at all:
+        # conda envs are isolated, so a rule that declares one can never see a
+        # torch installed outside it. Omitting the directive is therefore the
+        # only way to REUSE an already-working torch (the container's ROCm base
+        # image, a module-loaded torch on HPC) instead of installing a second
+        # copy. The rule then runs in whichever python is running Snakemake,
+        # which must already provide torch + pholdlib.
+        conda:
+            None if GPU_BACKEND == "system" else os.path.join("..", "envs", f"prostt5-{GPU_BACKEND}.yaml")
+        script:
+            os.path.join("..", "scripts", "predict_3di.py")
 
 
     rule build_hallmark_query_db:
@@ -216,9 +176,7 @@ if PD == "prostt5-foldseek":
         log:
             os.path.join(LOGSDIR, "build_hallmark_query_db.log")
         conda:
-            None if CONTAINER_IMAGE else os.path.join("..", "envs", "foldseek.yaml")
-        container:
-            CONTAINER_IMAGE
+            os.path.join("..", "envs", "foldseek.yaml")
         script:
             os.path.join("..", "scripts", "build_foldseek_query_db.py")
 
@@ -271,9 +229,7 @@ if PD == "prostt5-foldseek":
         log:
             os.path.join(LOGSDIR, "scan_hallmark.log")
         conda:
-            None if CONTAINER_IMAGE else os.path.join("..", "envs", "foldseek.yaml")
-        container:
-            CONTAINER_IMAGE
+            os.path.join("..", "envs", "foldseek.yaml")
         shell:
             """
             foldseek search {params.query_prefix} {input.hallmark_db} {params.result} {params.tmp} \
