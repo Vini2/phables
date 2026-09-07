@@ -111,6 +111,38 @@ Options:
                                   batch immediately  [default: 4000]
   --prostt5-max-batch INTEGER     max sequences per ProstT5 batch -- device-
                                   specific, tune per GPU  [default: 20]
+  --job-cpu INTEGER               CPUs each rule requests (hmmsearch, mmseqs,
+                                  foldseek, coverm, flow decomposition).
+                                  Overrides resources.jobCPU in the config.
+                                  NOTE this is not --threads: --threads sets
+                                  Snakemake's total core budget, and a rule
+                                  still only asks for resources.jobCPU
+                                  (default 8), so --threads 64 alone leaves
+                                  every rule running 8-wide and 56 cores idle.
+                                  Default None means 'use the config value',
+                                  which is also what keeps this settable at
+                                  all -- a non-None click default would be
+                                  merged OVER the config file by snaketool and
+                                  could never be changed from one
+  --job-mem INTEGER               memory in MB each rule requests. Overrides
+                                  resources.jobMem. Same None-default
+                                  reasoning as --job-cpu
+  --mfd-time-limit FLOAT          seconds allowed for any single flow-
+                                  decomposition solve. A component whose solve
+                                  exceeds it is left unresolved (a timeout is
+                                  not a proof of infeasibility, so the search
+                                  does not continue to a K it cannot call
+                                  minimal). Default: no limit, every answer
+                                  exact. On real data the unresolvable tail
+                                  spends hours proving infeasibility at K near
+                                  --maxpaths; a limit of a few hundred seconds
+                                  bounds a whole sample's wall time
+  --mfd-dump-slow FLOAT           write the flow network of any component
+                                  whose decomposition took longer than this
+                                  many seconds to
+                                  <output>/phables/slow_mfd_instances/ as
+                                  JSON, so it can be reproduced off the
+                                  cluster. Default: off
   --mfd-workers INTEGER           number of worker processes for the flow-
                                   decomposition step. Components are
                                   independent, so they are split across
@@ -194,6 +226,9 @@ Options:
 * `--use-conda` / `--no-use-conda` - use conda for Snakemake rules  [default: `use-conda`]
 * `--conda-prefix` - custom conda env directory
 * `--mfd-workers` - worker processes for the flow-decomposition (MFD) step [default: 1]. Components are independent, so they're split across processes and merged in component order — output is identical to `1`, genome numbering included. Distinct from `--threads`: the MILP solver gains nothing measurable from extra threads (building the model dominates, not solving it), so speedup has to come from running components concurrently. Expect ~2–2.5x on a realistic component mix — a few large components dominate the runtime and can't be split
+* `--mfd-time-limit` - seconds allowed for any single flow-decomposition solve [default: none]. A component whose solve exceeds it is left unresolved and logged as a WARNING; a timeout is not a proof of infeasibility, so the search does not continue to a K it could not call minimal. On real data the components that have *no* decomposition within `--maxpaths` are the ones that take hours (each is one infeasibility proof at K = `--maxpaths`); a limit of a few hundred to a couple of thousand seconds bounds a sample's wall time at the cost of leaving those components unresolved
+* `--mfd-dump-slow` - write the flow network of any component whose decomposition took longer than this many seconds to `<output>/phables/slow_mfd_instances/` as JSON [default: off]. The file is the exact instance handed to the solver, so a pathological component can be reproduced off the cluster
+* `--job-cpu` / `--job-mem` - CPUs and memory (MB) each rule requests, overriding `resources.jobCPU` / `resources.jobMem` in the config [defaults: 8 / 16000 from the config]. Not the same as `--threads`: that sets Snakemake's total core budget, but each rule still only asks for `jobCPU`, so `--threads 64` alone leaves every rule (coverm, foldseek, hmmsearch, the flow decomposition) running 8-wide with 56 cores idle
 * `--snake-default` - customise Snakemake runtime args  [default: `--rerun-incomplete, --printshellcmds, --nolock, --show-failed-logs`]
 
 ### Phage-gene detection: `--phagedetection`

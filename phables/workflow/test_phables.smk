@@ -64,6 +64,8 @@ rule test_phables:
         mincov = MC,
         compcount = CC,
         maxpaths = MP,
+        mfd_time_limit = MFD_TIME_LIMIT,
+        mfd_dump_slow = MFD_DUMP_SLOW,
         mgfrac = MGF,
         evalue = EV,
         seqidentity = SI,

@@ -3,8 +3,11 @@
 # Source: https://github.com/algbio/flowpaths
 
 import itertools
+import json
 import logging
 import math
+import os
+import time
 
 import flowpaths as fp
 import networkx as nx
@@ -19,7 +22,33 @@ __status__ = "Development"
 
 
 # Create logger
-logger = logging.getLogger(__name__)
+# The same named logger every other phables_utils module uses. phables.py
+# attaches its DEBUG file handler to "phables 2.0.0"; a logger named __name__
+# ("phables_utils.FD_Inexact") is not a child of that, so with the previous
+# line every message from this module -- including per-K attempt timings --
+# went to the unconfigured root logger and never appeared in
+# phables_output.log. That is why a 9-hour flow decomposition on Setonix left
+# no record of which K it was stuck on.
+logger = logging.getLogger("phables 2.0.0")
+
+# Runtime knobs, set once per run by phables.py via configure(). Module globals
+# rather than new positional parameters on resolve_short()/resolve_long():
+# those signatures are ~20 arguments deep across two 1400-line functions and
+# two call sites each, and --mfd-workers children are forked, so a module
+# global set in the parent is inherited by every worker for free.
+_MFD_TIME_LIMIT = float("inf")   # per-attempt HiGHS time limit in seconds
+_MFD_DUMP_SLOW_S = None          # dump the instance when a component exceeds this
+_MFD_DUMP_DIR = None
+
+
+def configure(time_limit=None, dump_slow_s=None, dump_dir=None):
+    """Set the per-run MFD knobs (see the globals above). Called by phables.py."""
+    global _MFD_TIME_LIMIT, _MFD_DUMP_SLOW_S, _MFD_DUMP_DIR
+    if time_limit is not None and float(time_limit) > 0:
+        _MFD_TIME_LIMIT = float(time_limit)
+    if dump_slow_s is not None:
+        _MFD_DUMP_SLOW_S = float(dump_slow_s)
+        _MFD_DUMP_DIR = dump_dir
 
 
 def read_input(graphfile, number_subpath):
@@ -70,6 +99,8 @@ class InexactFlowDecomposition(fp.AbstractPathModelDAG):
         num_paths,
         subpath_constraints=None,
         threads=1,
+        allow_empty_paths=False,
+        time_limit=None,
     ):
         self.G = fp.stDAG(G)
         self.lb = lb
@@ -84,10 +115,16 @@ class InexactFlowDecomposition(fp.AbstractPathModelDAG):
             subpath_constraints=subpath_constraints or [],
             optimization_options={
                 "trusted_edges_for_safety": trusted_edges_for_safety,
+                # True only for the feasibility ORACLE in FD_Algorithm: "does any
+                # decomposition with <= K paths exist?". Paths may then be empty,
+                # which makes feasibility exactly monotone in K by construction.
+                # Never True for a model whose solution is returned.
+                "allow_empty_paths": allow_empty_paths,
             },
             solver_options={
                 "threads": threads,
                 "log_to_console": "false",
+                **({"time_limit": float(time_limit)} if time_limit is not None and time_limit != float("inf") else {}),
             },
         )
 
@@ -205,8 +242,9 @@ def _path_to_edges(path, from_flowpaths_node=lambda node: node):
     return list(itertools.pairwise(restored_path))
 
 
-def flowMultipleDecomposition(data, K, nthreads):
+def flowMultipleDecomposition(data, K, nthreads, allow_empty_paths=False):
     graph = data["graph"]
+    t_build = time.perf_counter()
     node_labels = {node: str(node) for node in graph.nodes}
     original_node_labels = {
         flowpaths_node: node for node, flowpaths_node in node_labels.items()
@@ -224,8 +262,17 @@ def flowMultipleDecomposition(data, K, nthreads):
             num_paths=K,
             subpath_constraints=subpath_constraints,
             threads=nthreads,
+            allow_empty_paths=allow_empty_paths,
+            time_limit=_MFD_TIME_LIMIT,
         )
+        data["build_time"] = time.perf_counter() - t_build
         model.solve()
+        # HiGHS status string: kOptimal / kInfeasible / kTimeLimit / ... The
+        # search below needs to tell "proved infeasible" from "ran out of time".
+        try:
+            data["status"] = model.solver.get_model_status()
+        except Exception:
+            data["status"] = "unknown"
 
         if model.is_solved():
             solution = model.get_solution()
@@ -245,6 +292,8 @@ def flowMultipleDecomposition(data, K, nthreads):
             )
     except (ValueError, RuntimeError, AttributeError) as e:
         data["message"] = "unsolved"
+        data["status"] = "error"
+        data.setdefault("build_time", time.perf_counter() - t_build)
         logger.debug(f"Flowpaths could not solve the MFD instance with K={K}: {e}")
 
     return data
@@ -252,93 +301,191 @@ def flowMultipleDecomposition(data, K, nthreads):
 
 def get_lowerbound_k(data):
     """
-    Smallest number of paths any valid decomposition of this component could
-    possibly use.
+    A VALID lower bound on the number of paths in any decomposition of this
+    component: the maximum antichain of edges that must carry flow.
 
-    The K search below tries K = 1, 2, 3, ... until one is feasible, rebuilding
-    the whole MILP each time (K is structural to the model -- every variable is
-    indexed by it -- so it genuinely cannot be reused, and neither flowpaths nor
-    HiGHS-via-flowpaths offers a warm start). Every attempt below the true answer
-    is therefore a complete model build that can only ever come back infeasible,
-    and model construction is ~95% of the cost of an attempt. Starting the search
-    at a proven lower bound skips exactly those wasted builds.
+    Every edge whose lower bound is positive has to lie on at least one path,
+    and two edges that no single source-to-sink path can both traverse need two
+    different paths. So the largest set of pairwise-incomparable positive edges
+    is a lower bound on K. Nothing else is assumed about the flows.
 
-    Two bounds, both taken from flowpaths' own MinFlowDecomp.get_lowerbound_k:
+    What this replaces, and why (both measured on 17,189 real components dumped
+    from Setonix logs, checked against the original K = 1, 2, 3, ... ladder):
 
-    - the graph's WIDTH: the minimum number of paths needed to cover every edge.
-      Any decomposition must cover every edge carrying flow, so it cannot use
-      fewer paths than this.
-    - ceil(log2(number of distinct flow values)): k paths can produce at most
-      2^k distinct subset sums, so k must be at least log2 of the number of
-      distinct values that have to be represented.
+    - stDAG.get_width(), the minimum path cover of ALL edges. Edges with a zero
+      lower bound need not be covered at all, and 28% of real edges have one
+      (junction coverage 0), so this over-counted in 12% of components and made
+      the search START ABOVE the true minimum -- returning a 2-path
+      decomposition where 1 path suffices, and so on. 75 of 99 wrong answers.
+    - ceil(log2(#distinct flow values)). Valid for exact flows (k paths give at
+      most 2^k distinct subset sums) but NOT for intervals: lows of 20, 21, 22
+      under an upper bound of 30 are all met by one path of weight 22, yet the
+      term claims K >= 2. 36 wrong answers on their own.
 
-    Both are lower bounds, so the maximum of them is too, and starting there can
-    never skip a feasible smaller K -- the search still returns the same first
-    feasible K, just without the doomed attempts before it. Verified on synthetic
-    components: identical K and identical path sets with and without this.
+    Together those made 7.7% of real components come back with more paths than
+    the minimum -- while saving no measurable time (1,084 s vs 1,098 s for the
+    plain ladder over the same set). The bound here never skips a feasible K:
+    verified identical to the from-1 ladder on all 1,293 ground-truth networks.
 
-    Returns 1 (i.e. the original behaviour) if anything about the computation
-    fails. A lower bound is an optimisation, not a correctness requirement, so it
-    must never be the reason a component stops resolving.
+    Returns 1 on any failure. A bound is an optimisation; it must never be the
+    reason a component does not resolve.
     """
     try:
         graph = data["graph"]
-        if graph.number_of_edges() == 0:
+        required = [
+            (u, v) for (u, v) in data["edges"] if data["flows_low"].get((u, v), 0) > 0
+        ]
+        if graph.number_of_edges() == 0 or not required:
+            # No edge has to carry flow. Guarded EXPLICITLY: flowpaths treats an
+            # empty weight_function as "use the defaults", i.e. weight 1 on every
+            # edge, which would silently turn this back into the invalid all-edges
+            # width. Found on a real component whose five edges all had low = 0.
             return 1
-
-        # flowpaths' stDAG wants string node ids, same relabelling
-        # flowMultipleDecomposition does before building its model.
         node_labels = {node: str(node) for node in graph.nodes}
-        flowpaths_graph = nx.relabel_nodes(graph, node_labels, copy=True)
-        lowerbound = fp.stDAG(flowpaths_graph).get_width()
-
-        # Only edges that must carry flow constrain the decomposition; an edge
-        # whose lower bound is 0 need not be covered at all.
-        distinct_flows = {
-            int(data["flows_low"][edge])
-            for edge in data["edges"]
-            if data["flows_low"].get(edge, 0) > 0
-        }
-        if len(distinct_flows) > 1:
-            lowerbound = max(lowerbound, math.ceil(math.log2(len(distinct_flows))))
-
-        return max(1, lowerbound)
+        st = fp.stDAG(nx.relabel_nodes(graph, node_labels, copy=True))
+        weight = {(node_labels[u], node_labels[v]): 1 for (u, v) in required}
+        width = st.compute_max_edge_antichain(get_antichain=False, weight_function=weight)
+        return max(1, int(width))
     except Exception as e:
         logger.debug(f"Could not compute a lower bound on K ({e}); starting from 1")
         return 1
 
 
 def FD_Algorithm(data, max_paths, nthreads):
-    solutionWeights = 0
-    solutionSet = 0
+    """
+    Find the smallest K in [1, max_paths] for which an inexact flow
+    decomposition exists, and return it. The answer is identical to trying
+    K = 1, 2, 3, ... in turn; the differences are in how much work is skipped.
 
-    # See get_lowerbound_k: K < lowerbound is provably infeasible, and each such
-    # attempt costs a full MILP build. Capped at max_paths so a bound above the
-    # user's --maxpaths doesn't turn into a search over an empty range with
-    # different semantics -- that case has no solution within max_paths either
-    # way, and this keeps the "attempt at least one K" behaviour identical.
-    lowerbound = min(get_lowerbound_k(data), max_paths)
-    if lowerbound > 1:
-        logger.debug(
-            f"Starting the K search at {lowerbound} rather than 1 "
-            f"({lowerbound - 1} provably-infeasible attempt(s) skipped)"
+    HOW REAL COMPONENTS BEHAVE (1,131 of the largest, re-solved locally):
+      - 86% of resolvable components are feasible at the very first K tried;
+        the rest need one or two more. Feasible solves are cheap (~0.03 s).
+      - 58% of the largest components have NO decomposition within max_paths.
+        For those the old ladder tried every K up to max_paths, and proving
+        infeasibility gets exponentially slower with K: 0.5 s, 3 s, 30 s, 40 s,
+        then hours. 91% of all solver time went into components that ended
+        with no result. That is the 9-hour tail.
+
+    SO:
+      1. Valid lower bound above max_paths -> provably unresolvable, no solve.
+      2. Try K = lower bound. Solved -> done (the common case, no extra cost).
+      3. Otherwise ask ONE question before climbing: is K = max_paths feasible?
+         Feasibility is monotone in K for this model -- a solution with K paths
+         extends to K+1 by appending a zero-weight duplicate of its last path
+         (the lexicographic symmetry breaking is non-strict, and the safety
+         fixings never touch more than Kmin paths) -- so "no" at max_paths is a
+         proof that every K in between is infeasible too. Confirmed on 780/780
+         resolved real networks. No -> unresolvable, ladder skipped. Yes ->
+         climb as before, and if the climb reaches max_paths the probe's own
+         solution IS the answer (same model, same solver, same seed), so it is
+         reused rather than solved twice. The smallest feasible K and the model
+         at it are unchanged either way, so the returned decomposition is
+         identical to the plain ladder's.
+
+         NOT done with allow_empty_paths=True, although that is the textbook
+         way to make the question monotone: on a real component that variant
+         needed 450 s to prove K=10 infeasible where the standard model needed
+         58 s -- empty paths add symmetry and loosen the relaxation.
+      4. A per-attempt time limit (configure(time_limit=...)) turns a
+         would-be-hours proof into a bounded wait. A timeout is NOT a proof of
+         infeasibility, so the search stops there and reports the component
+         unresolved rather than continue to a K it cannot call minimal. Off by
+         default: with no limit every answer is exact.
+    """
+    n_edges = len(data["edges"])
+    t0 = time.perf_counter()
+    attempts = []            # (K, status, build s, solve s, oracle?)
+    solution_set, solution_weights = 0, 0
+
+    def attempt(target, K, oracle=False):
+        # `oracle` only tags the attempt in the log ("K10*"); the model is the
+        # standard one -- see the docstring for why not allow_empty_paths.
+        target = flowMultipleDecomposition(target, K, nthreads)
+        attempts.append((K, target.get("status", "?"), target.get("build_time", 0.0),
+                         target.get("runtime", 0.0), oracle))
+        return target
+
+    def limit_text():
+        # A timeout can also come from a solver-level limit set outside
+        # configure(), in which case _MFD_TIME_LIMIT is still inf.
+        return (f"the {_MFD_TIME_LIMIT:g}s time limit" if _MFD_TIME_LIMIT != float("inf")
+                else "the solver time limit")
+
+    def summary(outcome):
+        detail = " ".join(
+            f"K{K}{'*' if oracle else ''}:{str(st).replace('k', '', 1)}/{solve:.1f}s"
+            for K, st, build, solve, oracle in attempts
+        )
+        logger.info(
+            f"MFD [{n_edges} edges, lb={lowerbound}]: {outcome} after {len(attempts)} "
+            f"attempt(s), {time.perf_counter() - t0:.1f}s total{(' -- ' + detail) if detail else ''}"
         )
 
-    for i in range(lowerbound, max_paths + 1):
-        data = flowMultipleDecomposition(data, i, nthreads)
-        if data["message"] == "solved":
-            solutionSet = data["solution"]
-            solutionWeights = data["weights"]
-            break
+    lowerbound = get_lowerbound_k(data)
+    if lowerbound > max_paths:
+        summary(f"unresolvable: lower bound {lowerbound} > --maxpaths {max_paths}, no solve needed")
+        data["mfd_elapsed"] = time.perf_counter() - t0
+        return data, {}
 
-    # Get solution paths and weights
+    data = attempt(data, lowerbound)
+    if data["message"] == "solved":
+        solution_set, solution_weights = data["solution"], data["weights"]
+        summary(f"solved with K={lowerbound}")
+    elif data.get("status") == "kTimeLimit":
+        logger.warning(
+            f"MFD [{n_edges} edges]: K={lowerbound} hit {limit_text()}; "
+            f"cannot prove it infeasible, so the component is left unresolved"
+        )
+        summary("unresolved (time limit)")
+    else:
+        resolvable = True
+        probe = None
+        if lowerbound < max_paths:
+            # Standard model on a shallow copy of the data dict: same constraints
+            # the ladder would build at K = max_paths, so a feasible answer here
+            # can stand in for that final rung.
+            probe = attempt(dict(data), max_paths, oracle=True)
+            if probe["message"] != "solved":
+                resolvable = False
+                if probe.get("status") == "kTimeLimit":
+                    logger.warning(
+                        f"MFD [{n_edges} edges]: feasibility check at K={max_paths} hit {limit_text()}; component left unresolved"
+                    )
+                    summary("unresolved (time limit at the K=max probe)")
+                else:
+                    summary(f"unresolvable within --maxpaths {max_paths}; "
+                            f"K={lowerbound + 1}..{max_paths - 1} skipped")
+        if resolvable:
+            for K in range(lowerbound + 1, max_paths):
+                data = attempt(data, K)
+                if data["message"] == "solved":
+                    solution_set, solution_weights = data["solution"], data["weights"]
+                    summary(f"solved with K={K}")
+                    break
+                if data.get("status") == "kTimeLimit":
+                    logger.warning(
+                        f"MFD [{n_edges} edges]: K={K} hit {limit_text()}; "
+                        f"component left unresolved"
+                    )
+                    summary("unresolved (time limit)")
+                    break
+            else:
+                if probe is not None and probe["message"] == "solved":
+                    # Every K below max_paths is now proven infeasible, so the
+                    # minimum is max_paths -- and the probe already solved exactly
+                    # that model.
+                    solution_set, solution_weights = probe["solution"], probe["weights"]
+                    summary(f"solved with K={max_paths} (reusing the feasibility probe)")
+                else:
+                    # lowerbound == max_paths: the single attempt above failed.
+                    summary(f"unresolvable within --maxpaths {max_paths}")
+
     solution_paths = {}
+    if solution_set != 0:
+        for i in range(0, len(solution_set)):
+            solution_paths[i] = {"weight": solution_weights[i], "path": solution_set[i]}
 
-    if solutionSet != 0:
-        for i in range(0, len(solutionSet)):
-            solution_paths[i] = {"weight": solutionWeights[i], "path": solutionSet[i]}
-            # print("W:",solutionWeights[i], solutionSet[i])
-
+    data["mfd_elapsed"] = time.perf_counter() - t0
     return data, solution_paths
 
 
@@ -429,5 +576,25 @@ def SolveInstances(Graphs, max_paths, outfile, recfile, nthreads):
         }
 
         data, solution_paths = FD_Algorithm(data, max_paths, nthreads)
+
+        # Optional: keep the exact instance of any component that took longer
+        # than configure(dump_slow_s=...). This is what makes a pathological
+        # component reproducible off the cluster -- the network as handed to the
+        # solver, in the same format read_input()/SolveInstances consume.
+        if _MFD_DUMP_SLOW_S is not None and data.get("mfd_elapsed", 0) > _MFD_DUMP_SLOW_S and _MFD_DUMP_DIR:
+            try:
+                os.makedirs(_MFD_DUMP_DIR, exist_ok=True)
+                fname = os.path.join(
+                    _MFD_DUMP_DIR,
+                    f"mfd_{len(Edges)}edges_{data['mfd_elapsed']:.0f}s_pid{os.getpid()}_{int(time.time()*1000)}.json",
+                )
+                with open(fname, "w") as fh:
+                    json.dump({"Nodes": Graphs[s]["Nodes"],
+                               "list of edges": [list(e) for e in listOfEdges],
+                               "subpaths": {str(k): list(v) for k, v in Graphs[s]["subpaths"].items()},
+                               "elapsed_s": data["mfd_elapsed"], "paths": len(solution_paths)}, fh)
+                logger.info(f"MFD: slow component ({data['mfd_elapsed']:.0f}s) dumped to {fname}")
+            except Exception as e:
+                logger.debug(f"could not dump slow MFD instance: {e}")
 
     return solution_paths

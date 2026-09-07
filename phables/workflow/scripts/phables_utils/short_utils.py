@@ -20,11 +20,12 @@ LEN_THRESHOLD = 0.95
 # Create logger
 logger = logging.getLogger("phables 2.0.0")
 
-# How many chunks to create per worker in resolve_short_parallel. >1 so the
-# pool can load-balance an uneven component workload; small enough that
-# per-chunk overhead stays negligible against per-component solve times
-# measured in tens of milliseconds.
-CHUNKS_PER_WORKER = 4
+# Upper bound on the number of tasks handed to the pool in
+# resolve_short_parallel. In practice this means ONE COMPONENT PER TASK for any
+# realistic assembly, which is deliberate -- see the chunking comment there.
+# The cap only exists so a pathological graph with hundreds of thousands of
+# components cannot turn into hundreds of thousands of pool submissions.
+MAX_MFD_TASKS = 50000
 
 
 def resolve_short(
@@ -1659,14 +1660,35 @@ def resolve_short_parallel(
         )
         return resolve_short(pruned_vs=pruned_vs, **{**kwargs, "nthreads": nthreads})
 
-    # Deliberately MORE chunks than workers. Component cost is heavily skewed --
-    # a handful of large components dominate, and which ones is not known in
-    # advance -- so splitting into exactly one chunk per worker (static
-    # partitioning) lets a single worker draw several expensive components while
-    # the rest sit idle. Smaller chunks let the pool hand out more work to
-    # whichever process finishes first, and cost nothing extra to send, since
-    # only the chunk itself crosses the boundary.
-    size = max(1, math.ceil(len(keys) / (workers * CHUNKS_PER_WORKER)))
+    # ONE COMPONENT PER TASK. Component cost is heavily skewed and which
+    # components are expensive is not known in advance, so any chunk larger than
+    # one lets a single task draw several expensive components while the rest of
+    # the pool sits idle -- and everything queued behind them in that same chunk
+    # waits too.
+    #
+    # This used to be ceil(len(keys) / (workers * 4)). Measured on a real
+    # 424,819-vertex assembly (SRR12983578: 5,307 components reaching the
+    # solver, median 3 nodes, max 197 after --compcount drops 15 larger ones),
+    # comparing the worst task's share of total work:
+    #
+    #   cost model    chunks of 9      one per task     speedup of the critical path
+    #   size              2.0%             0.7%              2.35x
+    #   size^2           12.9%             6.8%              1.89x
+    #   size^3           24.0%            14.1%              1.70x
+    #
+    # One component per task hits the hard floor in every model -- the floor
+    # being the single largest component, which no split can subdivide. It is
+    # also what an interleaved assignment achieves, without interleaving's
+    # problem: `executor.map` preserves input order, and results are merged in
+    # that order to stay identical to the sequential path (genome numbering
+    # included), so reordering the input would have to be undone at the merge.
+    # Keeping tasks in key order and simply making them smaller changes the
+    # schedule without touching the result.
+    #
+    # The per-task cost is a dict of one component crossing the process
+    # boundary; the bulk inputs are inherited by fork and never sent (see
+    # _WORKER_KWARGS), so more tasks cost essentially nothing extra.
+    size = max(1, math.ceil(len(keys) / MAX_MFD_TASKS))
     chunks = [
         {k: pruned_vs[k] for k in keys[i : i + size]} for i in range(0, len(keys), size)
     ]

@@ -81,6 +81,12 @@ foldseek_gpu: False
 # model, not solving it, dominates -- so concurrency has to come from running
 # components side by side instead.
 mfd_workers: 1
+# Per-attempt time limit (seconds) for the flow-decomposition MILP, and the
+# threshold above which a slow component's network is dumped for offline
+# reproduction. Both null = off. Set from the command line (--mfd-time-limit,
+# --mfd-dump-slow): like every option here they are merged from the CLI.
+mfd_time_limit:
+mfd_dump_slow:
 # Batch limits are device-specific -- the defaults are conservative CPU/laptop-MPS
 # values, not tuned for any particular GPU. Retune per device (phold's autotune.py
 # is the reference approach) rather than trusting these at scale.

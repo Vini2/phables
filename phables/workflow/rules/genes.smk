@@ -17,9 +17,9 @@ if GC == "pyrodigal-gv":
         input:
             genome = EDGES_FILE,
         threads:
-            config["resources"]["jobCPU"]
+            JOB_CPU
         resources:
-            mem_mb = config["resources"]["jobMem"]
+            mem_mb = JOB_MEM
         output:
             faa = PROTEINS_FILE
         log:
@@ -35,9 +35,9 @@ else:
         input:
             genome = EDGES_FILE,
         threads:
-            config["resources"]["jobCPU"]
+            JOB_CPU
         resources:
-            mem_mb = config["resources"]["jobMem"]
+            mem_mb = JOB_MEM
         output:
             faa = PROTEINS_FILE
         params:
@@ -58,9 +58,9 @@ rule scan_smg:
         faa = PROTEINS_FILE,
         hmm = os.path.join(DBPATH, "marker.hmm"),
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     resources:
-        mem_mb = config["resources"]["jobMem"]
+        mem_mb = JOB_MEM
     output:
         hmmout = os.path.join(OUTDIR, "preprocess", "edges.fasta.hmmout")
     log:
@@ -79,9 +79,9 @@ rule scan_phrogs:
         genome = EDGES_FILE,
         db = os.path.join(DBPATH,"phrogs_mmseqs_db","phrogs_profile_db")
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     resources:
-        mem_mb = config["resources"]["jobMem"]
+        mem_mb = JOB_MEM
     output:
         os.path.join(OUTDIR, "preprocess", "phrogs_annotations.tsv")
     params:
@@ -131,9 +131,9 @@ if PD == "prostt5-foldseek":
         input:
             faa = PROTEINS_FILE,
         threads:
-            config["resources"]["jobCPU"]
+            JOB_CPU
         resources:
-            mem_mb = config["resources"]["jobMem"]
+            mem_mb = JOB_MEM
         output:
             threedi = QUERY_3DI
         params:
@@ -216,9 +216,9 @@ if PD == "prostt5-foldseek":
             db = os.path.join(OUTDIR, "preprocess", "hallmark", "query_db"),
             hallmark_db = HALLMARK_TARGET_DB,
         threads:
-            config["resources"]["jobCPU"]
+            JOB_CPU
         resources:
-            mem_mb = config["resources"]["jobMem"]
+            mem_mb = JOB_MEM
         output:
             os.path.join(OUTDIR, "preprocess", "hallmark_hits.tsv")
         params:

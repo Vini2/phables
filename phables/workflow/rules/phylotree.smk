@@ -4,10 +4,10 @@ rule build_msa:
     output:
         ALIGNED_GENOMES,
     params:
-        nthreads = config["resources"]["jobCPU"],
+        nthreads = JOB_CPU,
         log = os.path.join(LOGSDIR, "mafft_output.log")
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     log:
         os.path.join(LOGSDIR, "mafft_output.log")
     conda:
@@ -27,10 +27,10 @@ rule build_tree:
         aligned = ALIGNED_GENOMES,
         output = TREE_FILE,
         seed = 1,
-        nthreads = config["resources"]["jobCPU"],
+        nthreads = JOB_CPU,
         log = os.path.join(LOGSDIR, "piqtree_output.log")
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     log:
         os.path.join(LOGSDIR, "piqtree_output.log")
     conda:

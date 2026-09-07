@@ -38,28 +38,60 @@ solve). Two consequences, both measured: solver threads make no difference at
 all (1/2/4/8 threads are flat within noise), and a solver `time_limit` does not
 help either.
 
-**a. Start the K search at a proven lower bound** (`FD_Algorithm`)
+**a. A valid lower bound on K, and a search that stops proving the impossible** (`FD_Inexact.py`)
 
 `FD_Algorithm` tried K = 1, 2, 3, … until feasible, rebuilding the whole MILP
-each time. K is structural to the model, so it genuinely cannot be reused, and
-flowpaths does not expose a HiGHS warm start — meaning every attempt below the
-true answer was a full model build that could only return infeasible.
+each time. Two changes, both checked against that original ladder on **17,189
+real components** extracted from Setonix run logs (1,293 of them re-solved as
+ground truth):
 
-`get_lowerbound_k()` takes the max of the graph width and
-`ceil(log2(#distinct flow values))`, both lifted from flowpaths' own
-`MinFlowDecomp.get_lowerbound_k`. Both are lower bounds, so starting there
-cannot skip a feasible smaller K. It costs 1–4 ms and falls back to 1 on any
-error, since a lower bound is an optimisation and must never be why a component
-fails to resolve.
+*The lower bound.* An earlier version of this branch started the search at
+`max(stDAG.get_width(), ceil(log2(#distinct flows)))`. Both terms are lifted from
+flowpaths' `MinFlowDecomp`, and **both are invalid for the inexact
+(interval) decomposition phables solves**: `get_width()` covers *every* edge, but
+an edge whose lower bound is 0 (junction coverage 0 — 28% of real edges) need not
+be covered at all; and `log2` assumes exact flows, whereas lows of 20, 21, 22
+under an upper bound of 30 are all met by a single path of weight 22. On real
+data the search therefore started *above* the true minimum in 12% of components
+and returned a non-minimal decomposition in **7.7% of them** (2 paths where 1
+suffices, 3 where 2, …) — while saving no measurable time (1,084 s vs 1,098 s
+for the plain ladder over the same networks). That version never shipped
+upstream; it is replaced here by the maximum antichain over edges that *must*
+carry flow (lower bound > 0), which is a valid bound for any interval model. One
+edge case is guarded explicitly: flowpaths treats an *empty* `weight_function` as
+"use defaults", which would silently reinstate the all-edges width.
+
+*The search.* Re-solving the largest real components showed where the time goes:
+58% of them have **no** decomposition within `--maxpaths`, and for those the
+ladder tried every K, with each infeasibility proof exponentially slower than the
+last (0.5 s, 3 s, 30 s, 40 s, then hours) — 91% of all solver time ended with no
+result. `FD_Algorithm` now (1) skips solving entirely when the valid bound exceeds
+`--maxpaths`; (2) tries K = bound; (3) if that is infeasible, asks once whether
+K = `--maxpaths` is feasible. Feasibility is monotone in K for this model — a
+K-path solution extends to K+1 with a zero-weight duplicate path (the
+lexicographic symmetry breaking is non-strict and the safety fixings never touch
+more than Kmin paths), confirmed on 780/780 resolved real networks — so "no" at
+`--maxpaths` proves every K in between infeasible and the climb is skipped. "Yes"
+means the climb proceeds exactly as before, and if it reaches `--maxpaths` the
+probe's own solution is reused. The smallest feasible K and the model solved at it
+are unchanged in every case.
 
 | | |
 |---|---|
-| 18/18 synthetic cases | identical K, path count and path sets |
-| speedup | 1.5×–4.9×, growing with component size |
-| components that can't resolve within `--maxpaths` | up to 5.9× (the bound proves `K >= maxpaths` up front instead of burning the whole ladder) |
+| 1,293 real components vs the original K = 1, 2, … ladder | **identical** paths, weights and K, every one |
+| same 1,293, total solve time | 1,098 s → 373 s (**2.9×**) |
+| 1,131 largest components (60 s cap per attempt) | 2,237 s → 1,197 s; the unresolvable 58 %: 2,014 s → 891 s |
+| what remains | one infeasibility proof at K = `--maxpaths` per unresolvable component, instead of a ladder of them |
 
-(Also annotates `data["minK"]`, which was set to a constant `2` and never read
-by anything, so it isn't mistaken for the live bound.)
+Two new options for that residue. `--mfd-time-limit SECONDS` caps a single solve;
+a component that hits it is reported unresolved with a WARNING (a timeout is not
+an infeasibility proof, so the search does not continue to a K it could not call
+minimal). Off by default — with no limit every answer is exact. `--mfd-dump-slow
+SECONDS` writes the flow network of any component slower than that to
+`<output>/phables/slow_mfd_instances/` as JSON, so a pathological component can be
+reproduced off the cluster. Every component now also logs one INFO line with its
+K ladder and per-attempt times; previously this module logged to a logger that was
+not attached to phables' file handler, so nothing from it ever reached the log.
 
 **b. `--mfd-workers`: run components in parallel** (default `1`, unchanged behaviour)
 
@@ -76,8 +108,10 @@ them anywhere in the loop (per-component decisions use the loop-local `comp_*`
 sets). It's noted in the docstring, because chunking would silently change
 results if that ever stopped being true.
 
-Chunks merge in component order, so `all_resolved_paths` is identical to the
-sequential run — genomes are numbered by position, so a different order would
+Components are handed to the pool one at a time (a chunk of 9 that happened to
+contain one slow component used to hold its eight neighbours hostage for hours
+on a real assembly). Results merge in component order, so `all_resolved_paths`
+is identical to the sequential run — genomes are numbered by position, so a different order would
 rename every genome without changing the biology.
 
 | Workload | 2 | 4 | 8 workers |
@@ -127,6 +161,17 @@ Also here:
   torch (i.e. a second copy crept in).
 - `prostt5-rocm.yaml` bumped to `torch==2.9.1` (verified present on the pinned
   `rocm6.3` index, cp310–cp314).
+
+**c. `--job-cpu` / `--job-mem`: let rules use the cores they were given**
+
+Every rule takes `threads` and `nthreads` from `config["resources"]["jobCPU"]`
+(default 8); `--threads` only sets Snakemake's total core budget. So `--threads 64`
+on a 64-core node still ran `coverm`, `foldseek`, `hmmsearch` and the flow
+decomposition 8-wide with 56 cores idle — measured on a real run. `--job-cpu` and
+`--job-mem` override the two config values. Their click defaults are `None` on
+purpose: snaketool merges CLI defaults *over* config files, so a non-`None`
+default would make the config value permanently unsettable.
+
 
 ---
 

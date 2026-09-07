@@ -92,9 +92,9 @@ rule coverm_map:
         bam = os.path.join(OUTDIR, "preprocess", "temp", "{sample}.bam"),
         bai = os.path.join(OUTDIR, "preprocess", "temp", "{sample}.bam.bai"),
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     resources:
-        mem_mb = config["resources"]["jobMem"]
+        mem_mb = JOB_MEM
     conda:
         os.path.join("..", "envs", "coverm.yaml")
     log:

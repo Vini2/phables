@@ -71,9 +71,9 @@ rule coverm_map_genomes:
         bam = temp(os.path.join(OUTDIR, "postprocess", "temp", "{sample}.bam")),
         bai = temp(os.path.join(OUTDIR, "postprocess", "temp", "{sample}.bam.bai")),
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     resources:
-        mem_mb = config["resources"]["jobMem"]
+        mem_mb = JOB_MEM
     conda:
         os.path.join("..", "envs", "coverm.yaml")
     log:

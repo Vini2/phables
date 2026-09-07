@@ -35,11 +35,13 @@ rule run_phables:
         hallmark_evalue = config["hallmark_evalue"],
         hallmark_minbits = config["hallmark_minbits"],
         output = os.path.join(OUTDIR, "phables"),
-        nthreads = config["resources"]["jobCPU"],
+        nthreads = JOB_CPU,
         mfd_workers = MFD_WORKERS,
+        mfd_time_limit = MFD_TIME_LIMIT,
+        mfd_dump_slow = MFD_DUMP_SLOW,
         log = os.path.join(LOGSDIR, "phables_output.log")
     threads:
-        config["resources"]["jobCPU"]
+        JOB_CPU
     log:
         os.path.join(LOGSDIR, "phables_output.log")
     conda:

@@ -19,6 +19,9 @@ ML = config['minlength']
 MC = config['mincov']
 CC = config['compcount']
 MP = config['maxpaths']
+# .get(): both are optional and absent from older config files.
+MFD_TIME_LIMIT = config.get('mfd_time_limit')
+MFD_DUMP_SLOW = config.get('mfd_dump_slow')
 MGF = config['mgfrac']
 EV = config['evalue']
 SI = config['seqidentity']

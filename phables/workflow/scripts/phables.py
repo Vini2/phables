@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 import time
 
 from phables_utils import (component_utils, edge_graph_utils, gene_utils,
@@ -51,6 +52,9 @@ def main():
     output = snakemake.params.output
     nthreads = int(snakemake.params.nthreads)
     mfd_workers = int(snakemake.params.mfd_workers)
+    # Optional (None when absent): see FD_Inexact.configure and --mfd-time-limit.
+    mfd_time_limit = getattr(snakemake.params, "mfd_time_limit", None)
+    mfd_dump_slow = getattr(snakemake.params, "mfd_dump_slow", None)
     log = snakemake.params.log
 
     # Setup logger
@@ -86,7 +90,7 @@ def main():
     logger.info(f"Unitig phrog annotations file: {phrogs}")
     logger.info(f"Minimum length of unitigs to consider: {minlength}")
     logger.info(f"Minimum coverage of paths to output: {mincov}")
-    logger.info(f"Minimum unitig count to consider a component: {compcount}")
+    logger.info(f"Maximum unitig count to consider a component: {compcount}")
     logger.info(f"Maximum number of paths to resolve for a component: {maxpaths}")
     logger.info(f"Length threshold to consider single copy marker genes: {mgfrac}")
     logger.info(f"Maximum e-value for phrog annotations: {evalue}")
@@ -97,6 +101,16 @@ def main():
     logger.info(f"Prefix for genome identifiers: {prefix}")
     logger.info(f"Number of threads to use: {nthreads}")
     logger.info(f"Number of flow-decomposition workers: {mfd_workers}")
+    logger.info(f"Flow-decomposition per-attempt time limit: {mfd_time_limit if mfd_time_limit else 'none'}")
+    if mfd_dump_slow is not None:
+        logger.info(f"Flow-decomposition instances slower than {mfd_dump_slow}s will be dumped under {output}/slow_mfd_instances")
+    # Set once here, in the parent, before any --mfd-workers child is forked.
+    from phables_utils import FD_Inexact
+    FD_Inexact.configure(
+        time_limit=mfd_time_limit,
+        dump_slow_s=mfd_dump_slow,
+        dump_dir=os.path.join(output, "slow_mfd_instances"),
+    )
     logger.info(f"Output folder: {output}")
 
     if prefix is None or prefix == "":

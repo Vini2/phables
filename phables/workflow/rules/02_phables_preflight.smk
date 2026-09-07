@@ -31,12 +31,33 @@ ML = config['minlength']
 MC = config['mincov']
 CC = config['compcount']
 MP = config['maxpaths']
+# .get(): both are optional and absent from older config files.
+MFD_TIME_LIMIT = config.get('mfd_time_limit')
+MFD_DUMP_SLOW = config.get('mfd_dump_slow')
 MGF = config['mgfrac']
 GC = config['genecaller']
 PD = config['phagedetection']
 GPU_BACKEND = config['gpu_backend']
 FOLDSEEK_GPU = config['foldseek_gpu']
 MFD_WORKERS = config['mfd_workers']
+
+# Per-rule CPU/memory request. --job-cpu / --job-mem override resources.jobCPU /
+# resources.jobMem when given; otherwise the config value stands.
+#
+# These exist because --threads does NOT do what it looks like. --threads sets
+# Snakemake's total core budget (--cores); each rule separately asks for
+# resources.jobCPU, which defaults to 8. Snakemake then gives the rule
+# min(jobCPU, cores). So `--threads 64` on a 64-core node runs every rule 8-wide
+# and leaves 56 cores idle -- measured on a real run: coverm_map and
+# scan_hallmark both took their full time on 8 threads of a 64-core allocation.
+#
+# `or` rather than a dict .get default: click passes None when the flag is
+# absent, and None is exactly the value that must fall through to the config.
+# The click defaults are None for the same reason -- snaketool merges CLI
+# defaults OVER config files, so any non-None default would make
+# resources.jobCPU permanently unsettable from a config file.
+JOB_CPU = config.get('job_cpu') or config['resources']['jobCPU']
+JOB_MEM = config.get('job_mem') or config['resources']['jobMem']
 EV = config['evalue']
 SI = config['seqidentity']
 CT = config['covtol']

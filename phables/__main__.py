@@ -347,6 +347,64 @@ def run_options(func):
             show_default=True,
         ),
         click.option(
+            "--job-cpu",
+            default=None,
+            type=int,
+            required=False,
+            help=(
+                "CPUs each rule requests (hmmsearch, mmseqs, foldseek, coverm, "
+                "flow decomposition). Overrides resources.jobCPU in the config. "
+                "NOTE this is not --threads: --threads sets Snakemake's total "
+                "core budget, and a rule still only asks for resources.jobCPU "
+                "(default 8), so --threads 64 alone leaves every rule running "
+                "8-wide and 56 cores idle. Default None means 'use the config "
+                "value', which is also what keeps this settable at all -- a "
+                "non-None click default would be merged OVER the config file "
+                "by snaketool and could never be changed from one"
+            ),
+            show_default=True,
+        ),
+        click.option(
+            "--job-mem",
+            default=None,
+            type=int,
+            required=False,
+            help=(
+                "memory in MB each rule requests. Overrides resources.jobMem. "
+                "Same None-default reasoning as --job-cpu"
+            ),
+            show_default=True,
+        ),
+        click.option(
+            "--mfd-time-limit",
+            default=None,
+            type=float,
+            required=False,
+            help=(
+                "seconds allowed for any single flow-decomposition solve. A "
+                "component whose solve exceeds it is left unresolved (a "
+                "timeout is not a proof of infeasibility, so the search does not "
+                "continue to a K it cannot call minimal). Default: no limit, "
+                "every answer exact. On real data the unresolvable tail spends "
+                "hours proving infeasibility at K near --maxpaths; a limit of a "
+                "few hundred seconds bounds a whole sample's wall time"
+            ),
+            show_default=True,
+        ),
+        click.option(
+            "--mfd-dump-slow",
+            default=None,
+            type=float,
+            required=False,
+            help=(
+                "write the flow network of any component whose decomposition "
+                "took longer than this many seconds to <output>/phables/"
+                "slow_mfd_instances/ as JSON, so it can be reproduced off the "
+                "cluster. Default: off"
+            ),
+            show_default=True,
+        ),
+        click.option(
             "--mfd-workers",
             default=1,
             required=False,
